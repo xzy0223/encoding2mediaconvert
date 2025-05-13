@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<query>
+    <userid>mock_mock_test_user_id</userid>
+    <userkey>mock_mock_test_key</userkey>
+    <action>AddMedia</action>
+    <source>mock_mock_source_rendition__url</source>
+    <notify>mock_mock_encoding_notify_url</notify>
+    <notify_format>json</notify_format>
+    <notify_body_format>raw</notify_body_format>
+    <format>
+        <output>webm</output>
+        <video_codec>libvpx</video_codec>
+        <bitrate>3508k</bitrate>
+        <size>1280x720</size>
+        <two_pass>yes</two_pass>
+        <audio_codec>libvorbis</audio_codec>
+        <audio_bitrate>192k</audio_bitrate>
+        <audio_channels_number>2</audio_channels_number>
+        <audio_sample_rate>48000</audio_sample_rate>
+        <profile>high</profile>
+        <VCodecParameters>no</VCodecParameters>
+        <file_extension>webm</file_extension>
+        <destination>http://test_url.s3.amazonaws.com/encoding.com.output/mock_mock_output_rendition_name_11111_104.webm?acl=public-read</destination>
+    </format>
+</query>

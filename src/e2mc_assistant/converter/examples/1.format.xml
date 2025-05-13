@@ -1,0 +1,24 @@
+<format>
+    <output>mp4</output>
+    <video_codec>libx264</video_codec>
+    <framerate>25</framerate>
+    <profile>main</profile>
+    <bitrate>1300k</bitrate>
+    <size>1024x576</size>
+    <audio_codec>libfaac</audio_codec>
+    <audio_bitrate>128k</audio_bitrate>
+    <audio_sample_rate>48000</audio_sample_rate>
+    <loudnorm>-23</loudnorm>
+    <loudnorm_range>11</loudnorm_range>
+    <loudnorm_peak>-1.5</loudnorm_peak>
+    <video_codec_parameters>
+        <color_range>1</color_range>
+        <transfer_characteristics>1</transfer_characteristics>
+        <color_primaries>1</color_primaries>
+        <matrix_coefficients>1</matrix_coefficients>
+        <level>31</level>
+    </video_codec_parameters>
+    <video_sync>passthrough</video_sync>
+    <encoder>edc1</encoder>
+    <destination>http://xxx</destination>
+</format>

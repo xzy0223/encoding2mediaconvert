@@ -1,0 +1,4 @@
+include src/e2mc_assistant/converter/*.yaml
+include src/e2mc_assistant/converter/*.json
+include src/e2mc_assistant/converter/*.md
+recursive-include src/e2mc_assistant/converter/examples *

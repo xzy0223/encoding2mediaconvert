@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<query>
+    <userid>mock_mock_test_user_id</userid>
+    <userkey>mock_mock_test_key</userkey>
+    <action>AddMedia</action>
+    <source>mock_mock_source_rendition__url</source>
+    <notify>mock_mock_encoding_notify_url</notify>
+    <notify_format>json</notify_format>
+    <notify_body_format>raw</notify_body_format>
+    <format>
+        <output>mpegts</output>
+        <video_codec>mpeg2video</video_codec>
+        <size>1920x1080</size>
+        <framerate>30</framerate>
+        <bitrate>50000k</bitrate>
+        <profile>main</profile>
+        <force_interlaced>tff</force_interlaced>
+        <audio_codec>mp2</audio_codec>
+        <audio_bitrate>384k</audio_bitrate>
+        <audio_sample_rate>48000</audio_sample_rate>
+        <audio_channels_number>2</audio_channels_number>
+        <hard_cbr>yes</hard_cbr>
+        <cbr>yes</cbr>
+        <destination>http://test_url.s3.amazonaws.com/encoding.com.output/mock_mock_output_rendition_name_11111_491.ts?acl=public-read</destination>
+    </format>
+</query>

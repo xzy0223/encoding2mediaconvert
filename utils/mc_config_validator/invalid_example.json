@@ -1,0 +1,59 @@
+{
+  "UserMetadata": {},
+  "Settings": {
+    "TimecodeConfig": {
+      "Source": "INVALID_VALUE"
+    },
+    "OutputGroups": [
+      {
+        "Name": "File Group",
+        "Outputs": [
+          {
+            "ContainerSettings": {
+              "Container": "MP4",
+              "Mp4Settings": {}
+            },
+            "VideoDescription": {
+              "Width": "not_a_number",
+              "Height": 576,
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "FramerateDenominator": 1,
+                  "MaxBitrate": 1300000,
+                  "FramerateControl": "SPECIFIED",
+                  "RateControlMode": "QVBR",
+                  "FramerateNumerator": 25,
+                  "SceneChangeDetect": "TRANSITION_DETECTION",
+                  "QualityTuningLevel": "MULTI_PASS_HQ",
+                  "BandwidthReductionFilter": {
+                    "Strength": "AUTO",
+                    "Sharpening": "HIGH"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "OutputGroupSettings": {
+          "Type": "FILE_GROUP_SETTINGS",
+          "FileGroupSettings": {
+            "Destination": "s3://runmedia/Freewheel/Output/"
+          }
+        }
+      }
+    ],
+    "Inputs": [
+      {
+        "AudioSelectors": {
+          "Audio Selector 1": {
+            "DefaultSelection": "DEFAULT"
+          }
+        },
+        "VideoSelector": {},
+        "TimecodeSource": "ZEROBASED",
+        "FileInput": "s3://runmedia/Freewheel/1.input.mp4"
+      }
+    ]
+  }
+}

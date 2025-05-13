@@ -1,0 +1,1532 @@
+{
+    "AccelerationSettings": {
+        "Mode": "ENABLED"
+    },
+    "BillingTagsSource": "PRESET",
+    "ClientRequestToken": "",
+    "HopDestinations": [
+        {
+            "Priority": 0,
+            "Queue": "",
+            "WaitMinutes": 0
+        }
+    ],
+    "JobEngineVersion": "",
+    "JobTemplate": "",
+    "Priority": 0,
+    "Queue": "",
+    "Role": "",
+    "Settings": {
+        "AdAvailOffset": 0,
+        "AvailBlanking": {
+            "AvailBlankingImage": ""
+        },
+        "ColorConversion3DLUTSettings": [
+            {
+                "FileInput": "",
+                "InputColorSpace": "REC_709",
+                "InputMasteringLuminance": 0,
+                "OutputColorSpace": "P3D65_HDR",
+                "OutputMasteringLuminance": 0
+            }
+        ],
+        "Esam": {
+            "ManifestConfirmConditionNotification": {
+                "MccXml": ""
+            },
+            "ResponseSignalPreroll": 0,
+            "SignalProcessingNotification": {
+                "SccXml": ""
+            }
+        },
+        "ExtendedDataServices": {
+            "CopyProtectionAction": "PASSTHROUGH",
+            "VchipAction": "PASSTHROUGH"
+        },
+        "FollowSource": 0,
+        "Inputs": [
+            {
+                "AdvancedInputFilter": "ENABLED",
+                "AdvancedInputFilterSettings": {
+                    "AddTexture": "ENABLED",
+                    "Sharpening": "OFF"
+                },
+                "AudioSelectorGroups": {
+                    "KeyName": {
+                        "AudioSelectorNames": [
+                            ""
+                        ]
+                    }
+                },
+                "AudioSelectors": {
+                    "KeyName": {
+                        "AudioDurationCorrection": "FORCE",
+                        "CustomLanguageCode": "",
+                        "DefaultSelection": "NOT_DEFAULT",
+                        "ExternalAudioFileInput": "",
+                        "HlsRenditionGroupSettings": {
+                            "RenditionGroupId": "",
+                            "RenditionLanguageCode": "CHU",
+                            "RenditionName": ""
+                        },
+                        "LanguageCode": "KOM",
+                        "Offset": 0,
+                        "Pids": [
+                            0
+                        ],
+                        "ProgramSelection": 0,
+                        "RemixSettings": {
+                            "AudioDescriptionAudioChannel": 0,
+                            "AudioDescriptionDataChannel": 0,
+                            "ChannelMapping": {
+                                "OutputChannels": [
+                                    {
+                                        "InputChannels": [
+                                            0
+                                        ],
+                                        "InputChannelsFineTune": [
+                                            0.0
+                                        ]
+                                    }
+                                ]
+                            },
+                            "ChannelsIn": 0,
+                            "ChannelsOut": 0
+                        },
+                        "SelectorType": "TRACK",
+                        "Tracks": [
+                            0
+                        ]
+                    }
+                },
+                "CaptionSelectors": {
+                    "KeyName": {
+                        "CustomLanguageCode": "",
+                        "LanguageCode": "NYA",
+                        "SourceSettings": {
+                            "AncillarySourceSettings": {
+                                "Convert608To708": "UPCONVERT",
+                                "SourceAncillaryChannelNumber": 0,
+                                "TerminateCaptions": "DISABLED"
+                            },
+                            "DvbSubSourceSettings": {
+                                "Pid": 0
+                            },
+                            "EmbeddedSourceSettings": {
+                                "Convert608To708": "UPCONVERT",
+                                "Source608ChannelNumber": 0,
+                                "Source608TrackNumber": 0,
+                                "TerminateCaptions": "DISABLED"
+                            },
+                            "FileSourceSettings": {
+                                "ByteRateLimit": "ENABLED",
+                                "Convert608To708": "UPCONVERT",
+                                "ConvertPaintToPop": "DISABLED",
+                                "Framerate": {
+                                    "FramerateDenominator": 0,
+                                    "FramerateNumerator": 0
+                                },
+                                "SourceFile": "",
+                                "TimeDelta": 0,
+                                "TimeDeltaUnits": "SECONDS"
+                            },
+                            "SourceType": "ANCILLARY",
+                            "TeletextSourceSettings": {
+                                "PageNumber": ""
+                            },
+                            "TrackSourceSettings": {
+                                "TrackNumber": 0
+                            },
+                            "WebvttHlsSourceSettings": {
+                                "RenditionGroupId": "",
+                                "RenditionLanguageCode": "SND",
+                                "RenditionName": ""
+                            }
+                        }
+                    }
+                },
+                "Crop": {
+                    "Height": 0,
+                    "Width": 0,
+                    "X": 0,
+                    "Y": 0
+                },
+                "DeblockFilter": "ENABLED",
+                "DecryptionSettings": {
+                    "DecryptionMode": "AES_CTR",
+                    "EncryptedDecryptionKey": "",
+                    "InitializationVector": "",
+                    "KmsKeyRegion": ""
+                },
+                "DenoiseFilter": "DISABLED",
+                "DolbyVisionMetadataXml": "",
+                "DynamicAudioSelectors": {
+                    "KeyName": {
+                        "AudioDurationCorrection": "TRACK",
+                        "ExternalAudioFileInput": "",
+                        "LanguageCode": "YOR",
+                        "Offset": 0,
+                        "SelectorType": "ALL_TRACKS"
+                    }
+                },
+                "FileInput": "",
+                "FilterEnable": "FORCE",
+                "FilterStrength": 0,
+                "ImageInserter": {
+                    "InsertableImages": [
+                        {
+                            "Duration": 0,
+                            "FadeIn": 0,
+                            "FadeOut": 0,
+                            "Height": 0,
+                            "ImageInserterInput": "",
+                            "ImageX": 0,
+                            "ImageY": 0,
+                            "Layer": 0,
+                            "Opacity": 0,
+                            "StartTime": "",
+                            "Width": 0
+                        }
+                    ],
+                    "SdrReferenceWhiteLevel": 0
+                },
+                "InputClippings": [
+                    {
+                        "EndTimecode": "",
+                        "StartTimecode": ""
+                    }
+                ],
+                "InputScanType": "PSF",
+                "Position": {
+                    "Height": 0,
+                    "Width": 0,
+                    "X": 0,
+                    "Y": 0
+                },
+                "ProgramNumber": 0,
+                "PsiControl": "USE_PSI",
+                "SupplementalImps": [
+                    ""
+                ],
+                "TimecodeSource": "SPECIFIEDSTART",
+                "TimecodeStart": "",
+                "VideoGenerator": {
+                    "Channels": 0,
+                    "Duration": 0,
+                    "FramerateDenominator": 0,
+                    "FramerateNumerator": 0,
+                    "SampleRate": 0
+                },
+                "VideoOverlays": [
+                    {
+                        "EndTimecode": "",
+                        "InitialPosition": {
+                            "Height": 0,
+                            "Unit": "PERCENTAGE",
+                            "Width": 0,
+                            "XPosition": 0,
+                            "YPosition": 0
+                        },
+                        "Input": {
+                            "FileInput": "",
+                            "InputClippings": [
+                                {
+                                    "EndTimecode": "",
+                                    "StartTimecode": ""
+                                }
+                            ],
+                            "TimecodeSource": "SPECIFIEDSTART",
+                            "TimecodeStart": ""
+                        },
+                        "Playback": "ONCE",
+                        "StartTimecode": "",
+                        "Transitions": [
+                            {
+                                "EndPosition": {
+                                    "Height": 0,
+                                    "Unit": "PERCENTAGE",
+                                    "Width": 0,
+                                    "XPosition": 0,
+                                    "YPosition": 0
+                                },
+                                "EndTimecode": "",
+                                "StartTimecode": ""
+                            }
+                        ]
+                    }
+                ],
+                "VideoSelector": {
+                    "AlphaBehavior": "DISCARD",
+                    "ColorSpace": "HDR10",
+                    "ColorSpaceUsage": "FALLBACK",
+                    "EmbeddedTimecodeOverride": "NONE",
+                    "Hdr10Metadata": {
+                        "BluePrimaryX": 0,
+                        "BluePrimaryY": 0,
+                        "GreenPrimaryX": 0,
+                        "GreenPrimaryY": 0,
+                        "MaxContentLightLevel": 0,
+                        "MaxFrameAverageLightLevel": 0,
+                        "MaxLuminance": 0,
+                        "MinLuminance": 0,
+                        "RedPrimaryX": 0,
+                        "RedPrimaryY": 0,
+                        "WhitePointX": 0,
+                        "WhitePointY": 0
+                    },
+                    "MaxLuminance": 0,
+                    "PadVideo": "BLACK",
+                    "Pid": 0,
+                    "ProgramNumber": 0,
+                    "Rotate": "AUTO",
+                    "SampleRange": "FOLLOW"
+                }
+            }
+        ],
+        "KantarWatermark": {
+            "ChannelName": "",
+            "ContentReference": "",
+            "CredentialsSecretName": "",
+            "FileOffset": 0.0,
+            "KantarLicenseId": 0,
+            "KantarServerUrl": "",
+            "LogDestination": "",
+            "Metadata3": "",
+            "Metadata4": "",
+            "Metadata5": "",
+            "Metadata6": "",
+            "Metadata7": "",
+            "Metadata8": ""
+        },
+        "MotionImageInserter": {
+            "Framerate": {
+                "FramerateDenominator": 0,
+                "FramerateNumerator": 0
+            },
+            "Input": "",
+            "InsertionMode": "PNG",
+            "Offset": {
+                "ImageX": 0,
+                "ImageY": 0
+            },
+            "Playback": "ONCE",
+            "StartTime": ""
+        },
+        "NielsenConfiguration": {
+            "BreakoutCode": 0,
+            "DistributorId": ""
+        },
+        "NielsenNonLinearWatermark": {
+            "ActiveWatermarkProcess": "NAES2_AND_NW_AND_CBET",
+            "AdiFilename": "",
+            "AssetId": "",
+            "AssetName": "",
+            "CbetSourceId": "",
+            "EpisodeId": "",
+            "MetadataDestination": "",
+            "SourceId": 0,
+            "SourceWatermarkStatus": "CLEAN",
+            "TicServerUrl": "",
+            "UniqueTicPerAudioTrack": "RESERVE_UNIQUE_TICS_PER_TRACK"
+        },
+        "OutputGroups": [
+            {
+                "AutomatedEncodingSettings": {
+                    "AbrSettings": {
+                        "MaxAbrBitrate": 0,
+                        "MaxRenditions": 0,
+                        "MinAbrBitrate": 0,
+                        "Rules": [
+                            {
+                                "AllowedRenditions": [
+                                    {
+                                        "Height": 0,
+                                        "Required": "ENABLED",
+                                        "Width": 0
+                                    }
+                                ],
+                                "ForceIncludeRenditions": [
+                                    {
+                                        "Height": 0,
+                                        "Width": 0
+                                    }
+                                ],
+                                "MinBottomRenditionSize": {
+                                    "Height": 0,
+                                    "Width": 0
+                                },
+                                "MinTopRenditionSize": {
+                                    "Height": 0,
+                                    "Width": 0
+                                },
+                                "Type": "MIN_TOP_RENDITION_SIZE"
+                            }
+                        ]
+                    }
+                },
+                "CustomName": "",
+                "Name": "",
+                "OutputGroupSettings": {
+                    "CmafGroupSettings": {
+                        "AdditionalManifests": [
+                            {
+                                "ManifestNameModifier": "",
+                                "SelectedOutputs": [
+                                    ""
+                                ]
+                            }
+                        ],
+                        "BaseUrl": "",
+                        "ClientCache": "ENABLED",
+                        "CodecSpecification": "RFC_4281",
+                        "DashIFrameTrickPlayNameModifier": "",
+                        "DashManifestStyle": "BASIC",
+                        "Destination": "",
+                        "DestinationSettings": {
+                            "S3Settings": {
+                                "AccessControl": {
+                                    "CannedAcl": "BUCKET_OWNER_FULL_CONTROL"
+                                },
+                                "Encryption": {
+                                    "EncryptionType": "SERVER_SIDE_ENCRYPTION_KMS",
+                                    "KmsEncryptionContext": "",
+                                    "KmsKeyArn": ""
+                                },
+                                "StorageClass": "STANDARD"
+                            }
+                        },
+                        "Encryption": {
+                            "ConstantInitializationVector": "",
+                            "EncryptionMethod": "AES_CTR",
+                            "InitializationVectorInManifest": "INCLUDE",
+                            "SpekeKeyProvider": {
+                                "CertificateArn": "",
+                                "DashSignaledSystemIds": [
+                                    ""
+                                ],
+                                "EncryptionContractConfiguration": {
+                                    "SpekeAudioPreset": "PRESET_AUDIO_2",
+                                    "SpekeVideoPreset": "PRESET_VIDEO_7"
+                                },
+                                "HlsSignaledSystemIds": [
+                                    ""
+                                ],
+                                "ResourceId": "",
+                                "Url": ""
+                            },
+                            "StaticKeyProvider": {
+                                "KeyFormat": "",
+                                "KeyFormatVersions": "",
+                                "StaticKeyValue": "",
+                                "Url": ""
+                            },
+                            "Type": "STATIC_KEY"
+                        },
+                        "FragmentLength": 0,
+                        "ImageBasedTrickPlay": "THUMBNAIL_AND_FULLFRAME",
+                        "ImageBasedTrickPlaySettings": {
+                            "IntervalCadence": "FOLLOW_IFRAME",
+                            "ThumbnailHeight": 0,
+                            "ThumbnailInterval": 0.0,
+                            "ThumbnailWidth": 0,
+                            "TileHeight": 0,
+                            "TileWidth": 0
+                        },
+                        "ManifestCompression": "GZIP",
+                        "ManifestDurationFormat": "FLOATING_POINT",
+                        "MinBufferTime": 0,
+                        "MinFinalSegmentLength": 0.0,
+                        "MpdManifestBandwidthType": "MAX",
+                        "MpdProfile": "MAIN_PROFILE",
+                        "PtsOffsetHandlingForBFrames": "ZERO_BASED",
+                        "SegmentControl": "SINGLE_FILE",
+                        "SegmentLength": 0,
+                        "SegmentLengthControl": "GOP_MULTIPLE",
+                        "StreamInfResolution": "EXCLUDE",
+                        "TargetDurationCompatibilityMode": "LEGACY",
+                        "VideoCompositionOffsets": "UNSIGNED",
+                        "WriteDashManifest": "ENABLED",
+                        "WriteHlsManifest": "DISABLED",
+                        "WriteSegmentTimelineInRepresentation": "ENABLED"
+                    },
+                    "DashIsoGroupSettings": {
+                        "AdditionalManifests": [
+                            {
+                                "ManifestNameModifier": "",
+                                "SelectedOutputs": [
+                                    ""
+                                ]
+                            }
+                        ],
+                        "AudioChannelConfigSchemeIdUri": "DOLBY_CHANNEL_CONFIGURATION",
+                        "BaseUrl": "",
+                        "DashIFrameTrickPlayNameModifier": "",
+                        "DashManifestStyle": "COMPACT",
+                        "Destination": "",
+                        "DestinationSettings": {
+                            "S3Settings": {
+                                "AccessControl": {
+                                    "CannedAcl": "BUCKET_OWNER_READ"
+                                },
+                                "Encryption": {
+                                    "EncryptionType": "SERVER_SIDE_ENCRYPTION_KMS",
+                                    "KmsEncryptionContext": "",
+                                    "KmsKeyArn": ""
+                                },
+                                "StorageClass": "STANDARD_IA"
+                            }
+                        },
+                        "Encryption": {
+                            "PlaybackDeviceCompatibility": "UNENCRYPTED_SEI",
+                            "SpekeKeyProvider": {
+                                "CertificateArn": "",
+                                "EncryptionContractConfiguration": {
+                                    "SpekeAudioPreset": "PRESET_AUDIO_1",
+                                    "SpekeVideoPreset": "PRESET_VIDEO_1"
+                                },
+                                "ResourceId": "",
+                                "SystemIds": [
+                                    ""
+                                ],
+                                "Url": ""
+                            }
+                        },
+                        "FragmentLength": 0,
+                        "HbbtvCompliance": "NONE",
+                        "ImageBasedTrickPlay": "NONE",
+                        "ImageBasedTrickPlaySettings": {
+                            "IntervalCadence": "FOLLOW_IFRAME",
+                            "ThumbnailHeight": 0,
+                            "ThumbnailInterval": 0.0,
+                            "ThumbnailWidth": 0,
+                            "TileHeight": 0,
+                            "TileWidth": 0
+                        },
+                        "MinBufferTime": 0,
+                        "MinFinalSegmentLength": 0.0,
+                        "MpdManifestBandwidthType": "AVERAGE",
+                        "MpdProfile": "ON_DEMAND_PROFILE",
+                        "PtsOffsetHandlingForBFrames": "ZERO_BASED",
+                        "SegmentControl": "SEGMENTED_FILES",
+                        "SegmentLength": 0,
+                        "SegmentLengthControl": "EXACT",
+                        "VideoCompositionOffsets": "SIGNED",
+                        "WriteSegmentTimelineInRepresentation": "ENABLED"
+                    },
+                    "FileGroupSettings": {
+                        "Destination": "",
+                        "DestinationSettings": {
+                            "S3Settings": {
+                                "AccessControl": {
+                                    "CannedAcl": "PUBLIC_READ"
+                                },
+                                "Encryption": {
+                                    "EncryptionType": "SERVER_SIDE_ENCRYPTION_S3",
+                                    "KmsEncryptionContext": "",
+                                    "KmsKeyArn": ""
+                                },
+                                "StorageClass": "ONEZONE_IA"
+                            }
+                        }
+                    },
+                    "HlsGroupSettings": {
+                        "AdMarkers": [
+                            "ELEMENTAL"
+                        ],
+                        "AdditionalManifests": [
+                            {
+                                "ManifestNameModifier": "",
+                                "SelectedOutputs": [
+                                    ""
+                                ]
+                            }
+                        ],
+                        "AudioOnlyHeader": "INCLUDE",
+                        "BaseUrl": "",
+                        "CaptionLanguageMappings": [
+                            {
+                                "CaptionChannel": 0,
+                                "CustomLanguageCode": "",
+                                "LanguageCode": "GLG",
+                                "LanguageDescription": ""
+                            }
+                        ],
+                        "CaptionLanguageSetting": "OMIT",
+                        "CaptionSegmentLengthControl": "MATCH_VIDEO",
+                        "ClientCache": "ENABLED",
+                        "CodecSpecification": "RFC_4281",
+                        "Destination": "",
+                        "DestinationSettings": {
+                            "S3Settings": {
+                                "AccessControl": {
+                                    "CannedAcl": "PUBLIC_READ"
+                                },
+                                "Encryption": {
+                                    "EncryptionType": "SERVER_SIDE_ENCRYPTION_KMS",
+                                    "KmsEncryptionContext": "",
+                                    "KmsKeyArn": ""
+                                },
+                                "StorageClass": "STANDARD_IA"
+                            }
+                        },
+                        "DirectoryStructure": "SUBDIRECTORY_PER_STREAM",
+                        "Encryption": {
+                            "ConstantInitializationVector": "",
+                            "EncryptionMethod": "SAMPLE_AES",
+                            "InitializationVectorInManifest": "INCLUDE",
+                            "OfflineEncrypted": "ENABLED",
+                            "SpekeKeyProvider": {
+                                "CertificateArn": "",
+                                "EncryptionContractConfiguration": {
+                                    "SpekeAudioPreset": "SHARED",
+                                    "SpekeVideoPreset": "PRESET_VIDEO_2"
+                                },
+                                "ResourceId": "",
+                                "SystemIds": [
+                                    ""
+                                ],
+                                "Url": ""
+                            },
+                            "StaticKeyProvider": {
+                                "KeyFormat": "",
+                                "KeyFormatVersions": "",
+                                "StaticKeyValue": "",
+                                "Url": ""
+                            },
+                            "Type": "SPEKE"
+                        },
+                        "ImageBasedTrickPlay": "THUMBNAIL",
+                        "ImageBasedTrickPlaySettings": {
+                            "IntervalCadence": "FOLLOW_IFRAME",
+                            "ThumbnailHeight": 0,
+                            "ThumbnailInterval": 0.0,
+                            "ThumbnailWidth": 0,
+                            "TileHeight": 0,
+                            "TileWidth": 0
+                        },
+                        "ManifestCompression": "NONE",
+                        "ManifestDurationFormat": "INTEGER",
+                        "MinFinalSegmentLength": 0.0,
+                        "MinSegmentLength": 0,
+                        "OutputSelection": "MANIFESTS_AND_SEGMENTS",
+                        "ProgramDateTime": "INCLUDE",
+                        "ProgramDateTimePeriod": 0,
+                        "ProgressiveWriteHlsManifest": "DISABLED",
+                        "SegmentControl": "SINGLE_FILE",
+                        "SegmentLength": 0,
+                        "SegmentLengthControl": "EXACT",
+                        "SegmentsPerSubdirectory": 0,
+                        "StreamInfResolution": "INCLUDE",
+                        "TargetDurationCompatibilityMode": "SPEC_COMPLIANT",
+                        "TimedMetadataId3Frame": "NONE",
+                        "TimedMetadataId3Period": 0,
+                        "TimestampDeltaMilliseconds": 0
+                    },
+                    "MsSmoothGroupSettings": {
+                        "AdditionalManifests": [
+                            {
+                                "ManifestNameModifier": "",
+                                "SelectedOutputs": [
+                                    ""
+                                ]
+                            }
+                        ],
+                        "AudioDeduplication": "COMBINE_DUPLICATE_STREAMS",
+                        "Destination": "",
+                        "DestinationSettings": {
+                            "S3Settings": {
+                                "AccessControl": {
+                                    "CannedAcl": "BUCKET_OWNER_READ"
+                                },
+                                "Encryption": {
+                                    "EncryptionType": "SERVER_SIDE_ENCRYPTION_S3",
+                                    "KmsEncryptionContext": "",
+                                    "KmsKeyArn": ""
+                                },
+                                "StorageClass": "DEEP_ARCHIVE"
+                            }
+                        },
+                        "Encryption": {
+                            "SpekeKeyProvider": {
+                                "CertificateArn": "",
+                                "EncryptionContractConfiguration": {
+                                    "SpekeAudioPreset": "PRESET_AUDIO_1",
+                                    "SpekeVideoPreset": "PRESET_VIDEO_5"
+                                },
+                                "ResourceId": "",
+                                "SystemIds": [
+                                    ""
+                                ],
+                                "Url": ""
+                            }
+                        },
+                        "FragmentLength": 0,
+                        "FragmentLengthControl": "GOP_MULTIPLE",
+                        "ManifestEncoding": "UTF8"
+                    },
+                    "Type": "DASH_ISO_GROUP_SETTINGS"
+                },
+                "Outputs": [
+                    {
+                        "AudioDescriptions": [
+                            {
+                                "AudioChannelTaggingSettings": {
+                                    "ChannelTag": "VHR",
+                                    "ChannelTags": [
+                                        "VHL"
+                                    ]
+                                },
+                                "AudioNormalizationSettings": {
+                                    "Algorithm": "ITU_BS_1770_3",
+                                    "AlgorithmControl": "CORRECT_AUDIO",
+                                    "CorrectionGateLevel": 0,
+                                    "LoudnessLogging": "LOG",
+                                    "PeakCalculation": "NONE",
+                                    "TargetLkfs": 0.0,
+                                    "TruePeakLimiterThreshold": 0.0
+                                },
+                                "AudioSourceName": "",
+                                "AudioType": 0,
+                                "AudioTypeControl": "FOLLOW_INPUT",
+                                "CodecSettings": {
+                                    "AacSettings": {
+                                        "AudioDescriptionBroadcasterMix": "BROADCASTER_MIXED_AD",
+                                        "Bitrate": 0,
+                                        "CodecProfile": "LC",
+                                        "CodingMode": "CODING_MODE_1_0",
+                                        "RateControlMode": "CBR",
+                                        "RawFormat": "NONE",
+                                        "SampleRate": 0,
+                                        "Specification": "MPEG2",
+                                        "VbrQuality": "HIGH"
+                                    },
+                                    "Ac3Settings": {
+                                        "Bitrate": 0,
+                                        "BitstreamMode": "HEARING_IMPAIRED",
+                                        "CodingMode": "CODING_MODE_3_2_LFE",
+                                        "Dialnorm": 0,
+                                        "DynamicRangeCompressionLine": "SPEECH",
+                                        "DynamicRangeCompressionProfile": "FILM_STANDARD",
+                                        "DynamicRangeCompressionRf": "NONE",
+                                        "LfeFilter": "ENABLED",
+                                        "MetadataControl": "FOLLOW_INPUT",
+                                        "SampleRate": 0
+                                    },
+                                    "AiffSettings": {
+                                        "BitDepth": 0,
+                                        "Channels": 0,
+                                        "SampleRate": 0
+                                    },
+                                    "Codec": "MP3",
+                                    "Eac3AtmosSettings": {
+                                        "Bitrate": 0,
+                                        "BitstreamMode": "COMPLETE_MAIN",
+                                        "CodingMode": "CODING_MODE_5_1_4",
+                                        "DialogueIntelligence": "ENABLED",
+                                        "DownmixControl": "SPECIFIED",
+                                        "DynamicRangeCompressionLine": "FILM_STANDARD",
+                                        "DynamicRangeCompressionRf": "MUSIC_LIGHT",
+                                        "DynamicRangeControl": "INITIALIZE_FROM_SOURCE",
+                                        "LoRoCenterMixLevel": 0.0,
+                                        "LoRoSurroundMixLevel": 0.0,
+                                        "LtRtCenterMixLevel": 0.0,
+                                        "LtRtSurroundMixLevel": 0.0,
+                                        "MeteringMode": "ITU_BS_1770_4",
+                                        "SampleRate": 0,
+                                        "SpeechThreshold": 0,
+                                        "StereoDownmix": "NOT_INDICATED",
+                                        "SurroundExMode": "NOT_INDICATED"
+                                    },
+                                    "Eac3Settings": {
+                                        "AttenuationControl": "NONE",
+                                        "Bitrate": 0,
+                                        "BitstreamMode": "HEARING_IMPAIRED",
+                                        "CodingMode": "CODING_MODE_3_2",
+                                        "DcFilter": "ENABLED",
+                                        "Dialnorm": 0,
+                                        "DynamicRangeCompressionLine": "SPEECH",
+                                        "DynamicRangeCompressionRf": "MUSIC_STANDARD",
+                                        "LfeControl": "NO_LFE",
+                                        "LfeFilter": "DISABLED",
+                                        "LoRoCenterMixLevel": 0.0,
+                                        "LoRoSurroundMixLevel": 0.0,
+                                        "LtRtCenterMixLevel": 0.0,
+                                        "LtRtSurroundMixLevel": 0.0,
+                                        "MetadataControl": "FOLLOW_INPUT",
+                                        "PassthroughControl": "WHEN_POSSIBLE",
+                                        "PhaseControl": "SHIFT_90_DEGREES",
+                                        "SampleRate": 0,
+                                        "StereoDownmix": "NOT_INDICATED",
+                                        "SurroundExMode": "NOT_INDICATED",
+                                        "SurroundMode": "NOT_INDICATED"
+                                    },
+                                    "FlacSettings": {
+                                        "BitDepth": 0,
+                                        "Channels": 0,
+                                        "SampleRate": 0
+                                    },
+                                    "Mp2Settings": {
+                                        "Bitrate": 0,
+                                        "Channels": 0,
+                                        "SampleRate": 0
+                                    },
+                                    "Mp3Settings": {
+                                        "Bitrate": 0,
+                                        "Channels": 0,
+                                        "RateControlMode": "CBR",
+                                        "SampleRate": 0,
+                                        "VbrQuality": 0
+                                    },
+                                    "OpusSettings": {
+                                        "Bitrate": 0,
+                                        "Channels": 0,
+                                        "SampleRate": 0
+                                    },
+                                    "VorbisSettings": {
+                                        "Channels": 0,
+                                        "SampleRate": 0,
+                                        "VbrQuality": 0
+                                    },
+                                    "WavSettings": {
+                                        "BitDepth": 0,
+                                        "Channels": 0,
+                                        "Format": "RIFF",
+                                        "SampleRate": 0
+                                    }
+                                },
+                                "CustomLanguageCode": "",
+                                "LanguageCode": "CHA",
+                                "LanguageCodeControl": "FOLLOW_INPUT",
+                                "RemixSettings": {
+                                    "AudioDescriptionAudioChannel": 0,
+                                    "AudioDescriptionDataChannel": 0,
+                                    "ChannelMapping": {
+                                        "OutputChannels": [
+                                            {
+                                                "InputChannels": [
+                                                    0
+                                                ],
+                                                "InputChannelsFineTune": [
+                                                    0.0
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    "ChannelsIn": 0,
+                                    "ChannelsOut": 0
+                                },
+                                "StreamName": ""
+                            }
+                        ],
+                        "CaptionDescriptions": [
+                            {
+                                "CaptionSelectorName": "",
+                                "CustomLanguageCode": "",
+                                "DestinationSettings": {
+                                    "BurninDestinationSettings": {
+                                        "Alignment": "CENTERED",
+                                        "ApplyFontColor": "WHITE_TEXT_ONLY",
+                                        "BackgroundColor": "WHITE",
+                                        "BackgroundOpacity": 0,
+                                        "FallbackFont": "MONOSPACED_SANSSERIF",
+                                        "FontColor": "BLACK",
+                                        "FontFileBold": "",
+                                        "FontFileBoldItalic": "",
+                                        "FontFileItalic": "",
+                                        "FontFileRegular": "",
+                                        "FontOpacity": 0,
+                                        "FontResolution": 0,
+                                        "FontScript": "HANT",
+                                        "FontSize": 0,
+                                        "HexFontColor": "",
+                                        "OutlineColor": "WHITE",
+                                        "OutlineSize": 0,
+                                        "RemoveRubyReserveAttributes": "ENABLED",
+                                        "ShadowColor": "AUTO",
+                                        "ShadowOpacity": 0,
+                                        "ShadowXOffset": 0,
+                                        "ShadowYOffset": 0,
+                                        "StylePassthrough": "DISABLED",
+                                        "TeletextSpacing": "AUTO",
+                                        "XPosition": 0,
+                                        "YPosition": 0
+                                    },
+                                    "DestinationType": "DVB_SUB",
+                                    "DvbSubDestinationSettings": {
+                                        "Alignment": "LEFT",
+                                        "ApplyFontColor": "ALL_TEXT",
+                                        "BackgroundColor": "WHITE",
+                                        "BackgroundOpacity": 0,
+                                        "DdsHandling": "NO_DISPLAY_WINDOW",
+                                        "DdsXCoordinate": 0,
+                                        "DdsYCoordinate": 0,
+                                        "FallbackFont": "MONOSPACED_SANSSERIF",
+                                        "FontColor": "RED",
+                                        "FontFileBold": "",
+                                        "FontFileBoldItalic": "",
+                                        "FontFileItalic": "",
+                                        "FontFileRegular": "",
+                                        "FontOpacity": 0,
+                                        "FontResolution": 0,
+                                        "FontScript": "AUTOMATIC",
+                                        "FontSize": 0,
+                                        "Height": 0,
+                                        "HexFontColor": "",
+                                        "OutlineColor": "RED",
+                                        "OutlineSize": 0,
+                                        "ShadowColor": "WHITE",
+                                        "ShadowOpacity": 0,
+                                        "ShadowXOffset": 0,
+                                        "ShadowYOffset": 0,
+                                        "StylePassthrough": "DISABLED",
+                                        "SubtitlingType": "HEARING_IMPAIRED",
+                                        "TeletextSpacing": "FIXED_GRID",
+                                        "Width": 0,
+                                        "XPosition": 0,
+                                        "YPosition": 0
+                                    },
+                                    "EmbeddedDestinationSettings": {
+                                        "Destination608ChannelNumber": 0,
+                                        "Destination708ServiceNumber": 0
+                                    },
+                                    "ImscDestinationSettings": {
+                                        "Accessibility": "DISABLED",
+                                        "StylePassthrough": "ENABLED"
+                                    },
+                                    "SccDestinationSettings": {
+                                        "Framerate": "FRAMERATE_25"
+                                    },
+                                    "SrtDestinationSettings": {
+                                        "StylePassthrough": "ENABLED"
+                                    },
+                                    "TeletextDestinationSettings": {
+                                        "PageNumber": "",
+                                        "PageTypes": [
+                                            "PAGE_TYPE_SUBTITLE"
+                                        ]
+                                    },
+                                    "TtmlDestinationSettings": {
+                                        "StylePassthrough": "DISABLED"
+                                    },
+                                    "WebvttDestinationSettings": {
+                                        "Accessibility": "DISABLED",
+                                        "StylePassthrough": "STRICT"
+                                    }
+                                },
+                                "LanguageCode": "BRE",
+                                "LanguageDescription": ""
+                            }
+                        ],
+                        "ContainerSettings": {
+                            "CmfcSettings": {
+                                "AudioDuration": "DEFAULT_CODEC_DURATION",
+                                "AudioGroupId": "",
+                                "AudioRenditionSets": "",
+                                "AudioTrackType": "ALTERNATE_AUDIO_AUTO_SELECT_DEFAULT",
+                                "DescriptiveVideoServiceFlag": "FLAG",
+                                "IFrameOnlyManifest": "EXCLUDE",
+                                "KlvMetadata": "PASSTHROUGH",
+                                "ManifestMetadataSignaling": "ENABLED",
+                                "Scte35Esam": "INSERT",
+                                "Scte35Source": "NONE",
+                                "TimedMetadata": "NONE",
+                                "TimedMetadataBoxVersion": "VERSION_0",
+                                "TimedMetadataSchemeIdUri": "",
+                                "TimedMetadataValue": ""
+                            },
+                            "Container": "Y4M",
+                            "F4vSettings": {
+                                "MoovPlacement": "PROGRESSIVE_DOWNLOAD"
+                            },
+                            "M2tsSettings": {
+                                "AudioBufferModel": "DVB",
+                                "AudioDuration": "MATCH_VIDEO_DURATION",
+                                "AudioFramesPerPes": 0,
+                                "AudioPids": [
+                                    0
+                                ],
+                                "Bitrate": 0,
+                                "BufferModel": "MULTIPLEX",
+                                "DataPTSControl": "ALIGN_TO_VIDEO",
+                                "DvbNitSettings": {
+                                    "NetworkId": 0,
+                                    "NetworkName": "",
+                                    "NitInterval": 0
+                                },
+                                "DvbSdtSettings": {
+                                    "OutputSdt": "SDT_NONE",
+                                    "SdtInterval": 0,
+                                    "ServiceName": "",
+                                    "ServiceProviderName": ""
+                                },
+                                "DvbSubPids": [
+                                    0
+                                ],
+                                "DvbTdtSettings": {
+                                    "TdtInterval": 0
+                                },
+                                "DvbTeletextPid": 0,
+                                "EbpAudioInterval": "VIDEO_INTERVAL",
+                                "EbpPlacement": "VIDEO_PID",
+                                "EsRateInPes": "EXCLUDE",
+                                "ForceTsVideoEbpOrder": "FORCE",
+                                "FragmentTime": 0.0,
+                                "KlvMetadata": "NONE",
+                                "MaxPcrInterval": 0,
+                                "MinEbpInterval": 0,
+                                "NielsenId3": "NONE",
+                                "NullPacketBitrate": 0.0,
+                                "PatInterval": 0,
+                                "PcrControl": "PCR_EVERY_PES_PACKET",
+                                "PcrPid": 0,
+                                "PmtInterval": 0,
+                                "PmtPid": 0,
+                                "PreventBufferUnderflow": "DISABLED",
+                                "PrivateMetadataPid": 0,
+                                "ProgramNumber": 0,
+                                "PtsOffset": 0,
+                                "PtsOffsetMode": "AUTO",
+                                "RateMode": "CBR",
+                                "Scte35Esam": {
+                                    "Scte35EsamPid": 0
+                                },
+                                "Scte35Pid": 0,
+                                "Scte35Source": "NONE",
+                                "SegmentationMarkers": "EBP_LEGACY",
+                                "SegmentationStyle": "RESET_CADENCE",
+                                "SegmentationTime": 0.0,
+                                "TimedMetadataPid": 0,
+                                "TransportStreamId": 0,
+                                "VideoPid": 0
+                            },
+                            "M3u8Settings": {
+                                "AudioDuration": "DEFAULT_CODEC_DURATION",
+                                "AudioFramesPerPes": 0,
+                                "AudioPids": [
+                                    0
+                                ],
+                                "DataPTSControl": "ALIGN_TO_VIDEO",
+                                "MaxPcrInterval": 0,
+                                "NielsenId3": "INSERT",
+                                "PatInterval": 0,
+                                "PcrControl": "CONFIGURED_PCR_PERIOD",
+                                "PcrPid": 0,
+                                "PmtInterval": 0,
+                                "PmtPid": 0,
+                                "PrivateMetadataPid": 0,
+                                "ProgramNumber": 0,
+                                "PtsOffset": 0,
+                                "PtsOffsetMode": "AUTO",
+                                "Scte35Pid": 0,
+                                "Scte35Source": "PASSTHROUGH",
+                                "TimedMetadata": "NONE",
+                                "TimedMetadataPid": 0,
+                                "TransportStreamId": 0,
+                                "VideoPid": 0
+                            },
+                            "MovSettings": {
+                                "ClapAtom": "INCLUDE",
+                                "CslgAtom": "INCLUDE",
+                                "Mpeg2FourCCControl": "MPEG",
+                                "PaddingControl": "OMNEON",
+                                "Reference": "EXTERNAL"
+                            },
+                            "Mp4Settings": {
+                                "AudioDuration": "DEFAULT_CODEC_DURATION",
+                                "CslgAtom": "EXCLUDE",
+                                "CttsVersion": 0,
+                                "FreeSpaceBox": "INCLUDE",
+                                "MoovPlacement": "NORMAL",
+                                "Mp4MajorBrand": ""
+                            },
+                            "MpdSettings": {
+                                "AccessibilityCaptionHints": "INCLUDE",
+                                "AudioDuration": "DEFAULT_CODEC_DURATION",
+                                "CaptionContainerType": "RAW",
+                                "KlvMetadata": "PASSTHROUGH",
+                                "ManifestMetadataSignaling": "DISABLED",
+                                "Scte35Esam": "INSERT",
+                                "Scte35Source": "PASSTHROUGH",
+                                "TimedMetadata": "PASSTHROUGH",
+                                "TimedMetadataBoxVersion": "VERSION_1",
+                                "TimedMetadataSchemeIdUri": "",
+                                "TimedMetadataValue": ""
+                            },
+                            "MxfSettings": {
+                                "AfdSignaling": "NO_COPY",
+                                "Profile": "OP1A",
+                                "XavcProfileSettings": {
+                                    "DurationMode": "ALLOW_ANY_DURATION",
+                                    "MaxAncDataSize": 0
+                                }
+                            }
+                        },
+                        "Extension": "",
+                        "NameModifier": "",
+                        "OutputSettings": {
+                            "HlsSettings": {
+                                "AudioGroupId": "",
+                                "AudioOnlyContainer": "AUTOMATIC",
+                                "AudioRenditionSets": "",
+                                "AudioTrackType": "ALTERNATE_AUDIO_AUTO_SELECT",
+                                "DescriptiveVideoServiceFlag": "FLAG",
+                                "IFrameOnlyManifest": "EXCLUDE",
+                                "SegmentModifier": ""
+                            }
+                        },
+                        "Preset": "",
+                        "VideoDescription": {
+                            "AfdSignaling": "AUTO",
+                            "AntiAlias": "ENABLED",
+                            "ChromaPositionMode": "AUTO",
+                            "CodecSettings": {
+                                "Av1Settings": {
+                                    "AdaptiveQuantization": "LOW",
+                                    "BitDepth": "BIT_8",
+                                    "FilmGrainSynthesis": "ENABLED",
+                                    "FramerateControl": "INITIALIZE_FROM_SOURCE",
+                                    "FramerateConversionAlgorithm": "MAINTAIN_FRAME_COUNT",
+                                    "FramerateDenominator": 0,
+                                    "FramerateNumerator": 0,
+                                    "GopSize": 0.0,
+                                    "MaxBitrate": 0,
+                                    "NumberBFramesBetweenReferenceFrames": 0,
+                                    "QvbrSettings": {
+                                        "QvbrQualityLevel": 0,
+                                        "QvbrQualityLevelFineTune": 0.0
+                                    },
+                                    "RateControlMode": "QVBR",
+                                    "Slices": 0,
+                                    "SpatialAdaptiveQuantization": "DISABLED"
+                                },
+                                "AvcIntraSettings": {
+                                    "AvcIntraClass": "CLASS_50",
+                                    "AvcIntraUhdSettings": {
+                                        "QualityTuningLevel": "SINGLE_PASS"
+                                    },
+                                    "FramerateControl": "INITIALIZE_FROM_SOURCE",
+                                    "FramerateConversionAlgorithm": "MAINTAIN_FRAME_COUNT",
+                                    "FramerateDenominator": 0,
+                                    "FramerateNumerator": 0,
+                                    "InterlaceMode": "PROGRESSIVE",
+                                    "ScanTypeConversionMode": "INTERLACED",
+                                    "SlowPal": "ENABLED",
+                                    "Telecine": "NONE"
+                                },
+                                "Codec": "AV1",
+                                "FrameCaptureSettings": {
+                                    "FramerateDenominator": 0,
+                                    "FramerateNumerator": 0,
+                                    "MaxCaptures": 0,
+                                    "Quality": 0
+                                },
+                                "GifSettings": {
+                                    "FramerateControl": "INITIALIZE_FROM_SOURCE",
+                                    "FramerateConversionAlgorithm": "INTERPOLATE",
+                                    "FramerateDenominator": 0,
+                                    "FramerateNumerator": 0
+                                },
+                                "H264Settings": {
+                                    "AdaptiveQuantization": "HIGHER",
+                                    "BandwidthReductionFilter": {
+                                        "Sharpening": "OFF",
+                                        "Strength": "LOW"
+                                    },
+                                    "Bitrate": 0,
+                                    "CodecLevel": "LEVEL_5_2",
+                                    "CodecProfile": "MAIN",
+                                    "DynamicSubGop": "ADAPTIVE",
+                                    "EndOfStreamMarkers": "INCLUDE",
+                                    "EntropyEncoding": "CABAC",
+                                    "FieldEncoding": "MBAFF",
+                                    "FlickerAdaptiveQuantization": "ENABLED",
+                                    "FramerateControl": "SPECIFIED",
+                                    "FramerateConversionAlgorithm": "MAINTAIN_FRAME_COUNT",
+                                    "FramerateDenominator": 0,
+                                    "FramerateNumerator": 0,
+                                    "GopBReference": "ENABLED",
+                                    "GopClosedCadence": 0,
+                                    "GopSize": 0.0,
+                                    "GopSizeUnits": "FRAMES",
+                                    "HrdBufferFinalFillPercentage": 0,
+                                    "HrdBufferInitialFillPercentage": 0,
+                                    "HrdBufferSize": 0,
+                                    "InterlaceMode": "FOLLOW_TOP_FIELD",
+                                    "MaxBitrate": 0,
+                                    "MinIInterval": 0,
+                                    "NumberBFramesBetweenReferenceFrames": 0,
+                                    "NumberReferenceFrames": 0,
+                                    "ParControl": "SPECIFIED",
+                                    "ParDenominator": 0,
+                                    "ParNumerator": 0,
+                                    "QualityTuningLevel": "SINGLE_PASS",
+                                    "QvbrSettings": {
+                                        "MaxAverageBitrate": 0,
+                                        "QvbrQualityLevel": 0,
+                                        "QvbrQualityLevelFineTune": 0.0
+                                    },
+                                    "RateControlMode": "VBR",
+                                    "RepeatPps": "DISABLED",
+                                    "SaliencyAwareEncoding": "DISABLED",
+                                    "ScanTypeConversionMode": "INTERLACED",
+                                    "SceneChangeDetect": "ENABLED",
+                                    "Slices": 0,
+                                    "SlowPal": "DISABLED",
+                                    "Softness": 0,
+                                    "SpatialAdaptiveQuantization": "DISABLED",
+                                    "Syntax": "DEFAULT",
+                                    "Telecine": "SOFT",
+                                    "TemporalAdaptiveQuantization": "ENABLED",
+                                    "UnregisteredSeiTimecode": "DISABLED",
+                                    "WriteMp4PackagingType": "AVC3"
+                                },
+                                "H265Settings": {
+                                    "AdaptiveQuantization": "MEDIUM",
+                                    "AlternateTransferFunctionSei": "ENABLED",
+                                    "BandwidthReductionFilter": {
+                                        "Sharpening": "OFF",
+                                        "Strength": "HIGH"
+                                    },
+                                    "Bitrate": 0,
+                                    "CodecLevel": "AUTO",
+                                    "CodecProfile": "MAIN_422_8BIT_HIGH",
+                                    "Deblocking": "ENABLED",
+                                    "DynamicSubGop": "ADAPTIVE",
+                                    "EndOfStreamMarkers": "INCLUDE",
+                                    "FlickerAdaptiveQuantization": "DISABLED",
+                                    "FramerateControl": "SPECIFIED",
+                                    "FramerateConversionAlgorithm": "INTERPOLATE",
+                                    "FramerateDenominator": 0,
+                                    "FramerateNumerator": 0,
+                                    "GopBReference": "DISABLED",
+                                    "GopClosedCadence": 0,
+                                    "GopSize": 0.0,
+                                    "GopSizeUnits": "FRAMES",
+                                    "HrdBufferFinalFillPercentage": 0,
+                                    "HrdBufferInitialFillPercentage": 0,
+                                    "HrdBufferSize": 0,
+                                    "InterlaceMode": "PROGRESSIVE",
+                                    "MaxBitrate": 0,
+                                    "MinIInterval": 0,
+                                    "NumberBFramesBetweenReferenceFrames": 0,
+                                    "NumberReferenceFrames": 0,
+                                    "ParControl": "INITIALIZE_FROM_SOURCE",
+                                    "ParDenominator": 0,
+                                    "ParNumerator": 0,
+                                    "QualityTuningLevel": "MULTI_PASS_HQ",
+                                    "QvbrSettings": {
+                                        "MaxAverageBitrate": 0,
+                                        "QvbrQualityLevel": 0,
+                                        "QvbrQualityLevelFineTune": 0.0
+                                    },
+                                    "RateControlMode": "VBR",
+                                    "SampleAdaptiveOffsetFilterMode": "DEFAULT",
+                                    "ScanTypeConversionMode": "INTERLACED",
+                                    "SceneChangeDetect": "ENABLED",
+                                    "Slices": 0,
+                                    "SlowPal": "ENABLED",
+                                    "SpatialAdaptiveQuantization": "DISABLED",
+                                    "Telecine": "NONE",
+                                    "TemporalAdaptiveQuantization": "ENABLED",
+                                    "TemporalIds": "DISABLED",
+                                    "Tiles": "ENABLED",
+                                    "UnregisteredSeiTimecode": "ENABLED",
+                                    "WriteMp4PackagingType": "HVC1"
+                                },
+                                "Mpeg2Settings": {
+                                    "AdaptiveQuantization": "OFF",
+                                    "Bitrate": 0,
+                                    "CodecLevel": "LOW",
+                                    "CodecProfile": "MAIN",
+                                    "DynamicSubGop": "ADAPTIVE",
+                                    "FramerateControl": "INITIALIZE_FROM_SOURCE",
+                                    "FramerateConversionAlgorithm": "FRAMEFORMER",
+                                    "FramerateDenominator": 0,
+                                    "FramerateNumerator": 0,
+                                    "GopClosedCadence": 0,
+                                    "GopSize": 0.0,
+                                    "GopSizeUnits": "FRAMES",
+                                    "HrdBufferFinalFillPercentage": 0,
+                                    "HrdBufferInitialFillPercentage": 0,
+                                    "HrdBufferSize": 0,
+                                    "InterlaceMode": "TOP_FIELD",
+                                    "IntraDcPrecision": "INTRA_DC_PRECISION_11",
+                                    "MaxBitrate": 0,
+                                    "MinIInterval": 0,
+                                    "NumberBFramesBetweenReferenceFrames": 0,
+                                    "ParControl": "INITIALIZE_FROM_SOURCE",
+                                    "ParDenominator": 0,
+                                    "ParNumerator": 0,
+                                    "QualityTuningLevel": "SINGLE_PASS",
+                                    "RateControlMode": "VBR",
+                                    "ScanTypeConversionMode": "INTERLACED_OPTIMIZE",
+                                    "SceneChangeDetect": "ENABLED",
+                                    "SlowPal": "ENABLED",
+                                    "Softness": 0,
+                                    "SpatialAdaptiveQuantization": "ENABLED",
+                                    "Syntax": "D_10",
+                                    "Telecine": "NONE",
+                                    "TemporalAdaptiveQuantization": "ENABLED"
+                                },
+                                "ProresSettings": {
+                                    "ChromaSampling": "SUBSAMPLE_TO_422",
+                                    "CodecProfile": "APPLE_PRORES_422",
+                                    "FramerateControl": "INITIALIZE_FROM_SOURCE",
+                                    "FramerateConversionAlgorithm": "DUPLICATE_DROP",
+                                    "FramerateDenominator": 0,
+                                    "FramerateNumerator": 0,
+                                    "InterlaceMode": "PROGRESSIVE",
+                                    "ParControl": "INITIALIZE_FROM_SOURCE",
+                                    "ParDenominator": 0,
+                                    "ParNumerator": 0,
+                                    "ScanTypeConversionMode": "INTERLACED_OPTIMIZE",
+                                    "SlowPal": "DISABLED",
+                                    "Telecine": "HARD"
+                                },
+                                "UncompressedSettings": {
+                                    "Fourcc": "I422",
+                                    "FramerateControl": "SPECIFIED",
+                                    "FramerateConversionAlgorithm": "MAINTAIN_FRAME_COUNT",
+                                    "FramerateDenominator": 0,
+                                    "FramerateNumerator": 0,
+                                    "InterlaceMode": "INTERLACED",
+                                    "ScanTypeConversionMode": "INTERLACED",
+                                    "SlowPal": "ENABLED",
+                                    "Telecine": "HARD"
+                                },
+                                "Vc3Settings": {
+                                    "FramerateControl": "SPECIFIED",
+                                    "FramerateConversionAlgorithm": "FRAMEFORMER",
+                                    "FramerateDenominator": 0,
+                                    "FramerateNumerator": 0,
+                                    "InterlaceMode": "PROGRESSIVE",
+                                    "ScanTypeConversionMode": "INTERLACED",
+                                    "SlowPal": "ENABLED",
+                                    "Telecine": "HARD",
+                                    "Vc3Class": "CLASS_220_8BIT"
+                                },
+                                "Vp8Settings": {
+                                    "Bitrate": 0,
+                                    "FramerateControl": "SPECIFIED",
+                                    "FramerateConversionAlgorithm": "DUPLICATE_DROP",
+                                    "FramerateDenominator": 0,
+                                    "FramerateNumerator": 0,
+                                    "GopSize": 0.0,
+                                    "HrdBufferSize": 0,
+                                    "MaxBitrate": 0,
+                                    "ParControl": "SPECIFIED",
+                                    "ParDenominator": 0,
+                                    "ParNumerator": 0,
+                                    "QualityTuningLevel": "MULTI_PASS_HQ",
+                                    "RateControlMode": "VBR"
+                                },
+                                "Vp9Settings": {
+                                    "Bitrate": 0,
+                                    "FramerateControl": "INITIALIZE_FROM_SOURCE",
+                                    "FramerateConversionAlgorithm": "INTERPOLATE",
+                                    "FramerateDenominator": 0,
+                                    "FramerateNumerator": 0,
+                                    "GopSize": 0.0,
+                                    "HrdBufferSize": 0,
+                                    "MaxBitrate": 0,
+                                    "ParControl": "SPECIFIED",
+                                    "ParDenominator": 0,
+                                    "ParNumerator": 0,
+                                    "QualityTuningLevel": "MULTI_PASS",
+                                    "RateControlMode": "VBR"
+                                },
+                                "XavcSettings": {
+                                    "AdaptiveQuantization": "MEDIUM",
+                                    "EntropyEncoding": "AUTO",
+                                    "FramerateControl": "SPECIFIED",
+                                    "FramerateConversionAlgorithm": "MAINTAIN_FRAME_COUNT",
+                                    "FramerateDenominator": 0,
+                                    "FramerateNumerator": 0,
+                                    "Profile": "XAVC_HD",
+                                    "SlowPal": "DISABLED",
+                                    "Softness": 0,
+                                    "SpatialAdaptiveQuantization": "DISABLED",
+                                    "TemporalAdaptiveQuantization": "ENABLED",
+                                    "Xavc4kIntraCbgProfileSettings": {
+                                        "XavcClass": "CLASS_300"
+                                    },
+                                    "Xavc4kIntraVbrProfileSettings": {
+                                        "XavcClass": "CLASS_480"
+                                    },
+                                    "Xavc4kProfileSettings": {
+                                        "BitrateClass": "BITRATE_CLASS_200",
+                                        "CodecProfile": "HIGH",
+                                        "FlickerAdaptiveQuantization": "DISABLED",
+                                        "GopBReference": "ENABLED",
+                                        "GopClosedCadence": 0,
+                                        "HrdBufferSize": 0,
+                                        "QualityTuningLevel": "SINGLE_PASS",
+                                        "Slices": 0
+                                    },
+                                    "XavcHdIntraCbgProfileSettings": {
+                                        "XavcClass": "CLASS_100"
+                                    },
+                                    "XavcHdProfileSettings": {
+                                        "BitrateClass": "BITRATE_CLASS_35",
+                                        "FlickerAdaptiveQuantization": "ENABLED",
+                                        "GopBReference": "DISABLED",
+                                        "GopClosedCadence": 0,
+                                        "HrdBufferSize": 0,
+                                        "InterlaceMode": "TOP_FIELD",
+                                        "QualityTuningLevel": "SINGLE_PASS_HQ",
+                                        "Slices": 0,
+                                        "Telecine": "NONE"
+                                    }
+                                }
+                            },
+                            "ColorMetadata": "IGNORE",
+                            "Crop": {
+                                "Height": 0,
+                                "Width": 0,
+                                "X": 0,
+                                "Y": 0
+                            },
+                            "DropFrameTimecode": "DISABLED",
+                            "FixedAfd": 0,
+                            "Height": 0,
+                            "Position": {
+                                "Height": 0,
+                                "Width": 0,
+                                "X": 0,
+                                "Y": 0
+                            },
+                            "RespondToAfd": "PASSTHROUGH",
+                            "ScalingBehavior": "FIT_NO_UPSCALE",
+                            "Sharpness": 0,
+                            "TimecodeInsertion": "PIC_TIMING_SEI",
+                            "TimecodeTrack": "DISABLED",
+                            "VideoPreprocessors": {
+                                "ColorCorrector": {
+                                    "Brightness": 0,
+                                    "ClipLimits": {
+                                        "MaximumRGBTolerance": 0,
+                                        "MaximumYUV": 0,
+                                        "MinimumRGBTolerance": 0,
+                                        "MinimumYUV": 0
+                                    },
+                                    "ColorSpaceConversion": "FORCE_P3DCI",
+                                    "Contrast": 0,
+                                    "Hdr10Metadata": {
+                                        "BluePrimaryX": 0,
+                                        "BluePrimaryY": 0,
+                                        "GreenPrimaryX": 0,
+                                        "GreenPrimaryY": 0,
+                                        "MaxContentLightLevel": 0,
+                                        "MaxFrameAverageLightLevel": 0,
+                                        "MaxLuminance": 0,
+                                        "MinLuminance": 0,
+                                        "RedPrimaryX": 0,
+                                        "RedPrimaryY": 0,
+                                        "WhitePointX": 0,
+                                        "WhitePointY": 0
+                                    },
+                                    "HdrToSdrToneMapper": "PRESERVE_DETAILS",
+                                    "Hue": 0,
+                                    "MaxLuminance": 0,
+                                    "SampleRangeConversion": "LIMITED_RANGE_SQUEEZE",
+                                    "Saturation": 0,
+                                    "SdrReferenceWhiteLevel": 0
+                                },
+                                "Deinterlacer": {
+                                    "Algorithm": "BLEND",
+                                    "Control": "FORCE_ALL_FRAMES",
+                                    "Mode": "INVERSE_TELECINE"
+                                },
+                                "DolbyVision": {
+                                    "L6Metadata": {
+                                        "MaxCll": 0,
+                                        "MaxFall": 0
+                                    },
+                                    "L6Mode": "SPECIFY",
+                                    "Mapping": "HDR10_NOMAP",
+                                    "Profile": "PROFILE_5"
+                                },
+                                "Hdr10Plus": {
+                                    "MasteringMonitorNits": 0,
+                                    "TargetMonitorNits": 0
+                                },
+                                "ImageInserter": {
+                                    "InsertableImages": [
+                                        {
+                                            "Duration": 0,
+                                            "FadeIn": 0,
+                                            "FadeOut": 0,
+                                            "Height": 0,
+                                            "ImageInserterInput": "",
+                                            "ImageX": 0,
+                                            "ImageY": 0,
+                                            "Layer": 0,
+                                            "Opacity": 0,
+                                            "StartTime": "",
+                                            "Width": 0
+                                        }
+                                    ],
+                                    "SdrReferenceWhiteLevel": 0
+                                },
+                                "NoiseReducer": {
+                                    "Filter": "CONSERVE",
+                                    "FilterSettings": {
+                                        "Strength": 0
+                                    },
+                                    "SpatialFilterSettings": {
+                                        "PostFilterSharpenStrength": 0,
+                                        "Speed": 0,
+                                        "Strength": 0
+                                    },
+                                    "TemporalFilterSettings": {
+                                        "AggressiveMode": 0,
+                                        "PostTemporalSharpening": "ENABLED",
+                                        "PostTemporalSharpeningStrength": "MEDIUM",
+                                        "Speed": 0,
+                                        "Strength": 0
+                                    }
+                                },
+                                "PartnerWatermarking": {
+                                    "NexguardFileMarkerSettings": {
+                                        "License": "",
+                                        "Payload": 0,
+                                        "Preset": "",
+                                        "Strength": "STRONGEST"
+                                    }
+                                },
+                                "TimecodeBurnin": {
+                                    "FontSize": 0,
+                                    "Position": "MIDDLE_RIGHT",
+                                    "Prefix": ""
+                                }
+                            },
+                            "Width": 0
+                        }
+                    }
+                ]
+            }
+        ],
+        "TimecodeConfig": {
+            "Anchor": "",
+            "Source": "ZEROBASED",
+            "Start": "",
+            "TimestampOffset": ""
+        },
+        "TimedMetadataInsertion": {
+            "Id3Insertions": [
+                {
+                    "Id3": "",
+                    "Timecode": ""
+                }
+            ]
+        }
+    },
+    "SimulateReservedQueue": "ENABLED",
+    "StatusUpdateInterval": "SECONDS_10",
+    "Tags": {
+        "KeyName": ""
+    },
+    "UserMetadata": {
+        "KeyName": ""
+    }
+}

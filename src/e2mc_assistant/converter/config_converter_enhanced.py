@@ -28,72 +28,73 @@ class ConfigConverter:
         self.custom_functions[name] = func
         
     def parse_xml(self, xml_file: str) -> Dict:
-        """Parse Encoding.com XML configuration file"""
+        """Parse Encoding.com XML configuration file, returning only the format element content"""
         tree = ET.parse(xml_file)
         root = tree.getroot()
         
-        # Convert XML to dictionary
+        # Find the format element
+        format_element = root.find('.//format')
+        if format_element is None:
+            self.logger.warning("No <format> element found in XML file")
+            return {}
+            
+        # Convert format element to dictionary
         result = {}
         
-        def process_element(element, current_dict):
-            # Handle array-like elements (multiple stream tags)
-            if element.tag == 'stream' and element.tag in current_dict:
-                # If this is a stream and we already have one, convert to array
-                if not isinstance(current_dict[element.tag], list):
-                    current_dict[element.tag] = [current_dict[element.tag]]
-                
-                # Process this stream
-                stream_dict = {}
-                for child in element:
-                    process_element(child, stream_dict)
-                
-                # Add to array
-                current_dict[element.tag].append(stream_dict)
-                return
-                
-            if len(element) == 0:
-                # Leaf node
-                text = element.text
-                if text is not None:
-                    if text.isdigit():
-                        text = int(text)
-                    elif self._is_float(text):
-                        text = float(text)
-                current_dict[element.tag] = text
+        # First, identify elements that might appear multiple times
+        element_counts = {}
+        for child in format_element:
+            tag = child.tag
+            element_counts[tag] = element_counts.get(tag, 0) + 1
+        
+        # Process elements, handling multiples specially
+        for tag, count in element_counts.items():
+            if count > 1:
+                # This element appears multiple times, collect them in a list
+                elements = format_element.findall(tag)
+                result[tag] = []
+                for element in elements:
+                    if len(element) == 0:  # Simple element
+                        text = element.text
+                        if text is not None:
+                            if text.isdigit():
+                                text = int(text)
+                            elif self._is_float(text):
+                                text = float(text)
+                        result[tag].append(text)
+                    else:  # Complex element
+                        child_dict = {}
+                        for child in element:
+                            self._process_element(child, child_dict)
+                        result[tag].append(child_dict)
             else:
-                # Non-leaf node
-                new_dict = {}
-                current_dict[element.tag] = new_dict
-                for child in element:
-                    process_element(child, new_dict)
-        
-        # Special handling for stream elements which can be multiple
-        streams = []
-        non_streams = []
-        
-        for child in root:
-            if child.tag == 'stream':
-                streams.append(child)
-            else:
-                non_streams.append(child)
-        
-        # Process non-stream elements first
-        for child in non_streams:
-            process_element(child, result)
-            
-        # Process stream elements
-        if streams:
-            result['stream'] = []
-            for stream in streams:
-                stream_dict = {}
-                for child in stream:
-                    process_element(child, stream_dict)
-                result['stream'].append(stream_dict)
+                # Single occurrence, process normally
+                elements = format_element.findall(tag)
+                if elements:
+                    self._process_element(elements[0], result)
         
         # Debug output
         self.logger.debug(f"Parsed XML structure: {result}")
                 
         return result
+        
+    def _process_element(self, element, current_dict):
+        """Process a single XML element into a dictionary"""
+        if len(element) == 0:
+            # Leaf node
+            text = element.text
+            if text is not None:
+                if text.isdigit():
+                    text = int(text)
+                elif self._is_float(text):
+                    text = float(text)
+            current_dict[element.tag] = text
+        else:
+            # Non-leaf node
+            new_dict = {}
+            current_dict[element.tag] = new_dict
+            for child in element:
+                self._process_element(child, new_dict)
     
     def _is_float(self, value: str) -> bool:
         """Check if string can be converted to float"""
@@ -384,38 +385,51 @@ class ConfigConverter:
                     current = current[part]
                     
     def _process_iteration_rule(self, rule: Dict, source_data: Dict, target_data: Dict):
-        """Process iteration rules for array elements like streams"""
+        """Process iteration rules for array elements like streams or alternate_source"""
         source_path = rule['source']['path']
         source_array = self.get_value_by_path(source_data, source_path)
         
-        if not source_array or not isinstance(source_array, list):
+        if not source_array:
             self.logger.debug(f"No array found at {source_path} or not a list")
             return
+            
+        # Convert to list if it's a single item
+        if not isinstance(source_array, list):
+            source_array = [source_array]
+            self.logger.debug(f"Converted single item to list at {source_path}")
         
         sub_rules = rule['source'].get('rules', [])
         target_base_path = rule['target_base_path']
         name_modifier_config = rule.get('name_modifier')
+        key_format = rule.get('key_format')  # New parameter for key-value mapping
         
         # Get template structure if it exists
         template_outputs = None
-        parts = target_base_path.split('.')
-        current = target_data
-        for part in parts:
-            if part in current:
-                current = current[part]
-                if isinstance(current, list) and len(current) > 0:
-                    template_outputs = current[0]  # Use first item as template
-                    break
+        if not key_format:  # Only for array-type targets (not key-value)
+            parts = target_base_path.split('.')
+            current = target_data
+            for part in parts:
+                if part in current:
+                    current = current[part]
+                    if isinstance(current, list) and len(current) > 0:
+                        template_outputs = current[0]  # Use first item as template
+                        break
         
-        # Create target array
-        target_array = []
+        # Create target array or object
+        if key_format:
+            # For key-value mapping, ensure the target path exists
+            self._ensure_path_exists(target_data, target_base_path)
+            target_dict = self._get_nested_dict(target_data, target_base_path)
+        else:
+            # For array mapping
+            target_array = []
         
         # Process each source element
         for i, source_item in enumerate(source_array):
             self.logger.debug(f"Processing {source_path}[{i}]")
             
             # Start with template structure if available
-            if template_outputs:
+            if template_outputs and not key_format:
                 target_item = copy.deepcopy(template_outputs)
             else:
                 target_item = {}
@@ -493,10 +507,10 @@ class ConfigConverter:
                     
                     # Handle nested paths properly, especially for arrays like AudioDescriptions[0]
                     self._set_nested_value(target_item, sub_target_path, sub_target_value)
-                    self.logger.debug(f"Set {sub_target_path}={sub_target_value} in stream {i}")
+                    self.logger.debug(f"Set {sub_target_path}={sub_target_value} in {source_path} {i}")
             
             # Generate name modifier
-            if name_modifier_config:
+            if name_modifier_config and not key_format:
                 template = name_modifier_config.get('template', '')
                 name_modifier = template
                 
@@ -517,13 +531,65 @@ class ConfigConverter:
                     name_modifier = name_modifier.replace(f"{{{var_name}}}", str(var_value))
                 
                 target_item['NameModifier'] = name_modifier
-                self.logger.debug(f"Generated NameModifier: {name_modifier} for stream {i}")
+                self.logger.debug(f"Generated NameModifier: {name_modifier} for {source_path} {i}")
             
-            target_array.append(target_item)
+            # Add to target array or object
+            if key_format:
+                # Generate key name using the format and index
+                key_name = key_format.replace('{index}', str(i + 1))
+                target_dict[key_name] = target_item
+                self.logger.debug(f"Added key-value pair with key: {key_name} for {source_path} {i}")
+            else:
+                target_array.append(target_item)
         
-        # Set target array
-        self.set_value_by_path(target_data, target_base_path, target_array)
-        self.logger.debug(f"Set {len(target_array)} items at {target_base_path}")
+        # Set target array or object
+        if not key_format:
+            self.set_value_by_path(target_data, target_base_path, target_array)
+            self.logger.debug(f"Set {len(target_array)} items at {target_base_path}")
+            
+    def _ensure_path_exists(self, data: Dict, path: str) -> None:
+        """Ensure that a nested path exists in the dictionary"""
+        parts = path.split('.')
+        current = data
+        
+        for part in parts:
+            # Handle array indices, e.g., OutputGroups[0]
+            array_match = re.match(r'(.+)\[(\d+)\]', part)
+            
+            if array_match:
+                key = array_match.group(1)
+                index = int(array_match.group(2))
+                
+                if key not in current:
+                    current[key] = []
+                
+                # Ensure array has enough elements
+                while len(current[key]) <= index:
+                    current[key].append({})
+                
+                current = current[key][index]
+            else:
+                if part not in current:
+                    current[part] = {}
+                current = current[part]
+                
+    def _get_nested_dict(self, data: Dict, path: str) -> Dict:
+        """Get a nested dictionary at the specified path"""
+        parts = path.split('.')
+        current = data
+        
+        for part in parts:
+            # Handle array indices, e.g., OutputGroups[0]
+            array_match = re.match(r'(.+)\[(\d+)\]', part)
+            
+            if array_match:
+                key = array_match.group(1)
+                index = int(array_match.group(2))
+                current = current[key][index]
+            else:
+                current = current[part]
+                
+        return current
     def convert(self, source_file: str, template_file: str = None) -> Dict:
         """Execute configuration conversion"""
         # Parse source file
@@ -550,6 +616,15 @@ class ConfigConverter:
                 self.logger.debug(f"Processing iteration rule for {rule['source']['path']}")
                 self._process_iteration_rule(rule, source_data, target_data)
                 processed_params.add(rule['source']['path'])
+                continue
+                
+            # Handle dummy rules - just mark as processed without actual conversion
+            if rule['source'].get('type') == 'dummy':
+                source_path = rule['source']['path']
+                self.logger.debug(f"Processing dummy rule for {source_path}")
+                processed_params.add(source_path)
+                # Log that the parameter was processed but not added to output
+                self.logger.debug(f"Parameter {source_path} marked as processed (dummy type)")
                 continue
                 
             source_path = rule['source']['path']
@@ -634,6 +709,11 @@ class ConfigConverter:
         # Log unmapped parameters
         self._log_unmapped_parameters(source_data, processed_params)
         
+        # Remove any _dummy sections from the output
+        if '_dummy' in target_data:
+            del target_data['_dummy']
+            self.logger.debug("Removed _dummy section from output")
+        
         return target_data
         
     def _log_unmapped_parameters(self, source_data: Dict, processed_params: set, parent_path: str = ""):
@@ -680,9 +760,13 @@ def batch_convert(converter: ConfigConverter, source_dir: str, output_dir: str, 
                 
             template_path = os.path.join(source_dir, template_name)
             
+            # Setup logging for this specific file
+            log_file = os.path.join(output_dir, f"{os.path.splitext(os.path.basename(output_file))[0]}.log")
+            setup_file_logging(log_file)
+            
             if os.path.exists(template_path):
                 current_template = template_path
-                print(f"Using template: {template_path}")
+                logging.info(f"Using template: {template_path}")
             else:
                 current_template = template_file
             
@@ -690,10 +774,62 @@ def batch_convert(converter: ConfigConverter, source_dir: str, output_dir: str, 
                 result = converter.convert(source_file, current_template)
                 with open(output_file, 'w') as f:
                     json.dump(result, f, indent=2)
+                logging.info(f"Converted {source_file} to {output_file}")
                 print(f"Converted {source_file} to {output_file}")
             except Exception as e:
-                print(f"Error converting {source_file}: {str(e)}")
+                error_msg = f"Error converting {source_file}: {str(e)}"
+                logging.error(error_msg)
+                print(error_msg)
 
+
+def setup_logging(log_file=None, verbose=False):
+    """Setup logging to both console and file if log_file is provided"""
+    log_level = logging.DEBUG if verbose else logging.INFO
+    log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    
+    # Create logger
+    root_logger = logging.getLogger()
+    root_logger.setLevel(log_level)
+    
+    # Clear existing handlers
+    for handler in root_logger.handlers[:]:
+        root_logger.removeHandler(handler)
+    
+    # Console handler
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(log_level)
+    console_handler.setFormatter(logging.Formatter(log_format))
+    root_logger.addHandler(console_handler)
+    
+    # File handler (if log_file is provided)
+    if log_file:
+        file_handler = logging.FileHandler(log_file)
+        file_handler.setLevel(log_level)
+        file_handler.setFormatter(logging.Formatter(log_format))
+        root_logger.addHandler(file_handler)
+        logging.info(f"Logging to file: {log_file}")
+
+def setup_file_logging(log_file, verbose=False):
+    """Setup file logging for a specific conversion"""
+    log_level = logging.DEBUG if verbose else logging.INFO
+    log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    
+    # Create file handler for this specific conversion
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setLevel(log_level)
+    file_handler.setFormatter(logging.Formatter(log_format))
+    
+    # Get the root logger and add this handler
+    root_logger = logging.getLogger()
+    
+    # Remove any existing FileHandlers (to avoid duplicate logs)
+    for handler in root_logger.handlers[:]:
+        if isinstance(handler, logging.FileHandler):
+            root_logger.removeHandler(handler)
+    
+    # Add the new file handler
+    root_logger.addHandler(file_handler)
+    logging.info(f"Logging conversion details to: {log_file}")
 
 def main():
     parser = argparse.ArgumentParser(description='Convert Encoding.com configuration to AWS MediaConvert')
@@ -707,31 +843,40 @@ def main():
     
     args = parser.parse_args()
     
-    # Set logging level
-    log_level = logging.DEBUG if args.verbose else logging.INFO
-    logging.basicConfig(level=log_level, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    # Set up basic logging first
+    setup_logging(verbose=args.verbose)
     
+    # Create converter instance
     converter = ConfigConverter(args.rules)
     
     if args.batch:
         if not args.source or not args.output:
             parser.error("--batch requires both --source and --output to be directories")
+        
+        # For batch processing, each file will get its own log
         batch_convert(converter, args.source, args.output, args.template)
     else:
         if not args.source or not args.output:
             parser.error("--source and --output are required for single file conversion")
-            
+        
+        # Setup logging to a file in the same directory as the output file
+        output_dir = os.path.dirname(args.output)
+        output_filename = os.path.basename(args.output)
+        log_file = os.path.join(output_dir, f"{os.path.splitext(output_filename)[0]}.log")
+        setup_file_logging(log_file, args.verbose)
+        
         result = converter.convert(args.source, args.template)
         
         # Validate result
         if args.validate:
             if not converter.validate(result, args.validate):
-                print("Validation failed. See log for details.")
+                logging.error("Validation failed.")
                 return
         
         with open(args.output, 'w') as f:
             json.dump(result, f, indent=2)
         
+        logging.info(f"Conversion completed. Output saved to {args.output}")
         print(f"Conversion completed. Output saved to {args.output}")
 
 

@@ -51,10 +51,15 @@ class VideoAnalyzer:
         bucket_name, object_key = self._parse_s3_path(s3_path)
         
         # Create a temporary file to download the video
-        with tempfile.NamedTemporaryFile(suffix=os.path.splitext(object_key)[1]) as temp_file:
+        temp_file = None
+        try:
+            temp_file = tempfile.NamedTemporaryFile(suffix=os.path.splitext(object_key)[1], delete=False)
+            temp_path = temp_file.name
+            temp_file.close()  # Close the file handle but keep the file
+            
             # Download the video from S3
             s3_client = boto3.client('s3')
-            s3_client.download_file(bucket_name, object_key, temp_file.name)
+            s3_client.download_file(bucket_name, object_key, temp_path)
             
             # Extract video information using ffprobe
             try:
@@ -65,7 +70,7 @@ class VideoAnalyzer:
                     "-print_format", "json",
                     "-show_format",
                     "-show_streams",
-                    temp_file.name
+                    temp_path
                 ]
                 
                 result = subprocess.run(cmd, capture_output=True, text=True)
@@ -76,7 +81,7 @@ class VideoAnalyzer:
                 probe_result = json.loads(result.stdout)
                 
                 # Extract additional frame information
-                frame_info = self._extract_frame_info(temp_file.name)
+                frame_info = self._extract_frame_info(temp_path)
                 probe_result["frame_info"] = frame_info
                 
                 return probe_result
@@ -84,6 +89,14 @@ class VideoAnalyzer:
                 raise RuntimeError(f"Failed to extract video information: {str(e)}")
             except json.JSONDecodeError as e:
                 raise RuntimeError(f"Failed to parse ffprobe output: {str(e)}")
+        finally:
+            # Clean up the temporary file
+            if temp_file is not None:
+                try:
+                    if os.path.exists(temp_path):
+                        os.unlink(temp_path)
+                except Exception as e:
+                    print(f"Warning: Failed to delete temporary file {temp_path}: {str(e)}", file=sys.stderr)
 
     def _extract_frame_info(self, video_path: str) -> Dict[str, Any]:
         """
@@ -170,22 +183,18 @@ class VideoAnalyzer:
         """
         differences = {}
         
-        # Key metrics to compare
-        key_metrics = [
-            "duration", "size", "bit_rate", "format_name", 
-            "format_long_name", "start_time"
-        ]
+        # Compare all keys from both format dictionaries
+        all_keys = set(format1.keys()) | set(format2.keys())
         
-        for key in key_metrics:
-            if key in format1 or key in format2:
-                val1 = format1.get(key, "N/A")
-                val2 = format2.get(key, "N/A")
-                
-                if val1 != val2:
-                    differences[key] = {
-                        "video1": val1,
-                        "video2": val2
-                    }
+        for key in all_keys:
+            val1 = format1.get(key, "N/A")
+            val2 = format2.get(key, "N/A")
+            
+            if val1 != val2:
+                differences[key] = {
+                    "video1": val1,
+                    "video2": val2
+                }
         
         return differences
 
@@ -271,14 +280,6 @@ class VideoAnalyzer:
         """
         differences = {}
         
-        # Key metrics to compare for video streams
-        key_metrics = [
-            "codec_name", "codec_long_name", "profile", "width", "height",
-            "coded_width", "coded_height", "bit_rate", "avg_frame_rate",
-            "time_base", "duration", "nb_frames", "level", "color_range",
-            "color_space", "color_transfer", "color_primaries", "pix_fmt"
-        ]
-        
         # Compare first video stream (or return differences in counts)
         if not video_streams1 and not video_streams2:
             return {}
@@ -293,16 +294,18 @@ class VideoAnalyzer:
         stream1 = video_streams1[0]
         stream2 = video_streams2[0]
         
-        for key in key_metrics:
-            if key in stream1 or key in stream2:
-                val1 = stream1.get(key, "N/A")
-                val2 = stream2.get(key, "N/A")
-                
-                if val1 != val2:
-                    differences[key] = {
-                        "video1": val1,
-                        "video2": val2
-                    }
+        # Compare all keys from both stream dictionaries
+        all_keys = set(stream1.keys()) | set(stream2.keys())
+        
+        for key in all_keys:
+            val1 = stream1.get(key, "N/A")
+            val2 = stream2.get(key, "N/A")
+            
+            if val1 != val2:
+                differences[key] = {
+                    "video1": val1,
+                    "video2": val2
+                }
         
         return differences
 
@@ -319,13 +322,6 @@ class VideoAnalyzer:
         """
         differences = {}
         
-        # Key metrics to compare for audio streams
-        key_metrics = [
-            "codec_name", "codec_long_name", "profile", "sample_rate",
-            "channels", "channel_layout", "bit_rate", "duration",
-            "nb_frames", "time_base"
-        ]
-        
         # Compare first audio stream (or return differences in counts)
         if not audio_streams1 and not audio_streams2:
             return {}
@@ -340,16 +336,18 @@ class VideoAnalyzer:
         stream1 = audio_streams1[0]
         stream2 = audio_streams2[0]
         
-        for key in key_metrics:
-            if key in stream1 or key in stream2:
-                val1 = stream1.get(key, "N/A")
-                val2 = stream2.get(key, "N/A")
-                
-                if val1 != val2:
-                    differences[key] = {
-                        "video1": val1,
-                        "video2": val2
-                    }
+        # Compare all keys from both stream dictionaries
+        all_keys = set(stream1.keys()) | set(stream2.keys())
+        
+        for key in all_keys:
+            val1 = stream1.get(key, "N/A")
+            val2 = stream2.get(key, "N/A")
+            
+            if val1 != val2:
+                differences[key] = {
+                    "video1": val1,
+                    "video2": val2
+                }
         
         return differences
 

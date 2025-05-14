@@ -21,7 +21,7 @@
                 "H264Settings": {
                   "FramerateDenominator": 1,
                   "MaxBitrate": 1300000,
-                  "FramerateControl": "SPECIFIED",
+                  "FramerateControl": "SPECIFIED1",
                   "RateControlMode": "QVBR",
                   "FramerateNumerator": 25,
                   "SceneChangeDetect": "TRANSITION_DETECTION",

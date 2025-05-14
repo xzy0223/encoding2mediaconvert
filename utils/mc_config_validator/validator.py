@@ -11,7 +11,7 @@ import json
 import sys
 import os
 import argparse
-from jsonschema import validate, ValidationError, SchemaError
+from jsonschema import Draft7Validator, SchemaError
 
 
 class MediaConvertConfigValidator:
@@ -28,6 +28,7 @@ class MediaConvertConfigValidator:
         """
         self.schema_path = schema_path
         self.schema = self._load_schema()
+        self.validator = Draft7Validator(self.schema)
 
     def _load_schema(self):
         """
@@ -53,6 +54,7 @@ class MediaConvertConfigValidator:
     def validate_config(self, config_path):
         """
         Validate a MediaConvert job configuration against the schema.
+        Collects all validation errors instead of stopping at the first one.
         
         Args:
             config_path (str): Path to the configuration file
@@ -75,10 +77,31 @@ class MediaConvertConfigValidator:
             
             settings = config['Settings']
             
-            # Validate the Settings object against the schema
-            validate(instance=settings, schema=self.schema)
-            print(f"Validation successful: {config_path} conforms to the schema")
-            return True
+            # Collect all schema validation errors
+            schema_errors = list(self.validator.iter_errors(settings))
+            
+            # Collect custom validation errors
+            custom_errors = self._validate_h264_settings(settings)
+            
+            # If no errors, validation is successful
+            if not schema_errors and not custom_errors:
+                print(f"Validation successful: {config_path} conforms to the schema")
+                return True
+            
+            # Output all schema validation errors
+            if schema_errors:
+                print(f"Found {len(schema_errors)} schema validation errors:")
+                for i, error in enumerate(schema_errors, 1):
+                    path = " -> ".join([str(p) for p in error.path]) if error.path else "root"
+                    print(f"{i}. Schema error at {path}: {error.message}")
+            
+            # Output all custom validation errors
+            if custom_errors:
+                print(f"Found {len(custom_errors)} custom validation errors:")
+                for i, error in enumerate(custom_errors, 1):
+                    print(f"{i}. {error}")
+            
+            return False
             
         except FileNotFoundError:
             print(f"Error: Configuration file not found at {config_path}")
@@ -86,13 +109,40 @@ class MediaConvertConfigValidator:
         except json.JSONDecodeError as e:
             print(f"Error: Invalid JSON in configuration file: {e}")
             return False
-        except ValidationError as e:
-            print(f"Validation error: {e.message}")
-            print(f"Path: {' -> '.join([str(p) for p in e.path])}")
-            return False
         except SchemaError as e:
             print(f"Schema error: {e.message}")
             return False
+
+    def _validate_h264_settings(self, settings):
+        """
+        Perform additional validation on H264Settings that might not be covered by the schema.
+        
+        Args:
+            settings (dict): The Settings object from the configuration
+            
+        Returns:
+            list: List of validation errors, empty if no errors
+        """
+        errors = []
+        
+        # Check all outputs for H264Settings
+        for i, output_group in enumerate(settings.get('OutputGroups', [])):
+            for j, output in enumerate(output_group.get('Outputs', [])):
+                video_desc = output.get('VideoDescription', {})
+                codec_settings = video_desc.get('CodecSettings', {})
+                
+                if codec_settings.get('Codec') == 'H_264':
+                    h264_settings = codec_settings.get('H264Settings', {})
+                    
+                    # Check FramerateControl
+                    framerate_control = h264_settings.get('FramerateControl')
+                    if framerate_control and framerate_control not in ['INITIALIZE_FROM_SOURCE', 'SPECIFIED']:
+                        errors.append(f"Invalid FramerateControl value: '{framerate_control}' at OutputGroups[{i}].Outputs[{j}].VideoDescription.CodecSettings.H264Settings. "
+                                     f"Must be one of: INITIALIZE_FROM_SOURCE, SPECIFIED")
+                    
+                    # Add more custom validations for H264Settings here
+                    
+        return errors
 
 
 def main():

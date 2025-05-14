@@ -6,9 +6,9 @@ This module provides functionality for analyzing video files, comparing them, an
 
 - Extract video information from S3 using ffmpeg
 - Compare two videos and identify differences in:
-  - Format information (duration, bitrate, etc.)
-  - Video stream properties (codec, resolution, framerate, etc.)
-  - Audio stream properties (codec, channels, sample rate, etc.)
+  - Format information (all available properties)
+  - Video stream properties (all available properties)
+  - Audio stream properties (all available properties)
   - Frame information (keyframe distribution, etc.)
 - Analyze differences using Claude 3.5 on Bedrock
 
@@ -65,17 +65,10 @@ pip install boto3
 
 ### Python API
 
-To use the analyzer as a Python module, make sure the project root directory is in your Python path:
-
-```bash
-# Add the project root to PYTHONPATH
-export PYTHONPATH=/path/to/e2mc_assistant:$PYTHONPATH
-```
-
-Then import the module:
+To use the analyzer as a Python module:
 
 ```python
-from src.analyzer import VideoAnalyzer
+from e2mc_assistant.analyzer.video_analyzer import VideoAnalyzer
 
 analyzer = VideoAnalyzer(region="us-east-1")
 video_info = analyzer.extract_video_info("s3://my-bucket/path/to/video.mp4")
@@ -85,7 +78,7 @@ print(video_info)
 #### Compare Two Videos
 
 ```python
-from src.analyzer import VideoAnalyzer
+from e2mc_assistant.analyzer.video_analyzer import VideoAnalyzer
 
 analyzer = VideoAnalyzer(region="us-east-1")
 
@@ -101,7 +94,7 @@ print(differences)
 #### Analyze Differences with Claude 3.5
 
 ```python
-from src.analyzer import VideoAnalyzer
+from e2mc_assistant.analyzer.video_analyzer import VideoAnalyzer
 
 analyzer = VideoAnalyzer(region="us-east-1")
 
@@ -127,47 +120,36 @@ The analyzer also provides a command-line interface for all operations.
 cd /home/ec2-user/e2mc_assistant
 source venv/bin/activate
 export PATH=$PATH:~/bin
-python src/analyzer/video_analyzer_fixed.py extract s3://my-bucket/path/to/video.mp4 --output video_info.json
+python -m e2mc_assistant.analyzer.video_analyzer extract s3://my-bucket/path/to/video.mp4 --output video_info.json
 ```
 
 #### Compare Two Videos
 
 ```bash
-python src/analyzer/video_analyzer_fixed.py compare s3://my-bucket/path/to/video1.mp4 s3://my-bucket/path/to/video2.mp4 --output differences.json
+python -m e2mc_assistant.analyzer.video_analyzer compare s3://my-bucket/path/to/video1.mp4 s3://my-bucket/path/to/video2.mp4 --output differences.json
 ```
 
 #### Analyze Differences with Claude 3.5
 
 ```bash
-python src/analyzer/video_analyzer_fixed.py analyze s3://my-bucket/path/to/video1.mp4 s3://my-bucket/path/to/video2.mp4 --output analysis.txt
+python -m e2mc_assistant.analyzer.video_analyzer analyze s3://my-bucket/path/to/video1.mp4 s3://my-bucket/path/to/video2.mp4 --output analysis.txt
 ```
 
 #### Analyze Differences from JSON File
 
 ```bash
-python src/analyzer/video_analyzer_fixed.py analyze-json differences.json --output analysis.txt
+python -m e2mc_assistant.analyzer.video_analyzer analyze-json differences.json --output analysis.txt
 ```
 
 #### Help
 
 ```bash
-python src/analyzer/video_analyzer_fixed.py --help
-python src/analyzer/video_analyzer_fixed.py extract --help
-python src/analyzer/video_analyzer_fixed.py compare --help
-python src/analyzer/video_analyzer_fixed.py analyze --help
-python src/analyzer/video_analyzer_fixed.py analyze-json --help
+python -m e2mc_assistant.analyzer.video_analyzer --help
+python -m e2mc_assistant.analyzer.video_analyzer extract --help
+python -m e2mc_assistant.analyzer.video_analyzer compare --help
+python -m e2mc_assistant.analyzer.video_analyzer analyze --help
+python -m e2mc_assistant.analyzer.video_analyzer analyze-json --help
 ```
-
-## Simple Analyzer
-
-For basic video information without requiring ffmpeg, you can use the `simple_analyzer.py` script:
-
-```bash
-python src/analyzer/simple_analyzer.py extract s3://my-bucket/path/to/video.mp4
-python src/analyzer/simple_analyzer.py list s3://my-bucket/path/
-```
-
-This provides basic metadata from S3 and doesn't require ffmpeg to be installed.
 
 ## Claude 3.5 Prompt Template
 

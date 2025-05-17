@@ -1695,7 +1695,7 @@ transformers:
     "libx264": "H_264"
     "libx265": "H_265"
     "vp9": "VP9"
-    "hevc": "HEVC"
+    "hevc": "H_265"
     "libvpx": "VP9"
     "mpeg2video": "MPEG2"
     "mpeg4": "H_264"
@@ -1836,7 +1836,6 @@ transformers:
     
   timecode_track_format:
     "yes": "EMBEDDED"
-    "no": ""
     
   twin_turbo_format:
     "yes": "SINGLE_PASS"

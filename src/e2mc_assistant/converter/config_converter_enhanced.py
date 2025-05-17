@@ -110,12 +110,15 @@ class ConfigConverter:
             return False
     
     def get_value_by_path(self, data: Dict, path: str) -> Any:
-        """Get value from dictionary by path"""
+        """Get value from dictionary by path with improved error handling"""
+        if data is None:
+            return None
+            
         parts = path.split('.')
         current = data
         
         for part in parts:
-            if part in current:
+            if isinstance(current, dict) and part in current:
                 current = current[part]
             else:
                 return None
@@ -148,6 +151,11 @@ class ConfigConverter:
             str_value = str(value)
             if str_value in transformer:
                 return transformer[str_value]
+            else:
+                # If the value doesn't match any mapping in the transformer,
+                # return None to indicate that the transformation failed
+                self.logger.warning(f"Value '{str_value}' not found in transformer '{transform_name}'")
+                return None
         
         return value
     
@@ -606,7 +614,7 @@ class ConfigConverter:
                 
         return current
     def convert(self, source_file: str, template_file: str = None) -> Dict:
-        """Execute configuration conversion"""
+        """Execute configuration conversion using an XML-first approach"""
         # Parse source file
         if source_file.endswith('.xml'):
             source_data = self.parse_xml(source_file)
@@ -621,108 +629,68 @@ class ConfigConverter:
         else:
             target_data = {"Settings": {"OutputGroups": [{}], "Inputs": [{}]}}
         
-        # Track which parameters have been processed
+        # Initialize tracking variables
         processed_params = set()
+        self.mapped_parameters = []  # Track successfully mapped parameters
+        self.unmapped_parameters = []  # Track unmapped parameters
         
-        # Apply mapping rules
+        # Create a rule lookup dictionary for faster access
+        rule_lookup = {}
+        iteration_rules = []
+        dummy_rules = []
+        
+        # Organize rules by their source path for easier lookup
         for rule in self.rules:
-            # Handle iteration rules
             if rule['source'].get('type') == 'iteration':
-                self.logger.debug(f"Processing iteration rule for {rule['source']['path']}")
-                self._process_iteration_rule(rule, source_data, target_data)
-                processed_params.add(rule['source']['path'])
+                iteration_rules.append(rule)
                 continue
-                
-            # Handle dummy rules - just mark as processed without actual conversion
-            if rule['source'].get('type') == 'dummy':
-                source_path = rule['source']['path']
-                self.logger.debug(f"Processing dummy rule for {source_path}")
-                processed_params.add(source_path)
-                # Log that the parameter was processed but not added to output
-                self.logger.debug(f"Parameter {source_path} marked as processed (dummy type)")
+            elif rule['source'].get('type') == 'dummy':
+                dummy_rules.append(rule)
                 continue
                 
             source_path = rule['source']['path']
-            source_type = rule['source'].get('type', 'string')
-            source_regex = rule['source'].get('regex')
-            
-            # Get source value
+            if source_path not in rule_lookup:
+                rule_lookup[source_path] = []
+            rule_lookup[source_path].append(rule)
+        
+        # First, process iteration rules (these handle special cases like streams)
+        for rule in iteration_rules:
+            self.logger.debug(f"Processing iteration rule for {rule['source']['path']}")
+            self._process_iteration_rule(rule, source_data, target_data)
+            processed_params.add(rule['source']['path'])
+        
+        # Next, process dummy rules to mark parameters as processed
+        for rule in dummy_rules:
+            source_path = rule['source']['path']
             source_value = self.get_value_by_path(source_data, source_path)
-            self.logger.debug(f"Processing rule for {source_path}, value: {source_value}")
-            
-            # Add to processed parameters
+            self.logger.debug(f"Processing dummy rule for {source_path}")
             processed_params.add(source_path)
-            
-            # Check condition (if any)
-            if 'condition' in rule['source'] and source_value is not None:
-                if not self.evaluate_condition(rule['source']['condition'], source_value, source_data):
-                    self.logger.debug(f"Skipping rule for {source_path} due to source condition")
-                    continue
-            
-            # If source value doesn't exist, use default (if provided)
-            if source_value is None:
-                if 'default' in rule['source']:
-                    source_value = rule['source']['default']
-                    self.logger.debug(f"Using default value for {source_path}: {source_value}")
-                else:
-                    self.logger.debug(f"Skipping rule for {source_path} (no value and no default)")
-                    continue
-            
-            # Process target mapping (can be single target or multiple targets)
-            targets = rule['target'] if isinstance(rule['target'], list) else [rule['target']]
-            
-            for target in targets:
-                target_path = target['path']
-                transform = target.get('transform')
-                
-                # Check target condition (if any)
-                if 'condition' in target:
-                    if not self.evaluate_condition(target['condition'], source_value, source_data):
-                        self.logger.debug(f"Skipping target {target_path} due to target condition")
-                        continue
-                
-                # Process value transformation
-                if 'value' in target:
-                    # Process with regex if specified
-                    if source_regex:
-                        match = re.match(source_regex, str(source_value))
-                        if match:
-                            value_template = target['value']
-                            # Replace $1, $2, etc. with match groups
-                            for i, group in enumerate(match.groups(), 1):
-                                value_template = value_template.replace(f'${i}', group)
-                            
-                            # Convert to appropriate type
-                            if value_template.isdigit():
-                                target_value = int(value_template)
-                            elif self._is_float(value_template):
-                                target_value = float(value_template)
-                            else:
-                                target_value = value_template
-                            
-                            self.logger.debug(f"Regex transformed {source_value} to {target_value}")
-                        else:
-                            self.logger.debug(f"Regex pattern {source_regex} did not match {source_value}")
-                            continue
-                    else:
-                        target_value = target['value']
-                        self.logger.debug(f"Using static value: {target_value}")
-                else:
-                    target_value = source_value
-                    
-                    # Apply transformation function
-                    if transform:
-                        context = {'source_data': source_data, 'target_data': target_data}
-                        original_value = target_value
-                        target_value = self.apply_transform(target_value, transform, context)
-                        self.logger.debug(f"Transformed {original_value} using {transform} to {type(target_value)}")
-                
-                # Set target value using the improved nested value setter
-                self._set_nested_value(target_data, target_path, target_value)
-                self.logger.debug(f"Mapped {source_path}={source_value} to {target_path}")
+            # Log the dummy rule match in the same format as regular mappings
+            self.logger.info(f"Mapped parameter: {source_path}={source_value} → [DUMMY RULE]")
+            # Add to mapped parameters list
+            if not hasattr(self, 'mapped_parameters'):
+                self.mapped_parameters = []
+            self.mapped_parameters.append((source_path, source_value, "DUMMY_RULE", None))
+        
+        # Now, traverse the source data structure and apply matching rules
+        self._process_source_data(source_data, "", rule_lookup, target_data, processed_params)
         
         # Log unmapped parameters
         self._log_unmapped_parameters(source_data, processed_params)
+        
+        # Generate summary statistics
+        mapped_count = len(self.mapped_parameters)
+        unmapped_count = len(self.unmapped_parameters)
+        total_params = mapped_count + unmapped_count
+        
+        # Log summary
+        self.logger.info(f"Conversion summary for {source_file}:")
+        self.logger.info(f"  - Total parameters: {total_params}")
+        if total_params > 0:
+            self.logger.info(f"  - Mapped parameters: {mapped_count} ({mapped_count/total_params*100:.1f}%)")
+            self.logger.info(f"  - Unmapped parameters: {unmapped_count} ({unmapped_count/total_params*100:.1f}%)")
+        else:
+            self.logger.info("  - No parameters found to convert")
         
         # Remove any _dummy sections from the output
         if '_dummy' in target_data:
@@ -731,8 +699,130 @@ class ConfigConverter:
         
         return target_data
         
+    def _process_source_data(self, source_data, current_path, rule_lookup, target_data, processed_params):
+        """Process source data recursively and apply matching rules"""
+        if not isinstance(source_data, dict):
+            return
+            
+        for key, value in source_data.items():
+            # Build the current path
+            path = f"{current_path}.{key}" if current_path else key
+            
+            # Check if we have rules for this path
+            if path in rule_lookup:
+                # Process all rules for this path
+                for rule in rule_lookup[path]:
+                    self._process_rule(rule, path, value, source_data, target_data, processed_params)
+            
+            # If this is a dictionary, process it recursively
+            if isinstance(value, dict):
+                self._process_source_data(value, path, rule_lookup, target_data, processed_params)
+            # If this is a list, process each item if they are dictionaries
+            elif isinstance(value, list):
+                for i, item in enumerate(value):
+                    if isinstance(item, dict):
+                        list_path = f"{path}[{i}]"
+                        self._process_source_data(item, list_path, rule_lookup, target_data, processed_params)
+    
+    def _process_rule(self, rule, source_path, source_value, source_data, target_data, processed_params):
+        """Process a single rule for a given source path and value"""
+        source_regex = rule['source'].get('regex')
+        
+        self.logger.debug(f"Processing rule for {source_path}, value: {source_value}")
+        
+        # Add to processed parameters
+        processed_params.add(source_path)
+        
+        # Check condition (if any)
+        if 'condition' in rule['source'] and source_value is not None:
+            if not self.evaluate_condition(rule['source']['condition'], source_value, source_data):
+                self.logger.debug(f"Skipping rule for {source_path} due to source condition")
+                return
+        
+        # If source value doesn't exist, use default (if provided)
+        if source_value is None:
+            if 'default' in rule['source']:
+                source_value = rule['source']['default']
+                self.logger.debug(f"Using default value for {source_path}: {source_value}")
+            else:
+                self.logger.debug(f"Skipping rule for {source_path} (no value and no default)")
+                return
+        
+        # Process target mapping (can be single target or multiple targets)
+        targets = rule['target'] if isinstance(rule['target'], list) else [rule['target']]
+        
+        for target in targets:
+            target_path = target['path']
+            transform = target.get('transform')
+            
+            # Check target condition (if any)
+            if 'condition' in target:
+                if not self.evaluate_condition(target['condition'], source_value, source_data):
+                    self.logger.debug(f"Skipping target {target_path} due to target condition")
+                    continue
+            
+            # Process value transformation
+            if 'value' in target:
+                # Process with regex if specified
+                if source_regex:
+                    match = re.match(source_regex, str(source_value))
+                    if match:
+                        value_template = target['value']
+                        # Replace $1, $2, etc. with match groups
+                        for i, group in enumerate(match.groups(), 1):
+                            value_template = value_template.replace(f'${i}', group)
+                        
+                        # Convert to appropriate type
+                        if value_template.isdigit():
+                            target_value = int(value_template)
+                        elif self._is_float(value_template):
+                            target_value = float(value_template)
+                        else:
+                            target_value = value_template
+                        
+                        self.logger.debug(f"Regex transformed {source_value} to {target_value}")
+                    else:
+                        self.logger.debug(f"Regex pattern {source_regex} did not match {source_value}")
+                        continue
+                else:
+                    target_value = target['value']
+                    self.logger.debug(f"Using static value: {target_value}")
+            else:
+                target_value = source_value
+                
+                # Apply transformation function
+                if transform:
+                    context = {'source_data': source_data, 'target_data': target_data}
+                    original_value = target_value
+                    target_value = self.apply_transform(target_value, transform, context)
+                    
+                    # If transformation returns None, it means the value didn't match any mapping
+                    if target_value is None:
+                        self.logger.warning(f"Skipping parameter mapping for {source_path}={source_value} → {target_path} (no matching transformation)")
+                        # Add to mapped parameters list (as mapped but skipped)
+                        if not hasattr(self, 'mapped_parameters'):
+                            self.mapped_parameters = []
+                        self.mapped_parameters.append((source_path, source_value, target_path, "SKIPPED_NO_MATCHING_TRANSFORM"))
+                        continue
+                        
+                    self.logger.debug(f"Transformed {original_value} using {transform} to {type(target_value)}")
+            
+            # Set target value using the improved nested value setter
+            self._set_nested_value(target_data, target_path, target_value)
+            # Log the parameter mapping with more detail
+            self.logger.info(f"Mapped parameter: {source_path}={source_value} → {target_path}={target_value}")
+            
+            # Add to mapped parameters list
+            if not hasattr(self, 'mapped_parameters'):
+                self.mapped_parameters = []
+            self.mapped_parameters.append((source_path, source_value, target_path, target_value))
+            
+        
     def _log_unmapped_parameters(self, source_data: Dict, processed_params: set, parent_path: str = ""):
         """Log parameters that don't have mapping rules"""
+        if not isinstance(source_data, dict):
+            return
+            
         for key, value in source_data.items():
             current_path = f"{parent_path}.{key}" if parent_path else key
             
@@ -752,6 +842,10 @@ class ConfigConverter:
             # Log unmapped leaf parameters
             else:
                 self.logger.warning(f"Unmapped parameter: {current_path} = {value}")
+                # Add to a list of unmapped parameters for summary
+                if not hasattr(self, 'unmapped_parameters'):
+                    self.unmapped_parameters = []
+                self.unmapped_parameters.append((current_path, value))
 
 
 def batch_convert(converter: ConfigConverter, source_dir: str, output_dir: str, template_file: str = None, schema_file: str = None):
@@ -795,6 +889,7 @@ def batch_convert(converter: ConfigConverter, source_dir: str, output_dir: str, 
                 # Validate the converted file if schema is provided
                 if schema_file:
                     validator = MediaConvertConfigValidator(schema_file)
+                    logging.info(f"Validating {output_file} against schema {schema_file}")
                     is_valid = validator.validate_config(output_file)
                     if not is_valid:
                         error_file = os.path.join(output_dir, f"{os.path.splitext(os.path.basename(output_file))[0]}.err")
@@ -916,6 +1011,7 @@ def main():
             # Validate result if schema is provided
             if args.validate:
                 validator = MediaConvertConfigValidator(args.validate)
+                logging.info(f"Validating {args.output} against schema {args.validate}")
                 is_valid = validator.validate_config(args.output)
                 if not is_valid:
                     error_file = os.path.join(output_dir, f"{os.path.splitext(output_filename)[0]}.err")

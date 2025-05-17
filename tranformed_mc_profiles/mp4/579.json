@@ -1,0 +1,74 @@
+{
+  "Settings": {
+    "Inputs": [
+      {
+        "TimecodeSource": "ZEROBASED",
+        "VideoSelector": {
+          "Rotate": "DEGREE_0"
+        },
+        "AudioSelectors": {
+          "Audio Selector 1": {
+            "DefaultSelection": "DEFAULT"
+          }
+        },
+        "FileInput": "{SOURCE_S3_URL}",
+        "DeblockFilter": "ENABLED"
+      }
+    ],
+    "OutputGroups": [
+      {
+        "Name": "File Group",
+        "OutputGroupSettings": {
+          "Type": "FILE_GROUP_SETTINGS",
+          "FileGroupSettings": {
+            "Destination": "S3_OUTPUT_URL"
+          }
+        },
+        "Outputs": [
+          {
+            "ContainerSettings": {
+              "Container": "MP4",
+              "Mp4Settings": {
+                "Mp4MajorBrand": "mp42"
+              }
+            },
+            "VideoDescription": {
+              "Width": 640,
+              "Height": 360,
+              "CodecSettings": {
+                "H264Settings": {
+                  "Bitrate": 900000,
+                  "Profile": "MAIN",
+                  "CodecProfile": "MAIN",
+                  "RateControlMode": "CBR",
+                  "QualityTuningLevel": "MULTI_PASS_HQ",
+                  "FramerateControl": "INITIALIZE_FROM_SOURCE",
+                  "GopSize": 60,
+                  "InterlaceMode": "PROGRESSIVE"
+                },
+                "Codec": "H_264"
+              },
+              "ScalingBehavior": "DEFAULT"
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "AacSettings": {
+                    "Bitrate": 56000,
+                    "CodingMode": "CODING_MODE_2_0",
+                    "SampleRate": 44100
+                  },
+                  "Codec": "AAC"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "TimecodeConfig": {
+      "Source": "ZEROBASED"
+    },
+    "FollowSource": 1
+  }
+}

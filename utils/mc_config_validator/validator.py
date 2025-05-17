@@ -66,13 +66,18 @@ class MediaConvertConfigValidator:
             FileNotFoundError: If the config file doesn't exist
             json.JSONDecodeError: If the config file contains invalid JSON
         """
+        import logging
+        logger = logging.getLogger('ConfigConverter')
+        
         try:
             with open(config_path, 'r') as config_file:
                 config = json.load(config_file)
             
             # Extract the Settings object for validation
             if 'Settings' not in config:
-                print("Error: Configuration is missing the 'Settings' object")
+                error_msg = "Error: Configuration is missing the 'Settings' object"
+                logger.error(error_msg)
+                print(error_msg)
                 return False
             
             settings = config['Settings']
@@ -85,32 +90,48 @@ class MediaConvertConfigValidator:
             
             # If no errors, validation is successful
             if not schema_errors and not custom_errors:
-                print(f"Validation successful: {config_path} conforms to the schema")
+                success_msg = f"Validation successful: {config_path} conforms to the schema"
+                logger.info(success_msg)
+                print(success_msg)
                 return True
             
             # Output all schema validation errors
             if schema_errors:
-                print(f"Found {len(schema_errors)} schema validation errors:")
+                error_count_msg = f"Found {len(schema_errors)} schema validation errors:"
+                logger.error(error_count_msg)
+                print(error_count_msg)
                 for i, error in enumerate(schema_errors, 1):
                     path = " -> ".join([str(p) for p in error.path]) if error.path else "root"
-                    print(f"{i}. Schema error at {path}: {error.message}")
+                    error_msg = f"{i}. Schema error at {path}: {error.message}"
+                    logger.error(error_msg)
+                    print(error_msg)
             
             # Output all custom validation errors
             if custom_errors:
-                print(f"Found {len(custom_errors)} custom validation errors:")
+                custom_error_msg = f"Found {len(custom_errors)} custom validation errors:"
+                logger.error(custom_error_msg)
+                print(custom_error_msg)
                 for i, error in enumerate(custom_errors, 1):
-                    print(f"{i}. {error}")
+                    error_detail = f"{i}. {error}"
+                    logger.error(error_detail)
+                    print(error_detail)
             
             return False
             
         except FileNotFoundError:
-            print(f"Error: Configuration file not found at {config_path}")
+            error_msg = f"Error: Configuration file not found at {config_path}"
+            logger.error(error_msg)
+            print(error_msg)
             return False
         except json.JSONDecodeError as e:
-            print(f"Error: Invalid JSON in configuration file: {e}")
+            error_msg = f"Error: Invalid JSON in configuration file: {e}"
+            logger.error(error_msg)
+            print(error_msg)
             return False
         except SchemaError as e:
-            print(f"Schema error: {e.message}")
+            error_msg = f"Schema error: {e.message}"
+            logger.error(error_msg)
+            print(error_msg)
             return False
 
     def _validate_h264_settings(self, settings):

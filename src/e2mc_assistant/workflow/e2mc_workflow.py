@@ -58,7 +58,7 @@ class E2MCWorkflow:
         self.job_submitter = None
         self.video_analyzer = None
 
-    def convert_configs(self, input_dir: str, output_dir: str, rules_file: str, template_file: Optional[str] = None) -> List[str]:
+    def convert_configs(self, input_dir: str, output_dir: str, rules_file: str, template_file: Optional[str] = None, schema_file: Optional[str] = None) -> List[str]:
         """
         Convert Encoding.com configuration files to MediaConvert configuration files.
 
@@ -67,6 +67,7 @@ class E2MCWorkflow:
             output_dir: Directory to save MediaConvert configuration files
             rules_file: Path to the mapping rules file
             template_file: Optional path to a template MediaConvert file
+            schema_file: Optional path to a JSON schema file for validation
 
         Returns:
             List of paths to the generated MediaConvert configuration files
@@ -76,6 +77,17 @@ class E2MCWorkflow:
         
         # Initialize converter
         self.converter = ConfigConverter(rules_file)
+        
+        # Configure logging for converter
+        converter_logger = logging.getLogger('ConfigConverter')
+        converter_logger.setLevel(logging.INFO)
+        
+        # Create a file handler for detailed logs
+        log_file = os.path.join(output_dir, 'conversion_details.log')
+        file_handler = logging.FileHandler(log_file)
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+        converter_logger.addHandler(file_handler)
         
         # Track converted files
         converted_files = []
@@ -95,7 +107,17 @@ class E2MCWorkflow:
                 # Define output filename with the same ID prefix
                 output_file = os.path.join(output_dir, f"{file_id}.json")
                 
+                # Create a specific log file for this conversion
+                file_log = os.path.join(output_dir, f"{file_id}_conversion.log")
+                file_handler = logging.FileHandler(file_log)
+                file_handler.setLevel(logging.DEBUG)
+                file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+                converter_logger.addHandler(file_handler)
+                
                 try:
+                    # Log the start of conversion
+                    converter_logger.info(f"Starting conversion of {source_file}")
+                    
                     # Convert the configuration
                     result = self.converter.convert(source_file, template_file)
                     
@@ -106,10 +128,34 @@ class E2MCWorkflow:
                     logger.info(f"Converted {source_file} to {output_file}")
                     converted_files.append(output_file)
                     
+                    # Log successful conversion
+                    converter_logger.info(f"Successfully converted {source_file} to {output_file}")
+                    
+                    # Validate the converted file if schema is provided
+                    if schema_file:
+                        from utils.mc_config_validator.validator import MediaConvertConfigValidator
+                        validator = MediaConvertConfigValidator(schema_file)
+                        converter_logger.info(f"Validating {output_file} against schema {schema_file}")
+                        is_valid = validator.validate_config(output_file)
+                        if not is_valid:
+                            error_file = os.path.join(output_dir, f"{file_id}.err")
+                            with open(error_file, 'w') as f:
+                                f.write(f"Validation failed for {output_file}\n")
+                                f.write("See log file for details\n")
+                            converter_logger.error(f"Validation failed for {output_file}. Error log written to {error_file}")
+                        else:
+                            converter_logger.info(f"Validation successful for {output_file}")
+                    
                 except Exception as e:
                     logger.error(f"Error converting {source_file}: {str(e)}")
+                    converter_logger.error(f"Error converting {source_file}: {str(e)}")
+                
+                # Remove the file-specific handler
+                converter_logger.removeHandler(file_handler)
+                file_handler.close()
         
         logger.info(f"Converted {len(converted_files)} configuration files")
+        print(f"Detailed conversion logs saved to {log_file} and individual files in {output_dir}")
         return converted_files
 
     def submit_mediaconvert_jobs(self, config_dir: str, s3_source_path: str, wait_for_completion: bool = True) -> Dict[str, str]:
@@ -433,6 +479,10 @@ def parse_arguments():
         default='us-east-1',
         help='AWS region (default: us-east-1)'
     )
+    convert_parser.add_argument(
+        '--validate',
+        help='Path to JSON schema file for validation'
+    )
     
     # Submit command
     submit_parser = subparsers.add_parser(
@@ -548,7 +598,8 @@ def main():
                 input_dir=args.input_dir,
                 output_dir=args.output_dir,
                 rules_file=args.rules_file,
-                template_file=args.template_file
+                template_file=args.template_file,
+                schema_file=args.validate if hasattr(args, 'validate') else None
             )
             
             print(f"Converted {len(converted_files)} configuration files")

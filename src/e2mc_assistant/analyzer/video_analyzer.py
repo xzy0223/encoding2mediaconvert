@@ -404,7 +404,7 @@ class VideoAnalyzer:
         
         return differences
 
-    def analyze_differences(self, differences: Dict[str, Any], model_id: str = "anthropic.claude-3-5-sonnet-20240620-v1:0") -> str:
+    def analyze_differences(self, differences: Dict[str, Any], model_id: str = "us.anthropic.claude-3-5-haiku-20241022-v1:0") -> str:
         """
         Analyze video differences using Claude 3.5 on Bedrock.
 
@@ -567,14 +567,14 @@ Please format your response with clear sections and bullet points where appropri
         # Save reports to S3 if requested
         report_paths = {}
         if s3_client and bucket_name and report_prefix:
-            # Save original info
-            original_info_path = f"{report_prefix}/original_info.json"
+            # Save encoding info (original)
+            encoding_info_path = f"{report_prefix}/encoding_info.json"
             s3_client.put_object(
                 Bucket=bucket_name,
-                Key=original_info_path,
+                Key=encoding_info_path,
                 Body=json.dumps(original_info, indent=2)
             )
-            report_paths["original_info"] = f"s3://{bucket_name}/{original_info_path}"
+            report_paths["encoding_info"] = f"s3://{bucket_name}/{encoding_info_path}"
             
             # Save MediaConvert info
             mc_info_path = f"{report_prefix}/mc_info.json"

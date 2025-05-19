@@ -178,19 +178,25 @@ class ConfigConverter:
             if logical_op == 'AND':
                 # All subconditions must be true
                 self.logger.debug(f"Evaluating AND condition with {len(condition['conditions'])} subconditions")
-                return all(self.evaluate_condition(subcond, source_value, source_data) 
+                result = all(self.evaluate_condition(subcond, source_value, source_data) 
                           for subcond in condition['conditions'])
+                self.logger.debug(f"AND condition result: {result}")
+                return result
             
             elif logical_op == 'OR':
                 # Any subcondition can be true
                 self.logger.debug(f"Evaluating OR condition with {len(condition['conditions'])} subconditions")
-                return any(self.evaluate_condition(subcond, source_value, source_data) 
+                result = any(self.evaluate_condition(subcond, source_value, source_data) 
                           for subcond in condition['conditions'])
+                self.logger.debug(f"OR condition result: {result}")
+                return result
             
             elif logical_op == 'NOT':
                 # Negate the result of the subcondition
                 self.logger.debug(f"Evaluating NOT condition")
-                return not self.evaluate_condition(condition['condition'], source_value, source_data)
+                result = not self.evaluate_condition(condition['condition'], source_value, source_data)
+                self.logger.debug(f"NOT condition result: {result}")
+                return result
         
         # Handle simple condition (backward compatible with existing rules)
         # If condition has source_path, get value from there instead
@@ -200,6 +206,11 @@ class ConfigConverter:
             
         op = condition.get('operator', 'eq')
         compare_value = condition.get('value')
+        
+        # Convert string values to consistent format for comparison
+        if isinstance(source_value, str) and isinstance(compare_value, str):
+            source_value = source_value.lower().strip()
+            compare_value = compare_value.lower().strip()
         
         if op == 'eq':
             result = source_value == compare_value
@@ -433,6 +444,9 @@ class ConfigConverter:
                     if isinstance(value, dict) and part in current and isinstance(current[part], dict):
                         self._merge_dicts(current[part], value)
                     else:
+                        # Check if we're overwriting an existing value and log it
+                        if part in current and current[part] != value:
+                            self.logger.debug(f"Overwriting existing value at {path}: {current[part]} -> {value}")
                         current[part] = value
                 else:
                     if part not in current:

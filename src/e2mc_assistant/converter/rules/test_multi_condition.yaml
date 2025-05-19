@@ -5,14 +5,14 @@ rules:
         operator: AND
         conditions:
           - operator: eq
-            value: no  # 检查 cbr=no
+            value: "no"  # 检查 cbr=no
           - operator: AND
             conditions:
               - operator: exists
                 source_path: cabr  # 检查 cabr 参数存在
               - operator: eq
                 source_path: cabr
-                value: no  # 检查 cabr=no
+                value: "no"  # 检查 cabr=no
     target:
       path: Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode
       value: QVBR_WITH_CABR
@@ -23,14 +23,14 @@ rules:
         operator: OR
         conditions:
           - operator: eq
-            value: yes  # 检查 cbr=yes
+            value: "yes"  # 检查 cbr=yes
           - operator: AND
             conditions:
               - operator: exists
                 source_path: cabr
               - operator: eq
                 source_path: cabr
-                value: yes
+                value: "yes"
     target:
       path: Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode
       value: CBR
@@ -41,7 +41,7 @@ rules:
         operator: NOT
         condition:
           operator: eq
-          value: mp4
+          value: "mp4"
     target:
       path: Settings.OutputGroups[0].OutputGroupSettings.Type
       value: HLS_GROUP_SETTINGS
@@ -79,15 +79,6 @@ rules:
       path: Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.Bitrate
       regex: "(\\d+)k"
       value: 800000
-      
-  - source:
-      path: cbr
-      condition:
-        operator: eq
-        value: no
-    target:
-      path: Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode
-      value: QVBR
 
 transformers:
   video_codec:

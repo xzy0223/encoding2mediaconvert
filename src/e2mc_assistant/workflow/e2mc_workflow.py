@@ -43,11 +43,8 @@ class E2MCWorkflow:
     job submission and video comparison.
     """
 
-    # Constants for Bedrock API calls
-    MAX_RETRIES = 5
-    INITIAL_BACKOFF = 1  # seconds
-    MAX_BACKOFF = 30  # seconds
-    JITTER = 0.1  # 10% jitter for backoff
+    # Constants for path handling
+    S3_PREFIX = "s3://"
 
     def __init__(self, region: str = 'us-east-1', role_arn: Optional[str] = None):
         """
@@ -565,157 +562,7 @@ class E2MCWorkflow:
             logger.error(f"Error searching for MediaConvert video: {str(e)}")
             return None
 
-    def _generate_llm_analysis(self, original_info: Dict, mc_info: Dict, differences: Dict) -> Dict:
-        """
-        Generate LLM analysis of video differences using Amazon Bedrock.
-        
-        Args:
-            original_info: Original video information
-            mc_info: MediaConvert video information
-            differences: Comparison results
-            
-        Returns:
-            Dictionary containing LLM analysis
-        """
-        # Prepare the prompt for the LLM
-        prompt = self._prepare_llm_prompt(original_info, mc_info, differences)
-        
-        # Call Bedrock with exponential backoff and retry
-        response = self._call_bedrock_with_retry(prompt)
-        
-        # Parse and return the response
-        return {
-            "prompt": prompt,
-            "analysis": response,
-            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
-        }
-        
-    def _prepare_llm_prompt(self, original_info: Dict, mc_info: Dict, differences: Dict) -> str:
-        """
-        Prepare a prompt for the LLM to analyze video differences.
-        
-        Args:
-            original_info: Original video information
-            mc_info: MediaConvert video information
-            differences: Comparison results
-            
-        Returns:
-            Formatted prompt string
-        """
-        # Create a simplified version of the differences to avoid token limits
-        simplified_diffs = self._simplify_differences(differences)
-        
-        prompt = f"""
-        You are a video encoding expert. Analyze the differences between an original video and its 
-        MediaConvert-processed version. Provide insights on quality, compatibility, and optimization.
-        
-        Original Video Information:
-        {json.dumps(self._extract_key_info(original_info), indent=2)}
-        
-        MediaConvert Video Information:
-        {json.dumps(self._extract_key_info(mc_info), indent=2)}
-        
-        Key Differences:
-        {json.dumps(simplified_diffs, indent=2)}
-        
-        Please provide:
-        1. A summary of the key differences
-        2. Analysis of potential quality impacts
-        3. Compatibility considerations
-        4. Recommendations for optimization
-        5. Overall assessment of the MediaConvert output quality
-        """
-        
-        return prompt
-        
-    def _simplify_differences(self, differences: Dict) -> Dict:
-        """
-        Simplify the differences dictionary to reduce token count.
-        
-        Args:
-            differences: Full comparison results
-            
-        Returns:
-            Simplified differences dictionary
-        """
-        simplified = {}
-        
-        # Extract only the most important differences
-        if "format" in differences:
-            simplified["format"] = {
-                "size": differences["format"].get("size", {}),
-                "bit_rate": differences["format"].get("bit_rate", {}),
-                "duration": differences["format"].get("duration", {})
-            }
-            
-        if "streams" in differences:
-            simplified["streams"] = {}
-            if "video_streams" in differences["streams"]:
-                video_streams = differences["streams"]["video_streams"]
-                simplified["streams"]["video_streams"] = {
-                    "bit_rate": video_streams.get("bit_rate", {}),
-                    "color_space": video_streams.get("color_space", {}),
-                    "has_b_frames": video_streams.get("has_b_frames", {})
-                }
-                
-            if "audio_streams" in differences["streams"]:
-                audio_streams = differences["streams"]["audio_streams"]
-                simplified["streams"]["audio_streams"] = {
-                    "bit_rate": audio_streams.get("bit_rate", {}),
-                    "duration": audio_streams.get("duration", {})
-                }
-                
-        if "frame_info" in differences:
-            simplified["frame_info"] = differences["frame_info"]
-            
-        return simplified
-        
-    def _extract_key_info(self, info: Dict) -> Dict:
-        """
-        Extract key information from video info to reduce token count.
-        
-        Args:
-            info: Full video information
-            
-        Returns:
-            Dictionary with key information
-        """
-        key_info = {}
-        
-        if "format" in info:
-            key_info["format"] = {
-                "format_name": info["format"].get("format_name", ""),
-                "bit_rate": info["format"].get("bit_rate", ""),
-                "duration": info["format"].get("duration", ""),
-                "size": info["format"].get("size", "")
-            }
-            
-        if "streams" in info:
-            key_info["streams"] = []
-            for stream in info["streams"]:
-                stream_info = {
-                    "codec_type": stream.get("codec_type", ""),
-                    "codec_name": stream.get("codec_name", "")
-                }
-                
-                if stream.get("codec_type") == "video":
-                    stream_info.update({
-                        "width": stream.get("width", ""),
-                        "height": stream.get("height", ""),
-                        "bit_rate": stream.get("bit_rate", ""),
-                        "avg_frame_rate": stream.get("avg_frame_rate", "")
-                    })
-                elif stream.get("codec_type") == "audio":
-                    stream_info.update({
-                        "sample_rate": stream.get("sample_rate", ""),
-                        "channels": stream.get("channels", ""),
-                        "bit_rate": stream.get("bit_rate", "")
-                    })
-                    
-                key_info["streams"].append(stream_info)
-                
-        return key_info
-        
+
     def _build_s3_path(self, *components):
         """
         Build an S3 path by joining components, properly handling slashes.
@@ -731,64 +578,6 @@ class E2MCWorkflow:
         
         # Join with single slashes
         return '/'.join(clean_components)
-        if not self.bedrock_client:
-            raise Exception("Bedrock client not initialized")
-            
-        # Model parameters
-        model_id = "anthropic.claude-v2"  # Use Claude V2 model
-        max_tokens = 4000
-        temperature = 0.7
-        
-        # Prepare request body
-        request_body = {
-            "prompt": f"\n\nHuman: {prompt}\n\nAssistant:",
-            "max_tokens_to_sample": max_tokens,
-            "temperature": temperature,
-            "top_p": 0.9
-        }
-        
-        # Retry with exponential backoff
-        retry_count = 0
-        backoff = self.INITIAL_BACKOFF
-        
-        while retry_count < self.MAX_RETRIES:
-            try:
-                response = self.bedrock_client.invoke_model(
-                    modelId=model_id,
-                    body=json.dumps(request_body)
-                )
-                
-                # Parse and return the response
-                response_body = json.loads(response['body'].read())
-                return response_body.get('completion', '')
-                
-            except ClientError as e:
-                error_code = e.response.get('Error', {}).get('Code', '')
-                
-                # Handle rate limiting errors
-                if error_code in ['ThrottlingException', 'TooManyRequestsException', 'ServiceUnavailableException']:
-                    retry_count += 1
-                    
-                    if retry_count >= self.MAX_RETRIES:
-                        logger.error(f"Maximum retries reached for Bedrock API call: {str(e)}")
-                        raise
-                        
-                    # Calculate backoff with jitter
-                    jitter = random.uniform(-self.JITTER, self.JITTER)
-                    sleep_time = min(backoff * (1 + jitter), self.MAX_BACKOFF)
-                    
-                    logger.warning(f"Rate limited by Bedrock API. Retrying in {sleep_time:.2f} seconds (attempt {retry_count}/{self.MAX_RETRIES})")
-                    time.sleep(sleep_time)
-                    
-                    # Increase backoff for next retry
-                    backoff = min(backoff * 2, self.MAX_BACKOFF)
-                else:
-                    # For other errors, don't retry
-                    logger.error(f"Error calling Bedrock API: {str(e)}")
-                    raise
-            except Exception as e:
-                logger.error(f"Unexpected error calling Bedrock API: {str(e)}")
-                raise
 
     def _save_to_s3(self, bucket_name: str, key: str, content: str) -> bool:
         """

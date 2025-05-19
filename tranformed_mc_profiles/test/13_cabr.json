@@ -11,6 +11,7 @@
               "CodecSettings": {
                 "Codec": "H_264",
                 "H264Settings": {
+                  "RateControlMode": "QVBR_WITH_CABR",
                   "Bitrate": 800000
                 }
               },

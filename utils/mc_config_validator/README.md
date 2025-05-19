@@ -7,6 +7,7 @@ This tool validates AWS MediaConvert job configurations against a JSON schema to
 - Validates MediaConvert job configurations against a JSON schema
 - Focuses on validating the "Settings" object in the configuration
 - Provides detailed error messages for validation failures
+- Checks for unknown parameters not defined in the schema
 - Can be used as a command-line tool or imported as a module
 
 ## Usage
@@ -15,10 +16,10 @@ This tool validates AWS MediaConvert job configurations against a JSON schema to
 
 ```bash
 # Basic usage with default schema location
-python validator.py /path/to/config.json
+python validator.py --config-path /path/to/config.json
 
 # Specify a custom schema file
-python validator.py /path/to/config.json --schema /path/to/custom_schema.json
+python validator.py --config-path /path/to/config.json --schema /path/to/custom_schema.json
 ```
 
 ### As a Module

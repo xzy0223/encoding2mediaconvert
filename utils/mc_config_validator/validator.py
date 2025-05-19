@@ -11,7 +11,11 @@ import json
 import sys
 import os
 import argparse
+import logging
 from jsonschema import Draft7Validator, SchemaError
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(name)s - %(levelname)s - %(message)s')
 
 
 class MediaConvertConfigValidator:
@@ -29,6 +33,7 @@ class MediaConvertConfigValidator:
         self.schema_path = schema_path
         self.schema = self._load_schema()
         self.validator = Draft7Validator(self.schema)
+        self.logger = logging.getLogger('ConfigValidator')
 
     def _load_schema(self):
         """
@@ -45,16 +50,17 @@ class MediaConvertConfigValidator:
             with open(self.schema_path, 'r') as schema_file:
                 return json.load(schema_file)
         except FileNotFoundError:
-            print(f"Error: Schema file not found at {self.schema_path}")
+            self.logger.error(f"Error: Schema file not found at {self.schema_path}")
             sys.exit(1)
         except json.JSONDecodeError as e:
-            print(f"Error: Invalid JSON in schema file: {e}")
+            self.logger.error(f"Error: Invalid JSON in schema file: {e}")
             sys.exit(1)
 
     def validate_config(self, config_path):
         """
         Validate a MediaConvert job configuration against the schema.
         Collects all validation errors instead of stopping at the first one.
+        Also checks for any parameters in the config that are not defined in the schema.
         
         Args:
             config_path (str): Path to the configuration file
@@ -66,18 +72,13 @@ class MediaConvertConfigValidator:
             FileNotFoundError: If the config file doesn't exist
             json.JSONDecodeError: If the config file contains invalid JSON
         """
-        import logging
-        logger = logging.getLogger('ConfigConverter')
-        
         try:
             with open(config_path, 'r') as config_file:
                 config = json.load(config_file)
             
             # Extract the Settings object for validation
             if 'Settings' not in config:
-                error_msg = "Error: Configuration is missing the 'Settings' object"
-                logger.error(error_msg)
-                print(error_msg)
+                self.logger.error("Error: Configuration is missing the 'Settings' object")
                 return False
             
             settings = config['Settings']
@@ -85,36 +86,34 @@ class MediaConvertConfigValidator:
             # Collect all schema validation errors
             schema_errors = list(self.validator.iter_errors(settings))
             
-            # Collect custom validation errors
-            custom_errors = self._validate_h264_settings(settings)
+            # Check for unknown parameters not defined in the schema
+            unknown_param_errors = self._check_unknown_parameters(settings)
             
             # If no errors, validation is successful
-            if not schema_errors and not custom_errors:
-                success_msg = f"Validation successful: {config_path} conforms to the schema"
-                logger.info(success_msg)
-                print(success_msg)
+            if not schema_errors and not unknown_param_errors:
+                self.logger.info(f"Validation successful: {config_path} conforms to the schema")
                 return True
             
             # Output all schema validation errors
             if schema_errors:
-                error_count_msg = f"Found {len(schema_errors)} schema validation errors:"
-                logger.error(error_count_msg)
-                print(error_count_msg)
+                self.logger.error(f"Found {len(schema_errors)} schema validation errors:")
                 for i, error in enumerate(schema_errors, 1):
                     path = " -> ".join([str(p) for p in error.path]) if error.path else "root"
-                    error_msg = f"{i}. Schema error at {path}: {error.message}"
-                    logger.error(error_msg)
-                    print(error_msg)
+                    self.logger.error(f"{i}. Schema error at {path}: {error.message}")
             
-            # Output all custom validation errors
-            if custom_errors:
-                custom_error_msg = f"Found {len(custom_errors)} custom validation errors:"
-                logger.error(custom_error_msg)
-                print(custom_error_msg)
-                for i, error in enumerate(custom_errors, 1):
-                    error_detail = f"{i}. {error}"
-                    logger.error(error_detail)
-                    print(error_detail)
+            # Output all unknown parameter errors
+            if unknown_param_errors:
+                self.logger.error(f"Found {len(unknown_param_errors)} unknown parameter errors:")
+                for i, error in enumerate(unknown_param_errors, 1):
+                    self.logger.error(f"{i}. {error}")
+                    
+                    # Extract the invalid parameter name and full path for clearer reporting
+                    if "Unknown parameter '" in error:
+                        param_name = error.split("Unknown parameter '")[1].split("'")[0]
+                        param_path = error.split(" at ")[1].split(".")[0]
+                        full_path = error.split(" at ")[1].split(". Valid")[0]
+                        self.logger.error(f"   --> INVALID PARAMETER: '{param_name}'")
+                        self.logger.error(f"   --> FULL PATH: '{full_path}'")
             
             return False
             
@@ -134,35 +133,75 @@ class MediaConvertConfigValidator:
             print(error_msg)
             return False
 
-    def _validate_h264_settings(self, settings):
+    def _check_unknown_parameters(self, config, path="", schema=None):
         """
-        Perform additional validation on H264Settings that might not be covered by the schema.
+        Recursively check for parameters in the config that are not defined in the schema.
         
         Args:
-            settings (dict): The Settings object from the configuration
+            config (dict): The configuration object or sub-object
+            path (str): Current path in the configuration (for error reporting)
+            schema (dict): Current schema or sub-schema to check against
             
         Returns:
-            list: List of validation errors, empty if no errors
+            list: List of error messages for unknown parameters
         """
         errors = []
         
-        # Check all outputs for H264Settings
-        for i, output_group in enumerate(settings.get('OutputGroups', [])):
-            for j, output in enumerate(output_group.get('Outputs', [])):
-                video_desc = output.get('VideoDescription', {})
-                codec_settings = video_desc.get('CodecSettings', {})
+        if schema is None:
+            schema = self.schema
+        
+        if isinstance(config, dict):
+            # For objects, check each property against the schema
+            for key, value in config.items():
+                current_path = f"{path}.{key}" if path else key
                 
-                if codec_settings.get('Codec') == 'H_264':
-                    h264_settings = codec_settings.get('H264Settings', {})
+                # Check if this is a property defined in the schema
+                if 'properties' in schema and key in schema['properties']:
+                    # Recursively check this property's value against its schema
+                    sub_schema = schema['properties'][key]
+                    errors.extend(self._check_unknown_parameters(value, current_path, sub_schema))
+                elif 'additionalProperties' in schema and schema['additionalProperties'] is not False:
+                    # If additionalProperties is allowed, check against that schema
+                    if isinstance(schema['additionalProperties'], dict):
+                        errors.extend(self._check_unknown_parameters(value, current_path, schema['additionalProperties']))
+                elif 'patternProperties' in schema:
+                    # Handle pattern properties (for dynamic keys)
+                    pattern_matched = False
+                    for pattern, pattern_schema in schema['patternProperties'].items():
+                        import re
+                        if re.match(pattern, key):
+                            pattern_matched = True
+                            errors.extend(self._check_unknown_parameters(value, current_path, pattern_schema))
                     
-                    # Check FramerateControl
-                    framerate_control = h264_settings.get('FramerateControl')
-                    if framerate_control and framerate_control not in ['INITIALIZE_FROM_SOURCE', 'SPECIFIED']:
-                        errors.append(f"Invalid FramerateControl value: '{framerate_control}' at OutputGroups[{i}].Outputs[{j}].VideoDescription.CodecSettings.H264Settings. "
-                                     f"Must be one of: INITIALIZE_FROM_SOURCE, SPECIFIED")
+                    if not pattern_matched and key not in ['type', 'properties', 'items', 'additionalProperties', 'required', 'enum', 'patternProperties']:
+                        # List valid properties if available
+                        valid_props = []
+                        if 'properties' in schema:
+                            valid_props = list(schema['properties'].keys())
+                        
+                        if valid_props:
+                            errors.append(f"Unknown parameter '{key}' at {current_path}. Valid parameters are: {', '.join(valid_props)}")
+                        else:
+                            errors.append(f"Unknown parameter '{key}' at {current_path}")
+                elif key not in ['type', 'properties', 'items', 'additionalProperties', 'required', 'enum', 'patternProperties']:
+                    # This is an unknown property
+                    # List valid properties if available
+                    valid_props = []
+                    if 'properties' in schema:
+                        valid_props = list(schema['properties'].keys())
                     
-                    # Add more custom validations for H264Settings here
-                    
+                    if valid_props:
+                        errors.append(f"Unknown parameter '{key}' at {current_path}. Valid parameters are: {', '.join(valid_props)}")
+                    else:
+                        errors.append(f"Unknown parameter '{key}' at {current_path}")
+                
+        elif isinstance(config, list):
+            # For arrays, check each item against the items schema
+            if 'items' in schema:
+                for i, item in enumerate(config):
+                    current_path = f"{path}[{i}]"
+                    errors.extend(self._check_unknown_parameters(item, current_path, schema['items']))
+        
         return errors
 
 
@@ -174,7 +213,8 @@ def main():
         description='Validate AWS MediaConvert job configurations against a JSON schema'
     )
     parser.add_argument(
-        'config_path',
+        '--config-path',
+        required=True,
         help='Path to the MediaConvert job configuration file'
     )
     parser.add_argument(

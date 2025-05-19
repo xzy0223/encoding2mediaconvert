@@ -139,9 +139,27 @@ class E2MCWorkflow:
                         is_valid = validator.validate_config(output_file)
                         if not is_valid:
                             error_file = os.path.join(output_dir, f"{file_id}.err")
+                            
+                            # Create a string handler to capture validation errors
+                            import io
+                            string_io = io.StringIO()
+                            string_handler = logging.StreamHandler(string_io)
+                            string_handler.setLevel(logging.ERROR)
+                            validator.logger.addHandler(string_handler)
+                            
+                            # Re-run validation to capture errors
+                            validator.validate_config(output_file)
+                            
+                            # Get the captured error messages
+                            validator.logger.removeHandler(string_handler)
+                            error_messages = string_io.getvalue()
+                            
+                            # Write detailed error information to the error file
                             with open(error_file, 'w') as f:
                                 f.write(f"Validation failed for {output_file}\n")
-                                f.write("See log file for details\n")
+                                f.write("Validation errors:\n")
+                                f.write(error_messages)
+                            
                             converter_logger.error(f"Validation failed for {output_file}. Error log written to {error_file}")
                         else:
                             converter_logger.info(f"Validation successful for {output_file}")
@@ -176,6 +194,10 @@ class E2MCWorkflow:
             role_arn=self.role_arn
         )
         
+        # Configure logging for job submitter
+        job_submitter_logger = logging.getLogger('MediaConvertJobSubmitter')
+        job_submitter_logger.setLevel(logging.INFO)
+        
         # Track job IDs and status
         job_results = {}
         
@@ -190,6 +212,13 @@ class E2MCWorkflow:
                     file_id = id_match.group(1)
                 else:
                     file_id = os.path.splitext(filename)[0]
+                
+                # Create a job log file in the same directory as the config file
+                job_log_file = os.path.join(config_dir, f"{file_id}_job_submission.log")
+                file_handler = logging.FileHandler(job_log_file)
+                file_handler.setLevel(logging.INFO)
+                file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+                job_submitter_logger.addHandler(file_handler)
                 
                 # Find source video in S3
                 source_video = self._find_source_video(s3_source_path, file_id)
@@ -212,21 +241,35 @@ class E2MCWorkflow:
                     response = self.job_submitter.submit_job(job_profile)
                     job_id = response['Job']['Id']
                     logger.info(f"Submitted job for {file_id} with job ID: {job_id}")
+                    job_submitter_logger.info(f"Submitted job for {file_id} with job ID: {job_id}")
+                    job_submitter_logger.info(f"Job settings: {json.dumps(job_profile, indent=2)}")
                     
                     # Wait for job completion if requested
                     if wait_for_completion:
                         logger.info(f"Waiting for job {job_id} to complete...")
+                        job_submitter_logger.info(f"Waiting for job {job_id} to complete...")
                         job = self.job_submitter.track_job(job_id)
                         job_results[job_id] = job['Status']
                         
+                        # Log job completion status
+                        job_submitter_logger.info(f"Job {job_id} completed with status: {job['Status']}")
+                        job_submitter_logger.info(f"Job details: {json.dumps(job, indent=2)}")
+                        
                         if job['Status'] != MediaConvertJobSubmitter.STATUS_COMPLETE:
                             logger.warning(f"Job {job_id} completed with status: {job['Status']}")
+                            job_submitter_logger.warning(f"Job {job_id} completed with status: {job['Status']}")
                     else:
                         job_results[job_id] = "SUBMITTED"
                     
                 except Exception as e:
-                    logger.error(f"Error submitting job for {file_id}: {str(e)}")
+                    error_msg = f"Error submitting job for {file_id}: {str(e)}"
+                    logger.error(error_msg)
+                    job_submitter_logger.error(error_msg)
                     job_results[file_id] = f"ERROR: {str(e)}"
+                
+                # Remove the file-specific handler
+                job_submitter_logger.removeHandler(file_handler)
+                file_handler.close()
         
         return job_results
 

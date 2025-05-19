@@ -38,7 +38,6 @@
                   "FramerateControl": "SPECIFIED",
                   "FramerateNumerator": 25,
                   "FramerateDenominator": 1,
-                  "Profile": "MAIN",
                   "CodecProfile": "MAIN",
                   "CodecLevel": "LEVEL_3"
                 }

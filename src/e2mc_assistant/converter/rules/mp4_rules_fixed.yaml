@@ -255,6 +255,11 @@ rules:
   - source:
       path: "closed_captions.cea_data_field"
       type: "dummy"  # dummy type to indicate no actual conversion needed
+
+  # 处理最小码率参数
+  - source:
+      path: "minrate"
+      type: "dummy"
       
   # Audio selector settings - using iteration for multiple alternate_source elements
   - source:
@@ -680,14 +685,9 @@ rules:
   - source:
       path: "cbr"
       type: "string"
-      default: "no"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode"
       transform: "rate_control_mode"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
       
   # Audio codec
   - source:
@@ -749,17 +749,6 @@ rules:
         operator: "eq"
         value: "mp4"
 
-  # Profile setting
-  - source:
-      path: "profile"
-      type: "string"
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.Profile"
-      transform: "profile_format"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
 
   # 处理H.264 level参数
   - source:
@@ -1107,18 +1096,6 @@ rules:
         operator: "ne"
         value: ""
         
-  # 处理最小码率参数
-  - source:
-      path: "minrate"
-      type: "string"
-      regex: "(\\d+)k"
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.MinBitrate"
-      value: "$1000"
-      condition:
-        source_path: "minrate"
-        operator: "ne"
-        value: ""
         
   # 处理像素宽高比参数
   - source:
@@ -1286,7 +1263,7 @@ rules:
       path: "video_codec_parameters.profile"
       type: "string"
     target:
-      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.Profile"
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.CodecProfile"
       transform: "profile_format"
       condition:
         source_path: "output"
@@ -1699,7 +1676,6 @@ transformers:
     "libvpx": "VP9"
     "mpeg2video": "MPEG2"
     "mpeg4": "H_264"
-    "wmv2": "H_264"
     "av1": "AV1"
     
   audio_codec_format:
@@ -1715,7 +1691,7 @@ transformers:
     
   rate_control_mode:
     "yes": "CBR"
-    "no": "QVBR"
+    "no": "VBR"
     
   profile_format:
     "main": "MAIN"

@@ -363,8 +363,8 @@ class E2MCWorkflow:
             file_id = prefix_parts[-1]
             
             # Find target videos (original and MediaConvert)
-            original_video = self._find_video_by_pattern(bucket_name, prefix_path, '_target.')
-            mc_video = self._find_video_by_pattern(bucket_name, prefix_path, '_target_mc.')
+            original_video = self._find_original_video(bucket_name, prefix_path)
+            mc_video = self._find_mc_video(bucket_name, prefix_path)
             
             if not original_video or not mc_video:
                 logger.warning(f"Missing videos for ID {file_id}, skipping")
@@ -459,6 +459,96 @@ class E2MCWorkflow:
             return None
         except Exception as e:
             logger.error(f"Error searching for video: {str(e)}")
+            return None
+
+    def _find_original_video(self, bucket_name: str, prefix: str) -> Optional[str]:
+        """
+        Find the original target video in S3 with pattern {id}_{可忽略的字符串}_target.{suffix}
+
+        Args:
+            bucket_name: S3 bucket name
+            prefix: S3 prefix to search in
+
+        Returns:
+            S3 URL of the video if found, None otherwise
+        """
+        try:
+            # List objects with the prefix
+            response = self.s3_client.list_objects_v2(
+                Bucket=bucket_name,
+                Prefix=prefix
+            )
+            
+            # Extract ID from prefix for matching
+            prefix_parts = prefix.rstrip('/').split('/')
+            file_id = prefix_parts[-1]
+            
+            # Look for files matching the pattern {id}_{可忽略的字符串}_target.{suffix}
+            import re
+            pattern = re.compile(f"^{re.escape(prefix)}{re.escape(file_id)}_.*_target\\.[a-zA-Z0-9]+$", re.IGNORECASE)
+            
+            for obj in response.get('Contents', []):
+                key = obj['Key']
+                if pattern.match(key):
+                    logger.debug(f"Found original video: {key}")
+                    return f"s3://{bucket_name}/{key}"
+            
+            # Fallback to simpler pattern if regex didn't match
+            for obj in response.get('Contents', []):
+                key = obj['Key']
+                if "_target." in key.lower() and not "_mc." in key.lower():
+                    logger.debug(f"Found original video (fallback): {key}")
+                    return f"s3://{bucket_name}/{key}"
+            
+            logger.warning(f"No original video found in {prefix}")
+            return None
+        except Exception as e:
+            logger.error(f"Error searching for original video: {str(e)}")
+            return None
+            
+    def _find_mc_video(self, bucket_name: str, prefix: str) -> Optional[str]:
+        """
+        Find the MediaConvert video in S3 with pattern {id}_{可忽略的字符串}_source_{可忽略的字符串}_{可忽略的字符串}_mc.{suffix}
+
+        Args:
+            bucket_name: S3 bucket name
+            prefix: S3 prefix to search in
+
+        Returns:
+            S3 URL of the video if found, None otherwise
+        """
+        try:
+            # List objects with the prefix
+            response = self.s3_client.list_objects_v2(
+                Bucket=bucket_name,
+                Prefix=prefix
+            )
+            
+            # Extract ID from prefix for matching
+            prefix_parts = prefix.rstrip('/').split('/')
+            file_id = prefix_parts[-1]
+            
+            # Look for files matching the pattern {id}_{可忽略的字符串}_source_{可忽略的字符串}_{可忽略的字符串}_mc.{suffix}
+            import re
+            pattern = re.compile(f"^{re.escape(prefix)}{re.escape(file_id)}_.*_source_.*_.*_mc\\.[a-zA-Z0-9]+$", re.IGNORECASE)
+            
+            for obj in response.get('Contents', []):
+                key = obj['Key']
+                if pattern.match(key):
+                    logger.debug(f"Found MC video: {key}")
+                    return f"s3://{bucket_name}/{key}"
+            
+            # Fallback to simpler pattern if regex didn't match
+            for obj in response.get('Contents', []):
+                key = obj['Key']
+                if "_source_" in key.lower() and "_mc." in key.lower():
+                    logger.debug(f"Found MC video (fallback): {key}")
+                    return f"s3://{bucket_name}/{key}"
+            
+            logger.warning(f"No MediaConvert video found in {prefix}")
+            return None
+        except Exception as e:
+            logger.error(f"Error searching for MediaConvert video: {str(e)}")
             return None
 
     def _save_to_s3(self, bucket_name: str, key: str, content: str) -> bool:

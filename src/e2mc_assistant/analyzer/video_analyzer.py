@@ -9,6 +9,7 @@ import json
 import tempfile
 import os
 import sys
+import time
 import argparse
 import subprocess
 import boto3
@@ -529,6 +530,21 @@ Please format your response with clear sections and bullet points where appropri
 """.strip().format(diff_json=json.dumps(differences, indent=2))
         
         return prompt
+        
+    def generate_report(self, original_info: Dict[str, Any], mc_info: Dict[str, Any], s3_client=None, bucket_name=None, report_prefix=None) -> Dict[str, Any]:
+        """
+        Generate a comprehensive report comparing original and MediaConvert videos.
+        
+        Args:
+            original_info: Original video information
+            mc_info: MediaConvert video information
+            s3_client: Optional S3 client for saving reports
+            bucket_name: Optional S3 bucket name for saving reports
+            report_prefix: Optional S3 prefix for saving reports
+            
+        Returns:
+            Dictionary containing report information and paths
+        """
         # Compare videos
         differences = self.compare_videos(original_info, mc_info)
         

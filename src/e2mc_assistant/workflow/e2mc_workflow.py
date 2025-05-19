@@ -271,7 +271,7 @@ class E2MCWorkflow:
                             
                             # Create error log file for failed jobs
                             if job['Status'] == MediaConvertJobSubmitter.STATUS_ERROR:
-                                error_file = os.path.join(config_dir, f"{file_id}.err")
+                                error_file = os.path.join(config_dir, f"{file_id}_job_execution.err")
                                 with open(error_file, 'w') as f:
                                     f.write(f"MediaConvert job {job_id} failed\n")
                                     f.write(f"Timestamp: {datetime.now().isoformat()}\n\n")
@@ -301,7 +301,7 @@ class E2MCWorkflow:
                     job_results[file_id] = f"ERROR: {str(e)}"
                     
                     # Create error log file for submission errors
-                    error_file = os.path.join(config_dir, f"{file_id}.err")
+                    error_file = os.path.join(config_dir, f"{file_id}_job_submission.err")
                     with open(error_file, 'w') as f:
                         f.write(f"Error submitting MediaConvert job for {file_id}\n")
                         f.write(f"Timestamp: {datetime.now().isoformat()}\n\n")

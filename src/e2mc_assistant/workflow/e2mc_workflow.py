@@ -18,6 +18,7 @@ import os
 import re
 import sys
 import time
+from datetime import datetime
 import random
 from typing import Dict, Any, List, Optional, Tuple
 from pathlib import Path
@@ -264,6 +265,26 @@ class E2MCWorkflow:
                         if job['Status'] != MediaConvertJobSubmitter.STATUS_COMPLETE:
                             logger.warning(f"Job {job_id} completed with status: {job['Status']}")
                             job_submitter_logger.warning(f"Job {job_id} completed with status: {job['Status']}")
+                            
+                            # Create error log file for failed jobs
+                            if job['Status'] == MediaConvertJobSubmitter.STATUS_ERROR:
+                                error_file = os.path.join(config_dir, f"{file_id}.err")
+                                with open(error_file, 'w') as f:
+                                    f.write(f"MediaConvert job {job_id} failed\n")
+                                    f.write(f"Timestamp: {datetime.now().isoformat()}\n\n")
+                                    f.write("Job details:\n")
+                                    f.write(json.dumps(job, indent=2))
+                                    
+                                    # Add error messages if available
+                                    if 'ErrorMessage' in job:
+                                        f.write("\n\nError message:\n")
+                                        f.write(job['ErrorMessage'])
+                                    elif 'ErrorCode' in job:
+                                        f.write("\n\nError code:\n")
+                                        f.write(job['ErrorCode'])
+                                        
+                                logger.error(f"Job {job_id} failed. Error details written to {error_file}")
+                                job_submitter_logger.error(f"Job {job_id} failed. Error details written to {error_file}")
                     else:
                         job_results[job_id] = "SUBMITTED"
                     

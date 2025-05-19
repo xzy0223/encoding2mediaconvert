@@ -5,11 +5,12 @@
 1. [工具概述](#1-工具概述)
 2. [转换程序详解](#2-转换程序详解)
 3. [映射规则文件详解](#3-映射规则文件详解)
-4. [使用方法](#4-使用方法)
-5. [规则编写指南](#5-规则编写指南)
-6. [扩展功能](#6-扩展功能)
-7. [故障排除](#7-故障排除)
-8. [示例](#8-示例)
+4. [多条件判断功能](#4-多条件判断功能)
+5. [使用方法](#5-使用方法)
+6. [规则编写指南](#6-规则编写指南)
+7. [扩展功能](#7-扩展功能)
+8. [故障排除](#8-故障排除)
+9. [示例](#9-示例)
 
 ## 1. 工具概述
 
@@ -24,6 +25,7 @@
 - 记录未映射的参数
 - 支持模板文件
 - 支持迭代规则处理多流配置
+- 支持复合逻辑条件判断
 
 ## 2. 转换程序详解
 
@@ -77,8 +79,9 @@ def apply_transform(self, value: Any, transform_name: str, context: Dict = None)
 
 ```python
 def evaluate_condition(self, condition: Dict, source_value: Any, source_data: Dict = None) -> bool:
-    """评估条件"""
-    # 支持多种操作符：eq, ne, gt, lt, in 等
+    """评估条件，支持复合逻辑条件"""
+    # 处理 AND、OR、NOT 逻辑运算符
+    # 支持多种比较操作符：eq, ne, gt, lt, in 等
 ```
 
 #### 2.1.5 迭代规则处理
@@ -89,24 +92,6 @@ def _process_iteration_rule(self, rule: Dict, source_data: Dict, target_data: Di
     # 处理每个源元素
     # 应用子规则
     # 生成名称修饰符
-```
-
-#### 2.1.6 流处理
-
-```python
-def _process_streams(self, streams: List, context: Dict) -> List:
-    """处理多流配置（HLS/DASH）"""
-    # 创建输出模板
-    # 处理每个流
-    # 设置视频/音频参数
-```
-
-#### 2.1.7 未映射参数记录
-
-```python
-def _log_unmapped_parameters(self, source_data: Dict, processed_params: set, parent_path: str = ""):
-    """记录没有映射规则的参数"""
-    # 递归检查未处理的参数
 ```
 
 ### 2.2 命令行接口
@@ -192,13 +177,6 @@ transformers:
 |------|------|------|------|------|
 | `target_base_path` | 字符串 | 是 | 目标数组的基础路径 | `"Settings.OutputGroups[0].Outputs"` |
 | `name_modifier` | 对象 | 否 | 名称修饰符配置 | `{"template": "_{size}_{bitrate}", "replacements": {...}}` |
-
-##### name_modifier 子字段
-
-| 字段 | 类型 | 必填 | 描述 | 示例 |
-|------|------|------|------|------|
-| `template` | 字符串 | 是 | 名称模板，使用`{变量名}`引用源值 | `"_{size}_{bitrate}"` |
-| `replacements` | 对象 | 否 | 变量替换规则 | `{"bitrate": {"regex": "(\\d+)k", "format": "$1K"}}` |
 
 #### 3.2.4 transformers 字段
 
@@ -308,45 +286,160 @@ transformers:
 | `contains` | 包含 | `{"operator": "contains", "value": "264"}` |
 | `exists` | 存在 | `{"operator": "exists"}` |
 
-### 3.5 常用转换函数
+## 4. 多条件判断功能
 
-| 转换函数 | 描述 | 示例映射 |
-|----------|------|----------|
-| `output_group_type` | 输出组类型转换 | `"mp4": "FILE_GROUP_SETTINGS"` |
-| `container_format` | 容器格式转换 | `"mp4": "MP4"` |
-| `video_codec_format` | 视频编解码器转换 | `"libx264": "H_264"` |
-| `audio_codec_format` | 音频编解码器转换 | `"libfaac": "AAC"` |
-| `rate_control_mode` | 码率控制模式转换 | `"yes": "CBR", "no": "QVBR"` |
-| `profile_format` | 编码配置文件转换 | `"main": "MAIN"` |
-| `h264_level_format` | H.264级别转换 | `"42": "LEVEL_4_2"` |
+多条件判断功能允许在规则中使用复合逻辑条件，支持 AND、OR、NOT 逻辑运算符，可以组合多个简单条件来表达复杂的判断逻辑。
 
-## 4. 使用方法
+### 4.1 复合条件结构
 
-### 4.1 基本用法
+#### 4.1.1 AND 条件
+
+当所有子条件都为真时，整个条件为真。
+
+```yaml
+condition:
+  operator: "AND"
+  conditions:
+    - operator: "eq"
+      value: "no"
+    - operator: "exists"
+      source_path: "cabr"
+```
+
+#### 4.1.2 OR 条件
+
+当任一子条件为真时，整个条件为真。
+
+```yaml
+condition:
+  operator: "OR"
+  conditions:
+    - operator: "eq"
+      value: "yes"
+    - operator: "eq"
+      source_path: "cabr"
+      value: "yes"
+```
+
+#### 4.1.3 NOT 条件
+
+对单个条件取反。
+
+```yaml
+condition:
+  operator: "NOT"
+  condition:
+    operator: "eq"
+    value: "mp4"
+```
+
+### 4.2 嵌套条件
+
+条件可以任意嵌套，构建复杂的逻辑表达式。
+
+```yaml
+condition:
+  operator: "AND"
+  conditions:
+    - operator: "eq"
+      value: "no"
+    - operator: "AND"
+      conditions:
+        - operator: "exists"
+          source_path: "cabr"
+        - operator: "eq"
+          source_path: "cabr"
+          value: "no"
+```
+
+### 4.3 实际应用示例
+
+#### 4.3.1 CBR 设置条件
+
+当 `cbr=no` 且 `cabr` 参数存在且等于 `no` 时，设置特定的码率控制模式。
+
+```yaml
+- source:
+    path: "cbr"
+    condition:
+      operator: "AND"
+      conditions:
+        - operator: "eq"
+          value: "no"
+        - operator: "AND"
+          conditions:
+            - operator: "exists"
+              source_path: "cabr"
+            - operator: "eq"
+              source_path: "cabr"
+              value: "no"
+  target:
+    path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode"
+    value: "QVBR_WITH_CABR"
+```
+
+#### 4.3.2 输出格式条件
+
+当输出格式不是 `mp4` 时，设置不同的输出组类型。
+
+```yaml
+- source:
+    path: "output"
+    condition:
+      operator: "NOT"
+      condition:
+        operator: "eq"
+        value: "mp4"
+  target:
+    path: "Settings.OutputGroups[0].OutputGroupSettings.Type"
+    value: "HLS_GROUP_SETTINGS"
+```
+
+### 4.4 多条件最佳实践
+
+1. **条件组织**
+   - 将简单条件放在复合条件的开始位置，以便快速评估
+   - 使用嵌套结构表达复杂逻辑，提高可读性
+
+2. **字符串值**
+   - 在YAML中使用引号包围字符串值，避免解析问题
+   - 例如：`value: "no"` 而不是 `value: no`
+
+3. **条件调试**
+   - 使用 `--verbose` 参数查看详细的条件评估日志
+   - 检查条件评估结果，确保逻辑正确
+
+4. **避免过度复杂**
+   - 过于复杂的条件难以维护，考虑拆分为多个规则
+   - 保持条件嵌套层级不超过3层
+
+## 5. 使用方法
+
+### 5.1 基本用法
 
 ```bash
 python config_converter.py --source input.xml --rules mapping_rules.yaml --output output.json
 ```
 
-### 4.2 使用模板
+### 5.2 使用模板
 
 ```bash
 python config_converter.py --source input.xml --rules mapping_rules.yaml --template template.json --output output.json
 ```
 
-### 4.3 批量处理
+### 5.3 批量处理
 
 ```bash
 python config_converter.py --source /path/to/xml/files --rules mapping_rules.yaml --output /path/to/output --batch
 ```
 
-### 4.4 详细日志
+### 5.4 详细日志
 
 ```bash
 python config_converter.py --source input.xml --rules mapping_rules.yaml --output output.json --verbose
 ```
 
-### 4.5 命令行参数
+### 5.5 命令行参数
 
 | 参数 | 描述 | 示例 |
 |------|------|------|
@@ -358,15 +451,15 @@ python config_converter.py --source input.xml --rules mapping_rules.yaml --outpu
 | `--validate` | JSON Schema验证文件 | `--validate schema.json` |
 | `--verbose` | 启用详细日志记录 | `--verbose` |
 
-## 5. 规则编写指南
+## 6. 规则编写指南
 
-### 5.1 路径表示法
+### 6.1 路径表示法
 
 - 源路径使用斜杠（/）分隔，如 `format/video_codec`
 - 目标路径使用点（.）分隔，如 `Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Codec`
 - 数组索引使用方括号，如 `OutputGroups[0]`
 
-### 5.2 条件规则编写
+### 6.2 条件规则编写
 
 1. **基于输出格式的条件**
 
@@ -396,7 +489,25 @@ python config_converter.py --source input.xml --rules mapping_rules.yaml --outpu
       value: "advanced_hls"
 ```
 
-### 5.3 迭代规则编写
+3. **使用复合条件**
+
+```yaml
+- source:
+    path: "cbr"
+    condition:
+      operator: "OR"
+      conditions:
+        - operator: "eq"
+          value: "yes"
+        - operator: "eq"
+          source_path: "cabr"
+          value: "yes"
+  target:
+    path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode"
+    value: "CBR"
+```
+
+### 6.3 迭代规则编写
 
 1. **定义迭代规则**
 
@@ -424,18 +535,7 @@ rules:
         value: "$2"
 ```
 
-3. **名称修饰符配置**
-
-```yaml
-name_modifier:
-  template: "_{size}_{bitrate}"
-  replacements:
-    "bitrate": 
-      regex: "(\\d+)k"
-      format: "$1K"
-```
-
-### 5.4 最佳实践
+### 6.4 最佳实践
 
 1. **路径命名**
    - 源路径使用斜杠（/）分隔
@@ -461,9 +561,9 @@ name_modifier:
    - 使用转换函数处理格式差异
    - 为复杂转换注册自定义函数
 
-## 6. 扩展功能
+## 7. 扩展功能
 
-### 6.1 自定义转换函数
+### 7.1 自定义转换函数
 
 ```python
 def my_custom_transform(value, context):
@@ -474,7 +574,7 @@ converter = ConfigConverter('mapping_rules.yaml')
 converter.register_custom_function('my_transform', my_custom_transform)
 ```
 
-### 6.2 验证功能
+### 7.2 验证功能
 
 ```python
 def validate(self, data: Dict, schema_file: str = None) -> bool:
@@ -482,7 +582,7 @@ def validate(self, data: Dict, schema_file: str = None) -> bool:
     # 使用 jsonschema 验证
 ```
 
-### 6.3 未映射参数记录
+### 7.3 未映射参数记录
 
 工具会自动记录未映射的参数，以便后续完善规则：
 
@@ -492,30 +592,30 @@ WARNING - Unmapped parameter: duration_precision = 3
 WARNING - Unmapped parameter: pack_files = yes
 ```
 
-## 7. 故障排除
+## 8. 故障排除
 
-### 7.1 常见问题
+### 8.1 常见问题
 
 1. **未映射参数**：检查日志中的 "Unmapped parameter" 警告，添加相应的映射规则
 2. **路径错误**：确保源路径和目标路径格式正确
 3. **条件不匹配**：检查条件操作符和值是否正确
 4. **类型转换错误**：确保数据类型兼容
 
-### 7.2 调试技巧
+### 8.2 调试技巧
 
 1. 使用 `--verbose` 参数获取详细日志
 2. 检查源数据结构是否符合预期
 3. 验证转换函数是否正确定义
 4. 检查条件评估结果
 
-## 8. 示例
+## 9. 示例
 
-### 8.1 MP4 配置转换
+### 9.1 MP4 配置转换
 
 **源配置 (1.format.xml)**:
 ```xml
 <format>
-    <output>mp4</output>
+    <o>mp4</o>
     <video_codec>libx264</video_codec>
     <framerate>25</framerate>
     <profile>main</profile>
@@ -541,168 +641,38 @@ WARNING - Unmapped parameter: pack_files = yes
     value: "MP4"
 ```
 
-**转换结果**:
-```json
-{
-  "Settings": {
-    "OutputGroups": [
-      {
-        "OutputGroupSettings": {
-          "Type": "FILE_GROUP_SETTINGS"
-        },
-        "Outputs": [
-          {
-            "ContainerSettings": {
-              "Container": "MP4"
-            },
-            "VideoDescription": {
-              "CodecSettings": {
-                "Codec": "H_264",
-                "H264Settings": {
-                  "FramerateNumerator": 25,
-                  "Bitrate": 1300000
-                }
-              },
-              "Width": 1024,
-              "Height": 576
-            },
-            "AudioDescriptions": [
-              {
-                "CodecSettings": {
-                  "Codec": "AAC",
-                  "AacSettings": {
-                    "Bitrate": 128000,
-                    "SampleRate": 48000
-                  }
-                }
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-### 8.2 HLS 配置转换
-
-**源配置 (2.format.xml)**:
-```xml
-<format>
-    <output>advanced_hls</output>
-    <stream>
-        <size>320x180</size>
-        <bitrate>180k</bitrate>
-        <framerate>30</framerate>
-        <audio_bitrate>96k</audio_bitrate>
-    </stream>
-    <stream>
-        <size>640x360</size>
-        <bitrate>675k</bitrate>
-        <framerate>30</framerate>
-        <audio_bitrate>96k</audio_bitrate>
-    </stream>
-    <segment_duration>2</segment_duration>
-</format>
-```
-
-**映射规则**:
-```yaml
-# 迭代规则处理多流
-- source:
-    path: "stream"
-    type: "iteration"
-    rules:
-      - source:
-          path: "size"
-          type: "string"
-          regex: "(\\d+)x(\\d+)"
-        target:
-          - path: "VideoDescription.Width"
-            value: "$1"
-          - path: "VideoDescription.Height"
-            value: "$2"
-      - source:
-          path: "bitrate"
-          type: "string"
-          regex: "(\\d+)k"
-        target:
-          path: "VideoDescription.CodecSettings.H264Settings.Bitrate"
-          value: "$1000"
-  target_base_path: "Settings.OutputGroups[0].Outputs"
-```
-
-**转换结果**:
-```json
-{
-  "Settings": {
-    "OutputGroups": [
-      {
-        "OutputGroupSettings": {
-          "Type": "HLS_GROUP_SETTINGS",
-          "HlsGroupSettings": {
-            "SegmentLength": 2
-          }
-        },
-        "Outputs": [
-          {
-            "VideoDescription": {
-              "Width": 320,
-              "Height": 180,
-              "CodecSettings": {
-                "H264Settings": {
-                  "Bitrate": 180000,
-                  "FramerateNumerator": 30
-                },
-                "Codec": "H_264"
-              }
-            },
-            "NameModifier": "_320x180_180K"
-          },
-          {
-            "VideoDescription": {
-              "Width": 640,
-              "Height": 360,
-              "CodecSettings": {
-                "H264Settings": {
-                  "Bitrate": 675000,
-                  "FramerateNumerator": 30
-                },
-                "Codec": "H_264"
-              }
-            },
-            "NameModifier": "_640x360_675K"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-### 8.3 嵌套参数处理
+### 9.2 多条件规则示例
 
 **源配置**:
 ```xml
 <format>
-    <output>mp4</output>
-    <video_codec_parameters>
-        <color_range>1</color_range>
-        <level>42</level>
-    </video_codec_parameters>
+    <o>mp4</o>
+    <cbr>no</cbr>
+    <cabr>no</cabr>
+    <bitrate>800k</bitrate>
 </format>
 ```
 
 **映射规则**:
 ```yaml
-# 处理嵌套参数
+# 使用多条件判断设置码率控制模式
 - source:
-    path: "video_codec_parameters/level"
-    type: "number"
+    path: "cbr"
+    condition:
+      operator: "AND"
+      conditions:
+        - operator: "eq"
+          value: "no"
+        - operator: "AND"
+          conditions:
+            - operator: "exists"
+              source_path: "cabr"
+            - operator: "eq"
+              source_path: "cabr"
+              value: "no"
   target:
-    path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.Level"
-    transform: "h264_level_format"
+    path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode"
+    value: "QVBR_WITH_CABR"
 ```
 
 **转换结果**:
@@ -716,7 +686,8 @@ WARNING - Unmapped parameter: pack_files = yes
             "VideoDescription": {
               "CodecSettings": {
                 "H264Settings": {
-                  "Level": "LEVEL_4_2"
+                  "RateControlMode": "QVBR_WITH_CABR",
+                  "Bitrate": 800000
                 }
               }
             }
@@ -727,16 +698,3 @@ WARNING - Unmapped parameter: pack_files = yes
   }
 }
 ```
-
-## 总结
-
-该转换工具通过可配置的映射规则实现了 Encoding.com 配置到 AWS MediaConvert 配置的灵活转换。核心功能包括：
-
-1. 基于路径的值映射
-2. 条件规则处理
-3. 值转换和格式化
-4. 多流配置处理
-5. 迭代规则支持
-6. 未映射参数记录
-
-通过这些功能，工具可以处理各种复杂的转码配置，并生成符合 AWS MediaConvert 要求的 JSON 配置文件。

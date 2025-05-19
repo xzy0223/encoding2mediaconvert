@@ -33,11 +33,11 @@
                 "Codec": "H_264",
                 "H264Settings": {
                   "GopSize": 125,
-                  "RateControlMode": "QVBR",
                   "Bitrate": 700000,
                   "FramerateControl": "SPECIFIED",
                   "FramerateNumerator": 25,
                   "FramerateDenominator": 1,
+                  "QualityTuningLevel": "MULTI_PASS_HQ",
                   "CodecProfile": "MAIN",
                   "CodecLevel": "LEVEL_3"
                 }
@@ -57,7 +57,8 @@
                   }
                 }
               }
-            ]
+            ],
+            "NameModifier": "_640x360_700000_mc"
           }
         ]
       }

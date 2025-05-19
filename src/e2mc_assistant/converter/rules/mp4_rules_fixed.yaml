@@ -152,6 +152,17 @@ rules:
         source_path: "output"
         operator: "eq"
         value: "mp4"
+
+  - source:
+      path: "two_pass"
+      type: "string"
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.QualityTuningLevel"
+      transform: "two_pass_format"
+      condition:
+        source_path: "output"
+        operator: "eq"
+        value: "mp4"
         
   # 处理metadata_copy参数
   - source:
@@ -685,15 +696,34 @@ rules:
   - source:
       path: "cbr"
       type: "string"
+      condition:
+       source_path: "cbr"
+       operator: "eq"
+       value: "no"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode"
-      transform: "rate_control_mode"
+      value: "VBR"
+      condition:
+        source_path: "cabr"
+        operator: "eq"
+        value: "no"
+
+  - source:
+      path: "cbr"
+      type: "string"
+      condition:
+       source_path: "cbr"
+       operator: "eq"
+       value: "yes"
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode"
+      value: "CBR"
+
       
   # Audio codec
   - source:
       path: "audio_codec"
       type: "string"
-      default: "libfaac"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.Codec"
       transform: "audio_codec_format"
@@ -1189,18 +1219,6 @@ rules:
         operator: "eq"
         value: "mp4"
         
-  # 处理两通道编码参数
-  - source:
-      path: "two_pass"
-      type: "string"
-      default: "no"
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode"
-      transform: "two_pass_format"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
         
   # 处理视频编码器熵编码参数
   - source:
@@ -1793,10 +1811,6 @@ transformers:
     "yes": "SINGLE_PASS"
     "no": "MULTI_PASS_HQ"
     
-  two_pass_format:
-    "yes": "QVBR"
-    "no": "VBR"
-    
   coder_format:
     "0": "CABAC"
     "1": "CAVLC"
@@ -1813,9 +1827,13 @@ transformers:
   timecode_track_format:
     "yes": "EMBEDDED"
     
-  twin_turbo_format:
+  two_turbo_format:
     "yes": "SINGLE_PASS"
     "no": "MULTI_PASS_HQ"
+
+  two_pass_format:
+    "yes": "MULTI_PASS_HQ"
+    "no": "SINGLE_PASS_HQ"
     
   color_primaries_format:
     "bt709": "FORCE_709"

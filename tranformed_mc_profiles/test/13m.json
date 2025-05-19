@@ -1,21 +1,7 @@
 {
   "Settings": {
-    "Inputs": [
-      {
-        "TimecodeSource": "ZEROBASED",
-        "VideoSelector": {},
-        "AudioSelectors": {
-          "Audio Selector 1": {
-            "DefaultSelection": "DEFAULT"
-          }
-        },
-        "FileInput": "{SOURCE_S3_URL}",
-        "DeblockFilter": "ENABLED"
-      }
-    ],
     "OutputGroups": [
       {
-        "Name": "File Group",
         "OutputGroupSettings": {
           "Type": "FILE_GROUP_SETTINGS",
           "FileGroupSettings": {
@@ -25,26 +11,25 @@
         "Outputs": [
           {
             "ContainerSettings": {
-              "Container": "MP4",
-              "Mp4Settings": {}
+              "Container": "MP4"
             },
             "VideoDescription": {
               "CodecSettings": {
                 "Codec": "H_264",
                 "H264Settings": {
                   "GopSize": 125,
-                  "RateControlMode": "QVBR",
-                  "Bitrate": 1100000,
+                  "Bitrate": 800000,
                   "FramerateControl": "SPECIFIED",
                   "FramerateNumerator": 25,
                   "FramerateDenominator": 1,
+                  "QualityTuningLevel": "MULTI_PASS_HQ",
                   "CodecProfile": "MAIN",
                   "CodecLevel": "LEVEL_3"
                 }
               },
+              "ScalingBehavior": "DEFAULT",
               "Width": 640,
-              "Height": 360,
-              "ScalingBehavior": "DEFAULT"
+              "Height": 360
             },
             "AudioDescriptions": [
               {
@@ -57,14 +42,16 @@
                   }
                 }
               }
-            ]
+            ],
+            "NameModifier": "_640x360_800000_mc"
           }
         ]
       }
     ],
-    "TimecodeConfig": {
-      "Source": "ZEROBASED"
-    },
-    "FollowSource": 1
+    "Inputs": [
+      {
+        "DeblockFilter": "ENABLED"
+      }
+    ]
   }
 }

@@ -18,8 +18,10 @@ import os
 import re
 import sys
 import time
+import random
 from typing import Dict, Any, List, Optional, Tuple
 from pathlib import Path
+from botocore.exceptions import ClientError
 
 # Import required modules from the project
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../')))
@@ -41,6 +43,12 @@ class E2MCWorkflow:
     job submission and video comparison.
     """
 
+    # Constants for Bedrock API calls
+    MAX_RETRIES = 5
+    INITIAL_BACKOFF = 1  # seconds
+    MAX_BACKOFF = 30  # seconds
+    JITTER = 0.1  # 10% jitter for backoff
+
     def __init__(self, region: str = 'us-east-1', role_arn: Optional[str] = None):
         """
         Initialize the workflow handler.
@@ -52,6 +60,14 @@ class E2MCWorkflow:
         self.region = region
         self.role_arn = role_arn
         self.s3_client = boto3.client('s3', region_name=region)
+        
+        # Initialize Bedrock client for LLM analysis
+        try:
+            self.bedrock_client = boto3.client('bedrock-runtime', region_name=region)
+            logger.info(f"Initialized Bedrock client in region {region}")
+        except Exception as e:
+            logger.warning(f"Failed to initialize Bedrock client: {str(e)}")
+            self.bedrock_client = None
         
         # Initialize components
         self.converter = None
@@ -362,6 +378,10 @@ class E2MCWorkflow:
             prefix_parts = prefix_path.rstrip('/').split('/')
             file_id = prefix_parts[-1]
             
+            # Create report directory structure
+            normalized_prefix = prefix_path.rstrip('/')
+            report_prefix = f"{normalized_prefix}/reports"
+            
             # Find target videos (original and MediaConvert)
             original_video = self._find_original_video(bucket_name, prefix_path)
             mc_video = self._find_mc_video(bucket_name, prefix_path)
@@ -376,20 +396,43 @@ class E2MCWorkflow:
                 original_info = self.video_analyzer.extract_video_info(original_video)
                 mc_info = self.video_analyzer.extract_video_info(mc_video)
                 
+                # Save original ffmpeg info
+                original_info_path = f"{report_prefix}/original_info.json"
+                self._save_to_s3(bucket_name, original_info_path, json.dumps(original_info, indent=2))
+                
+                # Save MediaConvert ffmpeg info
+                mc_info_path = f"{report_prefix}/mc_info.json"
+                self._save_to_s3(bucket_name, mc_info_path, json.dumps(mc_info, indent=2))
+                
                 # Compare videos
                 differences = self.video_analyzer.compare_videos(original_info, mc_info)
                 
-                # Save comparison results - normalize path to avoid double slashes
-                normalized_prefix_path = prefix_path.rstrip('/')
-                result_path = f"{normalized_prefix_path}/comparison_result.json"
-                self._save_to_s3(bucket_name, result_path, json.dumps(differences, indent=2))
+                # Save comparison results
+                diff_path = f"{report_prefix}/comparison_result.json"
+                self._save_to_s3(bucket_name, diff_path, json.dumps(differences, indent=2))
+                
+                # Generate LLM analysis if Bedrock client is available
+                llm_analysis = None
+                if self.bedrock_client:
+                    try:
+                        llm_analysis = self._generate_llm_analysis(original_info, mc_info, differences)
+                        llm_path = f"{report_prefix}/llm_analysis.json"
+                        self._save_to_s3(bucket_name, llm_path, json.dumps(llm_analysis, indent=2))
+                        logger.info(f"Generated LLM analysis for ID {file_id}")
+                    except Exception as e:
+                        logger.error(f"Error generating LLM analysis for ID {file_id}: {str(e)}")
                 
                 # Add to results
                 analysis_results[file_id] = {
                     'original_video': original_video,
                     'mc_video': mc_video,
                     'has_differences': bool(differences),
-                    'result_path': f"s3://{bucket_name}/{result_path}"
+                    'report_paths': {
+                        'original_info': f"s3://{bucket_name}/{original_info_path}",
+                        'mc_info': f"s3://{bucket_name}/{mc_info_path}",
+                        'comparison': f"s3://{bucket_name}/{diff_path}",
+                        'llm_analysis': f"s3://{bucket_name}/{report_prefix}/llm_analysis.json" if llm_analysis else None
+                    }
                 }
                 
                 logger.info(f"Completed analysis for ID {file_id}")
@@ -552,6 +595,157 @@ class E2MCWorkflow:
             logger.error(f"Error searching for MediaConvert video: {str(e)}")
             return None
 
+    def _generate_llm_analysis(self, original_info: Dict, mc_info: Dict, differences: Dict) -> Dict:
+        """
+        Generate LLM analysis of video differences using Amazon Bedrock.
+        
+        Args:
+            original_info: Original video information
+            mc_info: MediaConvert video information
+            differences: Comparison results
+            
+        Returns:
+            Dictionary containing LLM analysis
+        """
+        # Prepare the prompt for the LLM
+        prompt = self._prepare_llm_prompt(original_info, mc_info, differences)
+        
+        # Call Bedrock with exponential backoff and retry
+        response = self._call_bedrock_with_retry(prompt)
+        
+        # Parse and return the response
+        return {
+            "prompt": prompt,
+            "analysis": response,
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+        }
+        
+    def _prepare_llm_prompt(self, original_info: Dict, mc_info: Dict, differences: Dict) -> str:
+        """
+        Prepare a prompt for the LLM to analyze video differences.
+        
+        Args:
+            original_info: Original video information
+            mc_info: MediaConvert video information
+            differences: Comparison results
+            
+        Returns:
+            Formatted prompt string
+        """
+        # Create a simplified version of the differences to avoid token limits
+        simplified_diffs = self._simplify_differences(differences)
+        
+        prompt = f"""
+        You are a video encoding expert. Analyze the differences between an original video and its 
+        MediaConvert-processed version. Provide insights on quality, compatibility, and optimization.
+        
+        Original Video Information:
+        {json.dumps(self._extract_key_info(original_info), indent=2)}
+        
+        MediaConvert Video Information:
+        {json.dumps(self._extract_key_info(mc_info), indent=2)}
+        
+        Key Differences:
+        {json.dumps(simplified_diffs, indent=2)}
+        
+        Please provide:
+        1. A summary of the key differences
+        2. Analysis of potential quality impacts
+        3. Compatibility considerations
+        4. Recommendations for optimization
+        5. Overall assessment of the MediaConvert output quality
+        """
+        
+        return prompt
+        
+    def _simplify_differences(self, differences: Dict) -> Dict:
+        """
+        Simplify the differences dictionary to reduce token count.
+        
+        Args:
+            differences: Full comparison results
+            
+        Returns:
+            Simplified differences dictionary
+        """
+        simplified = {}
+        
+        # Extract only the most important differences
+        if "format" in differences:
+            simplified["format"] = {
+                "size": differences["format"].get("size", {}),
+                "bit_rate": differences["format"].get("bit_rate", {}),
+                "duration": differences["format"].get("duration", {})
+            }
+            
+        if "streams" in differences:
+            simplified["streams"] = {}
+            if "video_streams" in differences["streams"]:
+                video_streams = differences["streams"]["video_streams"]
+                simplified["streams"]["video_streams"] = {
+                    "bit_rate": video_streams.get("bit_rate", {}),
+                    "color_space": video_streams.get("color_space", {}),
+                    "has_b_frames": video_streams.get("has_b_frames", {})
+                }
+                
+            if "audio_streams" in differences["streams"]:
+                audio_streams = differences["streams"]["audio_streams"]
+                simplified["streams"]["audio_streams"] = {
+                    "bit_rate": audio_streams.get("bit_rate", {}),
+                    "duration": audio_streams.get("duration", {})
+                }
+                
+        if "frame_info" in differences:
+            simplified["frame_info"] = differences["frame_info"]
+            
+        return simplified
+        
+    def _extract_key_info(self, info: Dict) -> Dict:
+        """
+        Extract key information from video info to reduce token count.
+        
+        Args:
+            info: Full video information
+            
+        Returns:
+            Dictionary with key information
+        """
+        key_info = {}
+        
+        if "format" in info:
+            key_info["format"] = {
+                "format_name": info["format"].get("format_name", ""),
+                "bit_rate": info["format"].get("bit_rate", ""),
+                "duration": info["format"].get("duration", ""),
+                "size": info["format"].get("size", "")
+            }
+            
+        if "streams" in info:
+            key_info["streams"] = []
+            for stream in info["streams"]:
+                stream_info = {
+                    "codec_type": stream.get("codec_type", ""),
+                    "codec_name": stream.get("codec_name", "")
+                }
+                
+                if stream.get("codec_type") == "video":
+                    stream_info.update({
+                        "width": stream.get("width", ""),
+                        "height": stream.get("height", ""),
+                        "bit_rate": stream.get("bit_rate", ""),
+                        "avg_frame_rate": stream.get("avg_frame_rate", "")
+                    })
+                elif stream.get("codec_type") == "audio":
+                    stream_info.update({
+                        "sample_rate": stream.get("sample_rate", ""),
+                        "channels": stream.get("channels", ""),
+                        "bit_rate": stream.get("bit_rate", "")
+                    })
+                    
+                key_info["streams"].append(stream_info)
+                
+        return key_info
+        
     def _build_s3_path(self, *components):
         """
         Build an S3 path by joining components, properly handling slashes.
@@ -567,6 +761,64 @@ class E2MCWorkflow:
         
         # Join with single slashes
         return '/'.join(clean_components)
+        if not self.bedrock_client:
+            raise Exception("Bedrock client not initialized")
+            
+        # Model parameters
+        model_id = "anthropic.claude-v2"  # Use Claude V2 model
+        max_tokens = 4000
+        temperature = 0.7
+        
+        # Prepare request body
+        request_body = {
+            "prompt": f"\n\nHuman: {prompt}\n\nAssistant:",
+            "max_tokens_to_sample": max_tokens,
+            "temperature": temperature,
+            "top_p": 0.9
+        }
+        
+        # Retry with exponential backoff
+        retry_count = 0
+        backoff = self.INITIAL_BACKOFF
+        
+        while retry_count < self.MAX_RETRIES:
+            try:
+                response = self.bedrock_client.invoke_model(
+                    modelId=model_id,
+                    body=json.dumps(request_body)
+                )
+                
+                # Parse and return the response
+                response_body = json.loads(response['body'].read())
+                return response_body.get('completion', '')
+                
+            except ClientError as e:
+                error_code = e.response.get('Error', {}).get('Code', '')
+                
+                # Handle rate limiting errors
+                if error_code in ['ThrottlingException', 'TooManyRequestsException', 'ServiceUnavailableException']:
+                    retry_count += 1
+                    
+                    if retry_count >= self.MAX_RETRIES:
+                        logger.error(f"Maximum retries reached for Bedrock API call: {str(e)}")
+                        raise
+                        
+                    # Calculate backoff with jitter
+                    jitter = random.uniform(-self.JITTER, self.JITTER)
+                    sleep_time = min(backoff * (1 + jitter), self.MAX_BACKOFF)
+                    
+                    logger.warning(f"Rate limited by Bedrock API. Retrying in {sleep_time:.2f} seconds (attempt {retry_count}/{self.MAX_RETRIES})")
+                    time.sleep(sleep_time)
+                    
+                    # Increase backoff for next retry
+                    backoff = min(backoff * 2, self.MAX_BACKOFF)
+                else:
+                    # For other errors, don't retry
+                    logger.error(f"Error calling Bedrock API: {str(e)}")
+                    raise
+            except Exception as e:
+                logger.error(f"Unexpected error calling Bedrock API: {str(e)}")
+                raise
 
     def _save_to_s3(self, bucket_name: str, key: str, content: str) -> bool:
         """
@@ -680,6 +932,11 @@ def parse_arguments():
         default='us-east-1',
         help='AWS region (default: us-east-1)'
     )
+    analyze_parser.add_argument(
+        '--use-llm',
+        action='store_true',
+        help='Use LLM (Amazon Bedrock) to analyze video differences'
+    )
     
     # Full workflow command
     workflow_parser = subparsers.add_parser(
@@ -783,7 +1040,10 @@ def main():
                 else:
                     diff_status = "Has differences" if result['has_differences'] else "No differences"
                     print(f"ID {file_id}: {diff_status}")
-                    print(f"  Result saved to: {result['result_path']}")
+                    print(f"  Reports saved to:")
+                    for report_type, path in result['report_paths'].items():
+                        if path:
+                            print(f"    - {report_type}: {path}")
             
             return 0
             

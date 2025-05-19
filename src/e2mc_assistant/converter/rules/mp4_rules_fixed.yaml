@@ -124,7 +124,22 @@ rules:
   - source:
       path: "video_codec_parameters.qmin"
       type: "dummy"  # dummy type to indicate no actual conversion needed
-      
+
+  - source:
+      path: "closed_captions.forced"
+      type: "dummy" 
+
+  - source:
+      path: "file_extension"
+      type: "dummy" 
+
+  - source:
+      path: "rotate"
+      type: dummy
+      condition:
+        operator: "eq"
+        value: "def"
+
   # 处理视频旋转参数
   - source:
       path: "set_rotate"
@@ -132,6 +147,7 @@ rules:
     target:
       path: "Settings.Inputs[0].VideoSelector.Rotate"
       transform: "rotate_format"
+
       
   # 处理时间码轨道参数
   - source:
@@ -678,48 +694,141 @@ rules:
           operator: "eq"
           value: "mp4"
         
+      
+  # CBR/VBR mode
+  - source:
+      path: cbr
+      condition:
+        operator: AND
+        conditions:
+          - operator: eq
+            value: "no"  # 检查 cbr=no
+          - operator: AND
+            conditions:
+              - operator: exists
+                source_path: cabr  # 检查 cabr 参数存在
+              - operator: eq
+                source_path: cabr
+                value: "no"  # 检查 cabr=no
+    target:
+      path: Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode
+      value: VBR
+
+  - source:
+      path: cbr
+      condition:
+        operator: AND
+        conditions:
+          - operator: eq
+            value: "no"  # 检查 cbr=no
+          - operator: AND
+            conditions:
+              - operator: exists
+                source_path: cabr  # 检查 cabr 参数存在
+              - operator: eq
+                source_path: cabr
+                value: "yes"  # 检查 cabr=no
+    target:
+      path: Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode
+      value: QVBR
+
+  - source:
+      path: cbr
+      condition:
+        operator: AND
+        conditions:
+          - operator: eq
+            value: "no"  # 检查 cbr=no
+          - operator: NOT
+            condition:
+              operator: exists
+              source_path: cabr  # 检查 cabr 参数存在
+    target:
+      path: Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode
+      value: VBR
+
+  - source:
+      path: cbr
+      condition:
+        operator: eq
+        value: yes
+    target:
+      path: Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode
+      value: CBR
+
   # Video bitrate
   - source:
       path: "bitrate"
       type: "string"
       regex: "(\\d+)k"
-      default: "2000k"
+      condition:
+        operator: AND
+        conditions:
+          - operator: eq
+            source_path: cbr
+            value: "no"  # 检查 cbr=no
+          - operator: AND
+            conditions:
+              - operator: exists
+                source_path: cabr  # 检查 cabr 参数存在
+              - operator: eq
+                source_path: cabr
+                value: "no"  # 检查 cabr=no
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.Bitrate"
       value: "$1000"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
-      
-  # CBR/VBR mode
-  - source:
-      path: "cbr"
-      type: "string"
-      condition:
-       source_path: "cbr"
-       operator: "eq"
-       value: "no"
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode"
-      value: "VBR"
-      condition:
-        source_path: "cabr"
-        operator: "eq"
-        value: "no"
 
   - source:
-      path: "cbr"
+      path: "bitrate"
       type: "string"
+      regex: "(\\d+)k"
       condition:
-       source_path: "cbr"
-       operator: "eq"
-       value: "yes"
+        operator: AND
+        conditions:
+          - operator: eq
+            source_path: cbr
+            value: "no"  # 检查 cbr=no
+          - operator: AND
+            conditions:
+              - operator: exists
+                source_path: cabr  # 检查 cabr 参数存在
+              - operator: eq
+                source_path: cabr
+                value: "yes"  # 检查 cabr=no
     target:
-      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode"
-      value: "CBR"
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.MaxBitrate"
+      value: "$1000"
 
-      
+  - source:
+      path: "bitrate"
+      type: "string"
+      regex: "(\\d+)k"
+      condition:
+        operator: AND
+        conditions:
+          - operator: eq
+            source_path: cbr
+            value: "no"  # 检查 cbr=no
+          - operator: NOT
+            condition:
+              operator: exists
+              source_path: cabr  # 检查 cabr 参数存在
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.Bitrate"
+      value: "$1000"
+
+  - source:
+      path: "bitrate"
+      type: "string"
+      regex: "(\\d+)k"
+      condition:
+        operator: eq
+        source_path: cbr
+        value: yes
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.Bitrate"
+      value: "$1000"
+
   # Audio codec
   - source:
       path: "audio_codec"
@@ -760,7 +869,7 @@ rules:
   # Audio normalization
   - source:
       path: "loudnorm"
-      type: "string"
+      type: "number"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].AudioNormalizationSettings.TargetLkfs"
       condition:
@@ -771,7 +880,7 @@ rules:
   # Audio normalization peak
   - source:
       path: "loudnorm_peak"
-      type: "string"
+      type: "number"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].AudioNormalizationSettings.TruePeakLimiterThreshold"
       condition:
@@ -1657,6 +1766,17 @@ rules:
           format: "$1x$2"
 
 # Transformation functions
+  # 处理时间码复制参数
+  - source:
+      path: "copy_timestamps"
+      type: "string"
+    target:
+      path: "Settings.TimecodeConfig.Source"
+      value: "EMBEDDED"
+      condition:
+        operator: "eq"
+        value: "yes"
+
 transformers:
   output_group_type:
     "mp4": "FILE_GROUP_SETTINGS"
@@ -1827,7 +1947,7 @@ transformers:
   timecode_track_format:
     "yes": "EMBEDDED"
     
-  two_turbo_format:
+  twin_turbo_format:
     "yes": "SINGLE_PASS"
     "no": "MULTI_PASS_HQ"
 

@@ -160,7 +160,39 @@ class ConfigConverter:
         return value
     
     def evaluate_condition(self, condition: Dict, source_value: Any, source_data: Dict = None) -> bool:
-        """Evaluate condition"""
+        """
+        Evaluate condition with support for complex logical operations (AND, OR, NOT).
+        
+        Args:
+            condition: Condition dictionary that can contain logical operators
+            source_value: Value to compare against (for simple conditions)
+            source_data: Source data dictionary for looking up values by path
+            
+        Returns:
+            Boolean result of condition evaluation
+        """
+        # Check if this is a complex logical condition
+        if 'operator' in condition and condition['operator'] in ['AND', 'OR', 'NOT']:
+            logical_op = condition['operator']
+            
+            if logical_op == 'AND':
+                # All subconditions must be true
+                self.logger.debug(f"Evaluating AND condition with {len(condition['conditions'])} subconditions")
+                return all(self.evaluate_condition(subcond, source_value, source_data) 
+                          for subcond in condition['conditions'])
+            
+            elif logical_op == 'OR':
+                # Any subcondition can be true
+                self.logger.debug(f"Evaluating OR condition with {len(condition['conditions'])} subconditions")
+                return any(self.evaluate_condition(subcond, source_value, source_data) 
+                          for subcond in condition['conditions'])
+            
+            elif logical_op == 'NOT':
+                # Negate the result of the subcondition
+                self.logger.debug(f"Evaluating NOT condition")
+                return not self.evaluate_condition(condition['condition'], source_value, source_data)
+        
+        # Handle simple condition (backward compatible with existing rules)
         # If condition has source_path, get value from there instead
         if 'source_path' in condition and source_data:
             source_value = self.get_value_by_path(source_data, condition['source_path'])

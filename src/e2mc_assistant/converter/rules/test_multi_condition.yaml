@@ -15,7 +15,7 @@ rules:
                 value: no  # 检查 cabr=no
     target:
       path: Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode
-      value: QVBR
+      value: QVBR_WITH_CABR
 
   - source:
       path: cbr
@@ -45,6 +45,49 @@ rules:
     target:
       path: Settings.OutputGroups[0].OutputGroupSettings.Type
       value: HLS_GROUP_SETTINGS
+      
+  # 添加基本映射规则，以便能看到更多结果
+  - source:
+      path: output
+    target:
+      path: Settings.OutputGroups[0].OutputGroupSettings.Type
+      value: FILE_GROUP_SETTINGS
+      
+  - source:
+      path: video_codec
+    target:
+      path: Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Codec
+      value: H_264
+      
+  - source:
+      path: size
+    target:
+      path: Settings.OutputGroups[0].Outputs[0].VideoDescription.Width
+      regex: "(\\d+)x\\d+"
+      value: 640
+      
+  - source:
+      path: size
+    target:
+      path: Settings.OutputGroups[0].Outputs[0].VideoDescription.Height
+      regex: "\\d+x(\\d+)"
+      value: 360
+      
+  - source:
+      path: bitrate
+    target:
+      path: Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.Bitrate
+      regex: "(\\d+)k"
+      value: 800000
+      
+  - source:
+      path: cbr
+      condition:
+        operator: eq
+        value: no
+    target:
+      path: Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode
+      value: QVBR
 
 transformers:
   video_codec:

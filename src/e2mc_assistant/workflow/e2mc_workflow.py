@@ -260,7 +260,10 @@ class E2MCWorkflow:
                         
                         # Log job completion status
                         job_submitter_logger.info(f"Job {job_id} completed with status: {job['Status']}")
-                        job_submitter_logger.info(f"Job details: {json.dumps(job, indent=2)}")
+                        try:
+                            job_submitter_logger.info(f"Job details: {json.dumps(job, indent=2, default=str)}")
+                        except Exception as json_err:
+                            job_submitter_logger.error(f"Could not serialize job details: {str(json_err)}")
                         
                         if job['Status'] != MediaConvertJobSubmitter.STATUS_COMPLETE:
                             logger.warning(f"Job {job_id} completed with status: {job['Status']}")
@@ -273,7 +276,10 @@ class E2MCWorkflow:
                                     f.write(f"MediaConvert job {job_id} failed\n")
                                     f.write(f"Timestamp: {datetime.now().isoformat()}\n\n")
                                     f.write("Job details:\n")
-                                    f.write(json.dumps(job, indent=2))
+                                    try:
+                                        f.write(json.dumps(job, indent=2, default=str))
+                                    except Exception as json_err:
+                                        f.write(f"Could not serialize job details: {str(json_err)}")
                                     
                                     # Add error messages if available
                                     if 'ErrorMessage' in job:
@@ -293,6 +299,21 @@ class E2MCWorkflow:
                     logger.error(error_msg)
                     job_submitter_logger.error(error_msg)
                     job_results[file_id] = f"ERROR: {str(e)}"
+                    
+                    # Create error log file for submission errors
+                    error_file = os.path.join(config_dir, f"{file_id}.err")
+                    with open(error_file, 'w') as f:
+                        f.write(f"Error submitting MediaConvert job for {file_id}\n")
+                        f.write(f"Timestamp: {datetime.now().isoformat()}\n\n")
+                        f.write(f"Error message: {str(e)}\n\n")
+                        f.write("Job settings:\n")
+                        try:
+                            f.write(json.dumps(job_profile, indent=2, default=str))
+                        except Exception as json_err:
+                            f.write(f"Could not serialize job profile: {str(json_err)}")
+                    
+                    logger.error(f"Job submission error details written to {error_file}")
+                    job_submitter_logger.error(f"Job submission error details written to {error_file}")
                 
                 # Remove the file-specific handler
                 job_submitter_logger.removeHandler(file_handler)

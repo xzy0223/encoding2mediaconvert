@@ -379,8 +379,9 @@ class E2MCWorkflow:
                 # Compare videos
                 differences = self.video_analyzer.compare_videos(original_info, mc_info)
                 
-                # Save comparison results
-                result_path = f"{prefix_path}/comparison_result.json"
+                # Save comparison results - normalize path to avoid double slashes
+                normalized_prefix_path = prefix_path.rstrip('/')
+                result_path = f"{normalized_prefix_path}/comparison_result.json"
                 self._save_to_s3(bucket_name, result_path, json.dumps(differences, indent=2))
                 
                 # Add to results
@@ -550,6 +551,22 @@ class E2MCWorkflow:
         except Exception as e:
             logger.error(f"Error searching for MediaConvert video: {str(e)}")
             return None
+
+    def _build_s3_path(self, *components):
+        """
+        Build an S3 path by joining components, properly handling slashes.
+        
+        Args:
+            *components: Path components to join
+            
+        Returns:
+            Properly formatted S3 path
+        """
+        # Filter out empty components and strip slashes
+        clean_components = [comp.strip('/') for comp in components if comp]
+        
+        # Join with single slashes
+        return '/'.join(clean_components)
 
     def _save_to_s3(self, bucket_name: str, key: str, content: str) -> bool:
         """

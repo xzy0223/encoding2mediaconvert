@@ -226,8 +226,9 @@ class E2MCWorkflow:
                     logger.warning(f"No source video found for ID {file_id}, skipping")
                     continue
                 
-                # Define output destination
-                output_destination = f"{s3_source_path}/{file_id}/"
+                # Define output destination - normalize path to avoid double slashes
+                s3_path_normalized = s3_source_path.rstrip('/')
+                output_destination = f"{s3_path_normalized}/{file_id}/"
                 
                 try:
                     # Load job profile

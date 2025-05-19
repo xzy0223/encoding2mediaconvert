@@ -417,25 +417,88 @@ class VideoAnalyzer:
         # Create prompt for Claude
         prompt = self._create_analysis_prompt(differences)
         
-        # Call Bedrock with Claude 3.5
-        response = self.bedrock_client.invoke_model(
-            modelId=model_id,
-            body=json.dumps({
-                "anthropic_version": "bedrock-2023-05-31",
-                "max_tokens": 4096,
-                "messages": [
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ]
-            })
-        )
-        
-        response_body = json.loads(response.get('body').read())
-        analysis = response_body.get('content', [{}])[0].get('text', '')
+        # Call Bedrock with retry mechanism
+        analysis = self._call_bedrock_with_retry(prompt, model_id)
         
         return analysis
+
+    def _call_bedrock_with_retry(self, prompt: str, model_id: str) -> str:
+        """
+        Call Amazon Bedrock with exponential backoff and retry.
+        
+        Args:
+            prompt: The prompt to send to the model
+            model_id: Bedrock model ID to use
+            
+        Returns:
+            Model response text
+            
+        Raises:
+            Exception: If all retries fail
+        """
+        # Constants for retry mechanism
+        MAX_RETRIES = 5
+        INITIAL_BACKOFF = 1  # seconds
+        MAX_BACKOFF = 30  # seconds
+        JITTER = 0.1  # 10% jitter for backoff
+        
+        import random
+        import time
+        from botocore.exceptions import ClientError
+        
+        # Retry with exponential backoff
+        retry_count = 0
+        backoff = INITIAL_BACKOFF
+        
+        while retry_count < MAX_RETRIES:
+            try:
+                # Call Bedrock with Claude 3.5
+                response = self.bedrock_client.invoke_model(
+                    modelId=model_id,
+                    body=json.dumps({
+                        "anthropic_version": "bedrock-2023-05-31",
+                        "max_tokens": 4096,
+                        "messages": [
+                            {
+                                "role": "user",
+                                "content": prompt
+                            }
+                        ]
+                    })
+                )
+                
+                response_body = json.loads(response.get('body').read())
+                analysis = response_body.get('content', [{}])[0].get('text', '')
+                
+                return analysis
+                
+            except ClientError as e:
+                error_code = e.response.get('Error', {}).get('Code', '')
+                
+                # Handle rate limiting errors
+                if error_code in ['ThrottlingException', 'TooManyRequestsException', 'ServiceUnavailableException']:
+                    retry_count += 1
+                    
+                    if retry_count >= MAX_RETRIES:
+                        print(f"Maximum retries reached for Bedrock API call: {str(e)}", file=sys.stderr)
+                        raise
+                        
+                    # Calculate backoff with jitter
+                    jitter = random.uniform(-JITTER, JITTER)
+                    sleep_time = min(backoff * (1 + jitter), MAX_BACKOFF)
+                    
+                    print(f"Rate limited by Bedrock API. Retrying in {sleep_time:.2f} seconds (attempt {retry_count}/{MAX_RETRIES})", file=sys.stderr)
+                    time.sleep(sleep_time)
+                    
+                    # Increase backoff for next retry
+                    backoff = min(backoff * 2, MAX_BACKOFF)
+                else:
+                    # For other errors, don't retry
+                    print(f"Error calling Bedrock API: {str(e)}", file=sys.stderr)
+                    raise
+            except Exception as e:
+                print(f"Unexpected error calling Bedrock API: {str(e)}", file=sys.stderr)
+                raise
 
     def _create_analysis_prompt(self, differences: Dict[str, Any]) -> str:
         """
@@ -466,6 +529,123 @@ Please format your response with clear sections and bullet points where appropri
 """.strip().format(diff_json=json.dumps(differences, indent=2))
         
         return prompt
+        # Compare videos
+        differences = self.compare_videos(original_info, mc_info)
+        
+        # Generate LLM analysis if possible
+        llm_analysis = None
+        try:
+            llm_analysis = self.analyze_differences(differences)
+        except Exception as e:
+            print(f"Warning: Failed to generate LLM analysis: {str(e)}", file=sys.stderr)
+        
+        # Create report structure
+        report = {
+            "original_info": self._extract_key_info_for_report(original_info),
+            "mc_info": self._extract_key_info_for_report(mc_info),
+            "differences": differences,
+            "llm_analysis": llm_analysis,
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+        }
+        
+        # Save reports to S3 if requested
+        report_paths = {}
+        if s3_client and bucket_name and report_prefix:
+            # Save original info
+            original_info_path = f"{report_prefix}/original_info.json"
+            s3_client.put_object(
+                Bucket=bucket_name,
+                Key=original_info_path,
+                Body=json.dumps(original_info, indent=2)
+            )
+            report_paths["original_info"] = f"s3://{bucket_name}/{original_info_path}"
+            
+            # Save MediaConvert info
+            mc_info_path = f"{report_prefix}/mc_info.json"
+            s3_client.put_object(
+                Bucket=bucket_name,
+                Key=mc_info_path,
+                Body=json.dumps(mc_info, indent=2)
+            )
+            report_paths["mc_info"] = f"s3://{bucket_name}/{mc_info_path}"
+            
+            # Save differences
+            diff_path = f"{report_prefix}/comparison_result.json"
+            s3_client.put_object(
+                Bucket=bucket_name,
+                Key=diff_path,
+                Body=json.dumps(differences, indent=2)
+            )
+            report_paths["comparison"] = f"s3://{bucket_name}/{diff_path}"
+            
+            # Save LLM analysis if available
+            if llm_analysis:
+                llm_path = f"{report_prefix}/llm_analysis.json"
+                s3_client.put_object(
+                    Bucket=bucket_name,
+                    Key=llm_path,
+                    Body=json.dumps({"analysis": llm_analysis, "timestamp": report["timestamp"]}, indent=2)
+                )
+                report_paths["llm_analysis"] = f"s3://{bucket_name}/{llm_path}"
+            
+            # Save full report
+            full_report_path = f"{report_prefix}/full_report.json"
+            s3_client.put_object(
+                Bucket=bucket_name,
+                Key=full_report_path,
+                Body=json.dumps(report, indent=2)
+            )
+            report_paths["full_report"] = f"s3://{bucket_name}/{full_report_path}"
+            
+            report["report_paths"] = report_paths
+        
+        return report
+        
+    def _extract_key_info_for_report(self, info: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Extract key information from video info for the report.
+        
+        Args:
+            info: Full video information
+            
+        Returns:
+            Dictionary with key information
+        """
+        key_info = {}
+        
+        if "format" in info:
+            key_info["format"] = {
+                "format_name": info["format"].get("format_name", ""),
+                "bit_rate": info["format"].get("bit_rate", ""),
+                "duration": info["format"].get("duration", ""),
+                "size": info["format"].get("size", "")
+            }
+            
+        if "streams" in info:
+            key_info["streams"] = []
+            for stream in info["streams"]:
+                stream_info = {
+                    "codec_type": stream.get("codec_type", ""),
+                    "codec_name": stream.get("codec_name", "")
+                }
+                
+                if stream.get("codec_type") == "video":
+                    stream_info.update({
+                        "width": stream.get("width", ""),
+                        "height": stream.get("height", ""),
+                        "bit_rate": stream.get("bit_rate", ""),
+                        "avg_frame_rate": stream.get("avg_frame_rate", "")
+                    })
+                elif stream.get("codec_type") == "audio":
+                    stream_info.update({
+                        "sample_rate": stream.get("sample_rate", ""),
+                        "channels": stream.get("channels", ""),
+                        "bit_rate": stream.get("bit_rate", "")
+                    })
+                    
+                key_info["streams"].append(stream_info)
+                
+        return key_info
 
 
 def parse_args():

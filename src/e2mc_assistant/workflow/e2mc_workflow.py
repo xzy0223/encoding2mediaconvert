@@ -61,14 +61,6 @@ class E2MCWorkflow:
         self.role_arn = role_arn
         self.s3_client = boto3.client('s3', region_name=region)
         
-        # Initialize Bedrock client for LLM analysis
-        try:
-            self.bedrock_client = boto3.client('bedrock-runtime', region_name=region)
-            logger.info(f"Initialized Bedrock client in region {region}")
-        except Exception as e:
-            logger.warning(f"Failed to initialize Bedrock client: {str(e)}")
-            self.bedrock_client = None
-        
         # Initialize components
         self.converter = None
         self.job_submitter = None
@@ -396,43 +388,21 @@ class E2MCWorkflow:
                 original_info = self.video_analyzer.extract_video_info(original_video)
                 mc_info = self.video_analyzer.extract_video_info(mc_video)
                 
-                # Save original ffmpeg info
-                original_info_path = f"{report_prefix}/original_info.json"
-                self._save_to_s3(bucket_name, original_info_path, json.dumps(original_info, indent=2))
-                
-                # Save MediaConvert ffmpeg info
-                mc_info_path = f"{report_prefix}/mc_info.json"
-                self._save_to_s3(bucket_name, mc_info_path, json.dumps(mc_info, indent=2))
-                
-                # Compare videos
-                differences = self.video_analyzer.compare_videos(original_info, mc_info)
-                
-                # Save comparison results
-                diff_path = f"{report_prefix}/comparison_result.json"
-                self._save_to_s3(bucket_name, diff_path, json.dumps(differences, indent=2))
-                
-                # Generate LLM analysis if Bedrock client is available
-                llm_analysis = None
-                if self.bedrock_client:
-                    try:
-                        llm_analysis = self._generate_llm_analysis(original_info, mc_info, differences)
-                        llm_path = f"{report_prefix}/llm_analysis.json"
-                        self._save_to_s3(bucket_name, llm_path, json.dumps(llm_analysis, indent=2))
-                        logger.info(f"Generated LLM analysis for ID {file_id}")
-                    except Exception as e:
-                        logger.error(f"Error generating LLM analysis for ID {file_id}: {str(e)}")
+                # Generate comprehensive report
+                report = self.video_analyzer.generate_report(
+                    original_info=original_info,
+                    mc_info=mc_info,
+                    s3_client=self.s3_client,
+                    bucket_name=bucket_name,
+                    report_prefix=report_prefix
+                )
                 
                 # Add to results
                 analysis_results[file_id] = {
                     'original_video': original_video,
                     'mc_video': mc_video,
-                    'has_differences': bool(differences),
-                    'report_paths': {
-                        'original_info': f"s3://{bucket_name}/{original_info_path}",
-                        'mc_info': f"s3://{bucket_name}/{mc_info_path}",
-                        'comparison': f"s3://{bucket_name}/{diff_path}",
-                        'llm_analysis': f"s3://{bucket_name}/{report_prefix}/llm_analysis.json" if llm_analysis else None
-                    }
+                    'has_differences': bool(report.get('differences')),
+                    'report_paths': report.get('report_paths', {})
                 }
                 
                 logger.info(f"Completed analysis for ID {file_id}")

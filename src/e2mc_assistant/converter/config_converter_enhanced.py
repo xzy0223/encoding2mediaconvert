@@ -697,7 +697,74 @@ class ConfigConverter:
             del target_data['_dummy']
             self.logger.debug("Removed _dummy section from output")
         
+        # Add NameModifier to FILE_GROUP_SETTINGS outputs if missing
+        self._add_missing_name_modifiers(target_data)
+        
         return target_data
+        
+    def _add_missing_name_modifiers(self, target_data: Dict) -> None:
+        """Add NameModifier to FILE_GROUP_SETTINGS outputs if missing"""
+        if 'Settings' not in target_data or 'OutputGroups' not in target_data['Settings']:
+            return
+            
+        output_groups = target_data['Settings']['OutputGroups']
+        for group in output_groups:
+            # Check if this is a FILE_GROUP_SETTINGS output group
+            if ('OutputGroupSettings' in group and 
+                'Type' in group['OutputGroupSettings'] and 
+                group['OutputGroupSettings']['Type'] == 'FILE_GROUP_SETTINGS' and
+                'Outputs' in group):
+                
+                outputs = group['Outputs']
+                for output in outputs:
+                    # Check if NameModifier is missing
+                    if 'NameModifier' not in output:
+                        # Generate NameModifier based on video settings
+                        name_modifier = self._generate_name_modifier(output)
+                        if name_modifier:
+                            output['NameModifier'] = name_modifier
+                            self.logger.info(f"Added missing NameModifier: {name_modifier}")
+    
+    def _generate_name_modifier(self, output: Dict) -> str:
+        """Generate NameModifier based on video settings"""
+        width = None
+        height = None
+        bitrate = None
+        max_bitrate = None
+        
+        # Extract width and height
+        if ('VideoDescription' in output and 
+            'Width' in output['VideoDescription'] and 
+            'Height' in output['VideoDescription']):
+            width = output['VideoDescription']['Width']
+            height = output['VideoDescription']['Height']
+        
+        # Extract bitrate or max_bitrate
+        if ('VideoDescription' in output and 
+            'CodecSettings' in output['VideoDescription'] and 
+            'H264Settings' in output['VideoDescription']['CodecSettings']):
+            
+            h264_settings = output['VideoDescription']['CodecSettings']['H264Settings']
+            if 'Bitrate' in h264_settings:
+                bitrate = h264_settings['Bitrate']
+            elif 'MaxBitrate' in h264_settings:
+                max_bitrate = h264_settings['MaxBitrate']
+        
+        # Generate name modifier
+        if width and height:
+            resolution_part = f"_{width}x{height}"
+            
+            # Add bitrate information if available
+            if bitrate:
+                bitrate_part = f"_{bitrate}"
+                return f"{resolution_part}{bitrate_part}_mc"
+            elif max_bitrate:
+                bitrate_part = f"_{max_bitrate}"
+                return f"{resolution_part}{bitrate_part}_mc"
+            else:
+                return f"{resolution_part}_mc"
+        
+        return "_mc"  # Default if we can't extract resolution/bitrate
         
     def _process_source_data(self, source_data, current_path, rule_lookup, target_data, processed_params):
         """Process source data recursively and apply matching rules"""

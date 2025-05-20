@@ -13,6 +13,8 @@ import time
 import argparse
 import subprocess
 import boto3
+import random
+from botocore.exceptions import ClientError
 from typing import Dict, Any, List, Tuple, Optional
 
 
@@ -442,10 +444,6 @@ class VideoAnalyzer:
         INITIAL_BACKOFF = 1  # seconds
         MAX_BACKOFF = 30  # seconds
         JITTER = 0.1  # 10% jitter for backoff
-        
-        import random
-        import time
-        from botocore.exceptions import ClientError
         
         # Retry with exponential backoff
         retry_count = 0

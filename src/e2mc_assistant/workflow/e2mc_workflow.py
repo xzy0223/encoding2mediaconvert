@@ -484,35 +484,7 @@ class E2MCWorkflow:
         
         return prefixes
 
-    def _find_video_by_pattern(self, bucket_name: str, prefix: str, pattern: str) -> Optional[str]:
-        """
-        Find a video in S3 with the given pattern in its name.
 
-        Args:
-            bucket_name: S3 bucket name
-            prefix: S3 prefix to search in
-            pattern: Pattern to search for in the object key
-
-        Returns:
-            S3 URL of the video if found, None otherwise
-        """
-        try:
-            # List objects with the prefix
-            response = self.s3_client.list_objects_v2(
-                Bucket=bucket_name,
-                Prefix=prefix
-            )
-            
-            # Look for files matching the pattern
-            for obj in response.get('Contents', []):
-                key = obj['Key']
-                if pattern in key.lower():
-                    return f"s3://{bucket_name}/{key}"
-            
-            return None
-        except Exception as e:
-            logger.error(f"Error searching for video: {str(e)}")
-            return None
 
     def _find_original_video(self, bucket_name: str, prefix: str) -> Optional[str]:
         """
@@ -605,21 +577,7 @@ class E2MCWorkflow:
             return None
 
 
-    def _build_s3_path(self, *components):
-        """
-        Build an S3 path by joining components, properly handling slashes.
-        
-        Args:
-            *components: Path components to join
-            
-        Returns:
-            Properly formatted S3 path
-        """
-        # Filter out empty components and strip slashes
-        clean_components = [comp.strip('/') for comp in components if comp]
-        
-        # Join with single slashes
-        return '/'.join(clean_components)
+
 
     def _save_to_s3(self, bucket_name: str, key: str, content: str) -> bool:
         """

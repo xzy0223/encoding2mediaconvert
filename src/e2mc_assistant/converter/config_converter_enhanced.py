@@ -773,42 +773,25 @@ class ConfigConverter:
     
     def _generate_name_modifier(self, output: Dict) -> str:
         """Generate NameModifier based on video settings"""
-        width = None
-        height = None
-        bitrate = None
-        max_bitrate = None
-        
-        # Extract width and height
         if ('VideoDescription' in output and 
             'Width' in output['VideoDescription'] and 
             'Height' in output['VideoDescription']):
             width = output['VideoDescription']['Width']
             height = output['VideoDescription']['Height']
-        
-        # Extract bitrate or max_bitrate
-        if ('VideoDescription' in output and 
-            'CodecSettings' in output['VideoDescription'] and 
-            'H264Settings' in output['VideoDescription']['CodecSettings']):
-            
-            h264_settings = output['VideoDescription']['CodecSettings']['H264Settings']
-            if 'Bitrate' in h264_settings:
-                bitrate = h264_settings['Bitrate']
-            elif 'MaxBitrate' in h264_settings:
-                max_bitrate = h264_settings['MaxBitrate']
-        
-        # Generate name modifier
-        if width and height:
             resolution_part = f"_{width}x{height}"
             
             # Add bitrate information if available
-            if bitrate:
-                bitrate_part = f"_{bitrate}"
-                return f"{resolution_part}{bitrate_part}_mc"
-            elif max_bitrate:
-                bitrate_part = f"_{max_bitrate}"
-                return f"{resolution_part}{bitrate_part}_mc"
-            else:
-                return f"{resolution_part}_mc"
+            if ('VideoDescription' in output and 
+                'CodecSettings' in output['VideoDescription'] and 
+                'H264Settings' in output['VideoDescription']['CodecSettings']):
+                
+                h264_settings = output['VideoDescription']['CodecSettings']['H264Settings']
+                if 'Bitrate' in h264_settings:
+                    return f"{resolution_part}_{h264_settings['Bitrate']}_mc"
+                elif 'MaxBitrate' in h264_settings:
+                    return f"{resolution_part}_{h264_settings['MaxBitrate']}_mc"
+                else:
+                    return f"{resolution_part}_mc"
         
         return "_mc"  # Default if we can't extract resolution/bitrate
         

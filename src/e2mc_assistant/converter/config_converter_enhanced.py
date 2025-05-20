@@ -739,8 +739,11 @@ class ConfigConverter:
             if cbr == 'yes':
                 # Case 1.a: cbr=yes
                 self._set_nested_value(target_data, f"{target_path}.RateControlMode", "CBR")
-                self._set_nested_value(target_data, f"{target_path}.Bitrate", bitrate)
-                processed_params.add('bitrate')
+                
+                if bitrate_str:
+                    self._set_nested_value(target_data, f"{target_path}.Bitrate", bitrate)
+                    processed_params.add('bitrate')
+                    self.logger.info(f"Set Bitrate to {bitrate} from <bitrate>={bitrate_str}")
                 
                 # Log if maxrate or minrate are ignored
                 if maxrate_str:
@@ -762,6 +765,7 @@ class ConfigConverter:
                         if maxrate_str:
                             self._set_nested_value(target_data, f"{target_path}.MaxBitrate", maxrate)
                             processed_params.add('maxrate')
+                            self.logger.info(f"Set MaxBitrate to {maxrate} from <maxrate>={maxrate_str}")
                         else:
                             self.logger.warning(f"<maxrate> not found but required for QVBR mode when <cabr>=yes")
                             
@@ -777,10 +781,12 @@ class ConfigConverter:
                         if bitrate_str:
                             self._set_nested_value(target_data, f"{target_path}.Bitrate", bitrate)
                             processed_params.add('bitrate')
+                            self.logger.info(f"Set Bitrate to {bitrate} from <bitrate>={bitrate_str}")
                             
                         if maxrate_str:
                             self._set_nested_value(target_data, f"{target_path}.MaxBitrate", maxrate)
                             processed_params.add('maxrate')
+                            self.logger.info(f"Set MaxBitrate to {maxrate} from <maxrate>={maxrate_str}")
         
         # Case 2: If <cbr> doesn't exist
         elif bitrate_str:
@@ -790,6 +796,7 @@ class ConfigConverter:
                 # Case 2.a: bitrate exists, maxrate doesn't exist or is empty
                 self._set_nested_value(target_data, f"{target_path}.RateControlMode", "VBR")
                 self._set_nested_value(target_data, f"{target_path}.Bitrate", bitrate)
+                self.logger.info(f"Set Bitrate to {bitrate} from <bitrate>={bitrate_str}")
                 
                 # Set MaxBitrate to 2.5 * Bitrate
                 calculated_maxrate = int(bitrate * 2.5)
@@ -811,11 +818,15 @@ class ConfigConverter:
                     self._set_nested_value(target_data, f"{target_path}.RateControlMode", "VBR")
                     self._set_nested_value(target_data, f"{target_path}.Bitrate", bitrate_value)
                     self._set_nested_value(target_data, f"{target_path}.MaxBitrate", maxrate_value)
+                    self.logger.info(f"Set Bitrate to {bitrate_value} from <bitrate>={bitrate_str}")
+                    self.logger.info(f"Set MaxBitrate to {maxrate_value} from <maxrate>={maxrate_str}")
                     
                 elif maxrate_value == bitrate_value:
                     # Case 2.c: bitrate exists, maxrate exists and equals bitrate
                     self._set_nested_value(target_data, f"{target_path}.RateControlMode", "CBR")
                     self._set_nested_value(target_data, f"{target_path}.Bitrate", bitrate_value)
+                    self.logger.info(f"Set Bitrate to {bitrate_value} from <bitrate>={bitrate_str}")
+                    self.logger.info(f"Using CBR mode because maxrate equals bitrate")
                 
                 # Log if minrate is ignored
                 if minrate_str:
@@ -978,6 +989,11 @@ class ConfigConverter:
             # Build the current path
             path = f"{current_path}.{key}" if current_path else key
             
+            # Skip already processed parameters
+            if path in processed_params:
+                self.logger.debug(f"Skipping already processed parameter: {path}")
+                continue
+                
             # Check if we have rules for this path
             if path in rule_lookup:
                 # Process all rules for this path

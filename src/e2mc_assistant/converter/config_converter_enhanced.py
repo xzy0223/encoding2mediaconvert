@@ -521,7 +521,7 @@ class ConfigConverter:
                 if 'condition' in sub_rule['source']:
                     condition = sub_rule['source']['condition']
                     if not self.evaluate_condition(condition, sub_source_value, source_item):
-                        self.logger.debug(f"Skipping sub-rule for {sub_source_path} due to condition")
+                        self.logger.warning(f"Skipping sub-rule for {sub_source_path}={sub_source_value} due to condition not matching")
                         continue
                 
                 # Process target (can be single or multiple)
@@ -534,7 +534,7 @@ class ConfigConverter:
                     # Check target condition if any
                     if 'condition' in sub_target:
                         if not self.evaluate_condition(sub_target['condition'], sub_source_value, source_item):
-                            self.logger.debug(f"Skipping sub-target {sub_target_path} due to condition")
+                            self.logger.warning(f"Skipping sub-target {sub_target_path} for source {sub_source_path}={sub_source_value} due to condition not matching")
                             continue
                     
                     # Process value transformation
@@ -559,7 +559,7 @@ class ConfigConverter:
                                 
                                 self.logger.debug(f"Regex transformed {sub_source_value} to {sub_target_value}")
                             else:
-                                self.logger.debug(f"Regex pattern {source_regex} did not match {sub_source_value}")
+                                self.logger.warning(f"Regex pattern {source_regex} did not match {sub_source_value} for {sub_source_path}")
                                 continue
                         else:
                             sub_target_value = sub_target['value']
@@ -849,7 +849,7 @@ class ConfigConverter:
         # Check condition (if any)
         if 'condition' in rule['source'] and source_value is not None:
             if not self.evaluate_condition(rule['source']['condition'], source_value, source_data):
-                self.logger.debug(f"Skipping rule for {source_path} due to source condition")
+                self.logger.warning(f"Skipping rule for {source_path}={source_value} due to source condition not matching")
                 return
         
         # If source value doesn't exist, use default (if provided)
@@ -871,7 +871,7 @@ class ConfigConverter:
             # Check target condition (if any)
             if 'condition' in target:
                 if not self.evaluate_condition(target['condition'], source_value, source_data):
-                    self.logger.debug(f"Skipping target {target_path} due to target condition")
+                    self.logger.warning(f"Skipping target {target_path} for source {source_path}={source_value} due to target condition not matching")
                     continue
             
             # Process value transformation
@@ -895,7 +895,7 @@ class ConfigConverter:
                         
                         self.logger.debug(f"Regex transformed {source_value} to {target_value}")
                     else:
-                        self.logger.debug(f"Regex pattern {source_regex} did not match {source_value}")
+                        self.logger.warning(f"Regex pattern {source_regex} did not match {source_value} for {source_path}")
                         continue
                 else:
                     target_value = target['value']

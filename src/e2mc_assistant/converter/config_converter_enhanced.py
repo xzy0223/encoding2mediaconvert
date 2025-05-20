@@ -787,6 +787,27 @@ class ConfigConverter:
                             self._set_nested_value(target_data, f"{target_path}.MaxBitrate", maxrate)
                             processed_params.add('maxrate')
                             self.logger.info(f"Set MaxBitrate to {maxrate} from <maxrate>={maxrate_str}")
+                else:
+                    # New case: cbr=no and cabr doesn't exist
+                    if bitrate_str:
+                        # Set RateControlMode to VBR
+                        self._set_nested_value(target_data, f"{target_path}.RateControlMode", "VBR")
+                        
+                        # Set Bitrate
+                        self._set_nested_value(target_data, f"{target_path}.Bitrate", bitrate)
+                        processed_params.add('bitrate')
+                        self.logger.info(f"Set Bitrate to {bitrate} from <bitrate>={bitrate_str}")
+                        
+                        # Set MaxBitrate to 2.5 * Bitrate
+                        calculated_maxrate = int(bitrate * 2.5)
+                        self._set_nested_value(target_data, f"{target_path}.MaxBitrate", calculated_maxrate)
+                        self.logger.info(f"Setting MaxBitrate to {calculated_maxrate} (2.5 * Bitrate)")
+                        
+                        # Log if minrate is ignored
+                        if minrate_str:
+                            self.logger.info(f"Ignoring <minrate>={minrate_str} (not supported in MediaConvert)")
+                            processed_params.add('minrate')
+                            
         
         # Case 2: If <cbr> doesn't exist
         elif bitrate_str:

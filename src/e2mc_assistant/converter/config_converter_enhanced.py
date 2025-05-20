@@ -739,6 +739,7 @@ class ConfigConverter:
             if cbr == 'yes':
                 # Case 1.a: cbr=yes
                 self._set_nested_value(target_data, f"{target_path}.RateControlMode", "CBR")
+                self.logger.info(f"Set RateControlMode to CBR because <cbr>=yes")
                 
                 if bitrate_str:
                     self._set_nested_value(target_data, f"{target_path}.Bitrate", bitrate)
@@ -761,6 +762,7 @@ class ConfigConverter:
                     if cabr == 'yes':
                         # Case 1.b.i: cbr=no, cabr=yes
                         self._set_nested_value(target_data, f"{target_path}.RateControlMode", "QVBR")
+                        self.logger.info(f"Set RateControlMode to QVBR because <cbr>=no and <cabr>=yes")
                         
                         if maxrate_str:
                             self._set_nested_value(target_data, f"{target_path}.MaxBitrate", maxrate)
@@ -777,6 +779,7 @@ class ConfigConverter:
                     elif cabr == 'no':
                         # Case 1.b.ii: cbr=no, cabr=no
                         self._set_nested_value(target_data, f"{target_path}.RateControlMode", "VBR")
+                        self.logger.info(f"Set RateControlMode to VBR because <cbr>=no and <cabr>=no")
                         
                         if bitrate_str:
                             self._set_nested_value(target_data, f"{target_path}.Bitrate", bitrate)
@@ -792,6 +795,7 @@ class ConfigConverter:
                     if bitrate_str:
                         # Set RateControlMode to VBR
                         self._set_nested_value(target_data, f"{target_path}.RateControlMode", "VBR")
+                        self.logger.info(f"Set RateControlMode to VBR because <cbr>=no and <cabr> doesn't exist")
                         
                         # Set Bitrate
                         self._set_nested_value(target_data, f"{target_path}.Bitrate", bitrate)
@@ -816,6 +820,7 @@ class ConfigConverter:
             if not maxrate_str:
                 # Case 2.a: bitrate exists, maxrate doesn't exist or is empty
                 self._set_nested_value(target_data, f"{target_path}.RateControlMode", "VBR")
+                self.logger.info(f"Set RateControlMode to VBR because <cbr> doesn't exist and <maxrate> doesn't exist")
                 self._set_nested_value(target_data, f"{target_path}.Bitrate", bitrate)
                 self.logger.info(f"Set Bitrate to {bitrate} from <bitrate>={bitrate_str}")
                 
@@ -837,6 +842,7 @@ class ConfigConverter:
                 if maxrate_value > bitrate_value:
                     # Case 2.b: bitrate exists, maxrate exists and is greater than bitrate
                     self._set_nested_value(target_data, f"{target_path}.RateControlMode", "VBR")
+                    self.logger.info(f"Set RateControlMode to VBR because <cbr> doesn't exist and <maxrate> > <bitrate>")
                     self._set_nested_value(target_data, f"{target_path}.Bitrate", bitrate_value)
                     self._set_nested_value(target_data, f"{target_path}.MaxBitrate", maxrate_value)
                     self.logger.info(f"Set Bitrate to {bitrate_value} from <bitrate>={bitrate_str}")
@@ -845,6 +851,7 @@ class ConfigConverter:
                 elif maxrate_value == bitrate_value:
                     # Case 2.c: bitrate exists, maxrate exists and equals bitrate
                     self._set_nested_value(target_data, f"{target_path}.RateControlMode", "CBR")
+                    self.logger.info(f"Set RateControlMode to CBR because <cbr> doesn't exist and <maxrate> equals <bitrate>")
                     self._set_nested_value(target_data, f"{target_path}.Bitrate", bitrate_value)
                     self.logger.info(f"Set Bitrate to {bitrate_value} from <bitrate>={bitrate_str}")
                     self.logger.info(f"Using CBR mode because maxrate equals bitrate")

@@ -1016,6 +1016,12 @@ class ConfigConverter:
         
         self.logger.debug(f"Processing rule for {source_path}, value: {source_value}")
         
+        # Check if this parameter was already processed by rate control settings handler
+        rate_control_params = ['cbr', 'cabr', 'bitrate', 'maxrate', 'minrate']
+        if source_path in rate_control_params and source_path in processed_params:
+            self.logger.info(f"Skipping rule for {source_path}={source_value} as it was already processed by rate control settings handler")
+            return
+        
         # Add to processed parameters
         processed_params.add(source_path)
         

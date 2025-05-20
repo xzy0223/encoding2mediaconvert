@@ -659,6 +659,172 @@ class ConfigConverter:
                 current = current[part]
                 
         return current
+    def _parse_bitrate(self, bitrate_str: str) -> int:
+        """
+        Parse bitrate string (like '1300k') to integer value (1300000)
+        
+        Args:
+            bitrate_str: Bitrate string to parse
+            
+        Returns:
+            Integer value of bitrate in bits per second
+        """
+        if not bitrate_str:
+            return 0
+            
+        # Convert to string if it's not already
+        bitrate_str = str(bitrate_str).lower().strip()
+        
+        # Check for common formats
+        if bitrate_str.endswith('k'):
+            try:
+                return int(float(bitrate_str[:-1]) * 1000)
+            except (ValueError, TypeError):
+                self.logger.warning(f"Failed to parse bitrate: {bitrate_str}")
+                return 0
+        elif bitrate_str.endswith('m'):
+            try:
+                return int(float(bitrate_str[:-1]) * 1000000)
+            except (ValueError, TypeError):
+                self.logger.warning(f"Failed to parse bitrate: {bitrate_str}")
+                return 0
+        else:
+            # Assume it's already in bits per second
+            try:
+                return int(float(bitrate_str))
+            except (ValueError, TypeError):
+                self.logger.warning(f"Failed to parse bitrate: {bitrate_str}")
+                return 0
+    
+    def _process_rate_control_settings(self, source_data: Dict, target_data: Dict) -> bool:
+        """
+        Process rate control settings (CBR/VBR/QVBR) based on complex rules
+        
+        Args:
+            source_data: Source data dictionary
+            target_data: Target data dictionary to update
+            
+        Returns:
+            True if rate control settings were processed, False otherwise
+        """
+        # Check if output is mp4, otherwise log warning and return
+        output_format = self.get_value_by_path(source_data, 'output')
+        if output_format != 'mp4':
+            self.logger.warning(f"Rate control settings processing is only supported for MP4 output, got {output_format}. "
+                               "Need to add independent processing function for this format.")
+            return False
+            
+        # Get the target path for H264Settings
+        target_path = "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings"
+        
+        # Get relevant source parameters
+        cbr = self.get_value_by_path(source_data, 'cbr')
+        cabr = self.get_value_by_path(source_data, 'cabr')
+        bitrate_str = self.get_value_by_path(source_data, 'bitrate')
+        maxrate_str = self.get_value_by_path(source_data, 'maxrate')
+        minrate_str = self.get_value_by_path(source_data, 'minrate')
+        
+        # Parse bitrate values
+        bitrate = self._parse_bitrate(bitrate_str)
+        maxrate = self._parse_bitrate(maxrate_str)
+        minrate = self._parse_bitrate(minrate_str)
+        
+        # Track if we've processed these parameters
+        processed_params = set()
+        
+        # Case 1: If <cbr> exists and is not empty
+        if cbr is not None:
+            processed_params.add('cbr')
+            
+            if cbr == 'yes':
+                # Case 1.a: cbr=yes
+                self._set_nested_value(target_data, f"{target_path}.RateControlMode", "CBR")
+                self._set_nested_value(target_data, f"{target_path}.Bitrate", bitrate)
+                processed_params.add('bitrate')
+                
+                # Log if maxrate or minrate are ignored
+                if maxrate_str:
+                    self.logger.info(f"Ignoring <maxrate>={maxrate_str} because <cbr>=yes (CBR mode doesn't use MaxBitrate)")
+                    processed_params.add('maxrate')
+                if minrate_str:
+                    self.logger.info(f"Ignoring <minrate>={minrate_str} because <cbr>=yes (CBR mode doesn't use MinBitrate)")
+                    processed_params.add('minrate')
+                    
+            elif cbr == 'no':
+                # Case 1.b: cbr=no
+                if cabr is not None:
+                    processed_params.add('cabr')
+                    
+                    if cabr == 'yes':
+                        # Case 1.b.i: cbr=no, cabr=yes
+                        self._set_nested_value(target_data, f"{target_path}.RateControlMode", "QVBR")
+                        
+                        if maxrate_str:
+                            self._set_nested_value(target_data, f"{target_path}.MaxBitrate", maxrate)
+                            processed_params.add('maxrate')
+                        else:
+                            self.logger.warning(f"<maxrate> not found but required for QVBR mode when <cabr>=yes")
+                            
+                        # Log if bitrate is ignored
+                        if bitrate_str:
+                            self.logger.info(f"Ignoring <bitrate>={bitrate_str} in QVBR mode (using MaxBitrate instead)")
+                            processed_params.add('bitrate')
+                            
+                    elif cabr == 'no':
+                        # Case 1.b.ii: cbr=no, cabr=no
+                        self._set_nested_value(target_data, f"{target_path}.RateControlMode", "VBR")
+                        
+                        if bitrate_str:
+                            self._set_nested_value(target_data, f"{target_path}.Bitrate", bitrate)
+                            processed_params.add('bitrate')
+                            
+                        if maxrate_str:
+                            self._set_nested_value(target_data, f"{target_path}.MaxBitrate", maxrate)
+                            processed_params.add('maxrate')
+        
+        # Case 2: If <cbr> doesn't exist
+        elif bitrate_str:
+            processed_params.add('bitrate')
+            
+            if not maxrate_str:
+                # Case 2.a: bitrate exists, maxrate doesn't exist or is empty
+                self._set_nested_value(target_data, f"{target_path}.RateControlMode", "VBR")
+                self._set_nested_value(target_data, f"{target_path}.Bitrate", bitrate)
+                
+                # Set MaxBitrate to 2.5 * Bitrate
+                calculated_maxrate = int(bitrate * 2.5)
+                self._set_nested_value(target_data, f"{target_path}.MaxBitrate", calculated_maxrate)
+                self.logger.info(f"Setting MaxBitrate to {calculated_maxrate} (2.5 * Bitrate)")
+                
+                # Log if minrate is ignored
+                if minrate_str:
+                    self.logger.info(f"Ignoring <minrate>={minrate_str} (not supported in MediaConvert)")
+                    processed_params.add('minrate')
+                    
+            else:
+                processed_params.add('maxrate')
+                maxrate_value = maxrate
+                bitrate_value = bitrate
+                
+                if maxrate_value > bitrate_value:
+                    # Case 2.b: bitrate exists, maxrate exists and is greater than bitrate
+                    self._set_nested_value(target_data, f"{target_path}.RateControlMode", "VBR")
+                    self._set_nested_value(target_data, f"{target_path}.Bitrate", bitrate_value)
+                    self._set_nested_value(target_data, f"{target_path}.MaxBitrate", maxrate_value)
+                    
+                elif maxrate_value == bitrate_value:
+                    # Case 2.c: bitrate exists, maxrate exists and equals bitrate
+                    self._set_nested_value(target_data, f"{target_path}.RateControlMode", "CBR")
+                    self._set_nested_value(target_data, f"{target_path}.Bitrate", bitrate_value)
+                
+                # Log if minrate is ignored
+                if minrate_str:
+                    self.logger.info(f"Ignoring <minrate>={minrate_str} (not supported in MediaConvert)")
+                    processed_params.add('minrate')
+        
+        # Return processed parameters
+        return len(processed_params) > 0
+    
     def convert(self, source_file: str, template_file: str = None) -> Dict:
         """Execute configuration conversion using an XML-first approach"""
         # Parse source file
@@ -679,6 +845,14 @@ class ConfigConverter:
         processed_params = set()
         self.mapped_parameters = []  # Track successfully mapped parameters
         self.unmapped_parameters = []  # Track unmapped parameters
+        
+        # Process rate control settings first (special handling for CBR/VBR/QVBR)
+        if self._process_rate_control_settings(source_data, target_data):
+            # Mark these parameters as processed
+            for param in ['cbr', 'cabr', 'bitrate', 'maxrate', 'minrate']:
+                if self.get_value_by_path(source_data, param) is not None:
+                    processed_params.add(param)
+                    self.logger.info(f"Parameter {param} processed by custom rate control handler")
         
         # Create a rule lookup dictionary for faster access
         rule_lookup = {}

@@ -1,0 +1,87 @@
+Error submitting MediaConvert job for 238
+Timestamp: 2025-05-20T07:03:00.964239
+
+Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/codecProfile: Should match all dependencies: See other errors for more details | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings: Should match exactly one schema defined in "oneOf" | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/entropyEncoding: Must be CAVLC | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/codecProfile: Should be equal to one of the allowed values in ["HIGH","HIGH_10BIT","HIGH_422","HIGH_422_10BIT","MAIN"]
+
+Job settings:
+{
+  "Settings": {
+    "Inputs": [
+      {
+        "TimecodeSource": "ZEROBASED",
+        "VideoSelector": {},
+        "AudioSelectors": {
+          "Audio Selector 1": {
+            "DefaultSelection": "DEFAULT"
+          }
+        },
+        "FileInput": "s3://fw-mc-test/mp4/238/238_787925317_source.mp4",
+        "DeblockFilter": "ENABLED"
+      }
+    ],
+    "OutputGroups": [
+      {
+        "Name": "File Group",
+        "OutputGroupSettings": {
+          "Type": "FILE_GROUP_SETTINGS",
+          "FileGroupSettings": {
+            "Destination": "s3://fw-mc-test/mp4/238/"
+          }
+        },
+        "Outputs": [
+          {
+            "ContainerSettings": {
+              "Container": "MP4",
+              "Mp4Settings": {}
+            },
+            "VideoDescription": {
+              "CodecSettings": {
+                "H264Settings": {
+                  "RateControlMode": "CBR",
+                  "Bitrate": 800000,
+                  "QualityTuningLevel": "MULTI_PASS_HQ",
+                  "ParControl": "SPECIFIED",
+                  "ParNumerator": 16,
+                  "ParDenominator": 9,
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateNumerator": 25,
+                  "FramerateDenominator": 1,
+                  "CodecProfile": "BASELINE",
+                  "NumberReferenceFrames": 4,
+                  "GopSize": 50,
+                  "EntropyEncoding": "CABAC",
+                  "CodecLevel": "LEVEL_3"
+                },
+                "Codec": "H_264"
+              },
+              "Width": 640,
+              "Height": 360,
+              "ScalingBehavior": "STRETCH_TO_OUTPUT"
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 96000,
+                    "CodingMode": "CODING_MODE_2_0",
+                    "SampleRate": 48000
+                  }
+                },
+                "AudioNormalizationSettings": {
+                  "TargetLkfs": 17.23
+                }
+              }
+            ],
+            "NameModifier": "_640x360_800000_mc"
+          }
+        ]
+      }
+    ],
+    "TimecodeConfig": {
+      "Source": "ZEROBASED"
+    },
+    "FollowSource": 1
+  },
+  "Role": "arn:aws:iam::935206693453:role/MediaConvertRole"
+}

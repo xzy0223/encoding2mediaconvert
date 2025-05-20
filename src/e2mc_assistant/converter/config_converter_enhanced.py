@@ -138,9 +138,9 @@ class ConfigConverter:
         # Special case for audio_volume_format
         if transform_name == "audio_volume_format":
             try:
-                # Calculate -27 + 25 * (value / 100)
+                # (Calculate -27 + 25 * value) / 100
                 volume_value = float(value)
-                return -27 + 25 * (volume_value / 100)
+                return (-27 + 25 * volume_value) / 100
             except (ValueError, TypeError):
                 self.logger.warning(f"Invalid audio_volume value: {value}")
                 return value

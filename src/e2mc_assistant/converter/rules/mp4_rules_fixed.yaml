@@ -153,21 +153,12 @@ rules:
   - source:
       path: "timecode_track"
       type: "string"
+      condition:
+        operator: "eq"
+        value: "yes"
     target:
       path: "Settings.TimecodeConfig.Source"
       transform: "timecode_track_format"
-      
-  # 处理twin_turbo参数
-  - source:
-      path: "twin_turbo"
-      type: "string"
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.QualityTuningLevel"
-      transform: "twin_turbo_format"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
 
   - source:
       path: "two_pass"
@@ -175,10 +166,7 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.QualityTuningLevel"
       transform: "two_pass_format"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
+
         
   # 处理metadata_copy参数
   - source:
@@ -192,10 +180,7 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.VideoPreprocessors.ColorCorrector.ColorSpaceConversion"
       transform: "color_primaries_format"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
+
         
   # 处理视频色彩范围参数
   - source:
@@ -204,10 +189,7 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.VideoPreprocessors.ColorCorrector.ColorSpaceConversion"
       transform: "color_range_format"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
+
         
   # 处理视频色彩矩阵参数
   - source:
@@ -216,10 +198,7 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.VideoPreprocessors.ColorCorrector.ColorSpaceConversion"
       transform: "color_matrix_format"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
+
         
   # 处理视频色彩原色参数(colorprim)
   - source:
@@ -228,10 +207,7 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.VideoPreprocessors.ColorCorrector.ColorSpaceConversion"
       transform: "color_prim_format"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
+
         
   # 处理视频传输特性参数
   - source:
@@ -240,10 +216,7 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.VideoPreprocessors.ColorCorrector.ColorSpaceConversion"
       transform: "transfer_format"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
+
         
   # 处理视频传输特性参数(transfer_characteristics)
   - source:
@@ -257,10 +230,7 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.VideoPreprocessors.ColorCorrector.ColorSpaceConversion"
       transform: "matrix_coefficients_format"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
+
         
   # 处理视频分区参数
   - source:
@@ -273,20 +243,16 @@ rules:
       type: "number"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.NumberBFramesBetweenReferenceFrames"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
+
         
   # 处理字幕CEA数据字段参数
   - source:
       path: "closed_captions.cea_data_field"
       type: "dummy"  # dummy type to indicate no actual conversion needed
 
-  # 处理最小码率参数
   - source:
-      path: "minrate"
-      type: "dummy"
+      path: "loudnorm_range"
+      type: "dummy"  # 基于目前的统计，无需处理
       
   # Audio selector settings - using iteration for multiple alternate_source elements
   - source:
@@ -540,52 +506,28 @@ rules:
       type: "number"
       condition:
         operator: "eq"
-        value: "29.97"
+        value: 29.97
     target:
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateControl"
         value: "SPECIFIED"
-        condition:
-          source_path: "output"
-          operator: "eq"
-          value: "mp4"
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateNumerator"
         value: 30000
-        condition:
-          source_path: "output"
-          operator: "eq"
-          value: "mp4"
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateDenominator"
         value: 1001
-        condition:
-          source_path: "output"
-          operator: "eq"
-          value: "mp4"
           
   - source:
       path: "framerate"
       type: "number"
       condition:
         operator: "eq"
-        value: "59.94"
+        value: 59.94
     target:
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateControl"
         value: "SPECIFIED"
-        condition:
-          source_path: "output"
-          operator: "eq"
-          value: "mp4"
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateNumerator"
         value: 60000
-        condition:
-          source_path: "output"
-          operator: "eq"
-          value: "mp4"
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateDenominator"
         value: 1001
-        condition:
-          source_path: "output"
-          operator: "eq"
-          value: "mp4"
           
   # 处理帧率参数 - 修复版本
   - source:
@@ -597,48 +539,24 @@ rules:
     target:
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateControl"
         value: "SPECIFIED"
-        condition:
-          source_path: "output"
-          operator: "eq"
-          value: "mp4"
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateNumerator"
         value: 25
-        condition:
-          source_path: "output"
-          operator: "eq"
-          value: "mp4"
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateDenominator"
         value: 1
-        condition:
-          source_path: "output"
-          operator: "eq"
-          value: "mp4"
           
   - source:
       path: "framerate"
       type: "number"
       condition:
         operator: "eq"
-        value: "30"
+        value: 30
     target:
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateControl"
         value: "SPECIFIED"
-        condition:
-          source_path: "output"
-          operator: "eq"
-          value: "mp4"
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateNumerator"
         value: 30
-        condition:
-          source_path: "output"
-          operator: "eq"
-          value: "mp4"
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateDenominator"
         value: 1
-        condition:
-          source_path: "output"
-          operator: "eq"
-          value: "mp4"
           
   - source:
       path: "framerate"
@@ -649,29 +567,17 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateControl"
       value: "INITIALIZE_FROM_SOURCE"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
         
   # Resolution
   - source:
       path: "size"
       type: "string"
-      regex: "(\\d+)x(\\d+)"
+      regex: "(\\d+)x([1-9]\\d*)"
     target:
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.Width"
         value: "$1"
-        condition:
-          source_path: "output"
-          operator: "eq"
-          value: "mp4"
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.Height"
         value: "$2"
-        condition:
-          source_path: "output"
-          operator: "eq"
-          value: "mp4"
           
   # 处理特殊情况：宽度固定，高度自动
   - source:
@@ -681,18 +587,8 @@ rules:
     target:
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.Width"
         value: "$1"
-        condition:
-          source_path: "output"
-          operator: "eq"
-          value: "mp4"
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.ScalingBehavior"
         value: "DEFAULT"
-        condition:
-          source_path: "output"
-          operator: "eq"
-          value: "mp4"
-          operator: "eq"
-          value: "mp4"
         
       
   # CBR/VBR mode
@@ -751,7 +647,7 @@ rules:
       path: cbr
       condition:
         operator: eq
-        value: yes
+        value: "yes"
     target:
       path: Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode
       value: CBR
@@ -824,7 +720,7 @@ rules:
       condition:
         operator: eq
         source_path: cbr
-        value: yes
+        value: "yes"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.Bitrate"
       value: "$1000"
@@ -836,10 +732,6 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.Codec"
       transform: "audio_codec_format"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
       
   # Audio bitrate
   - source:
@@ -850,10 +742,6 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.AacSettings.Bitrate"
       value: "$1000"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
       
   # Audio sample rate
   - source:
@@ -861,10 +749,7 @@ rules:
       type: "number"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.AacSettings.SampleRate"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
+
       
   # Audio normalization
   - source:
@@ -872,10 +757,7 @@ rules:
       type: "number"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].AudioNormalizationSettings.TargetLkfs"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
+
       
   # Audio normalization peak
   - source:
@@ -883,23 +765,7 @@ rules:
       type: "number"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].AudioNormalizationSettings.TruePeakLimiterThreshold"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
 
-
-  # 处理H.264 level参数
-  - source:
-      path: "video_codec_parameters.level"
-      type: "number"
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.Level"
-      transform: "h264_level_format"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
 
   # 处理色彩空间参数
   - source:
@@ -911,10 +777,6 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.ColorSpace"
       value: "REC_709"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
 
   # 处理色彩范围参数
   - source:
@@ -926,10 +788,6 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.ColorMetadata"
       value: "INSERT"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
         
   # 处理时间码参数
   - source:
@@ -947,10 +805,6 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.AacSettings.CodingMode"
       transform: "audio_channels_format"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
         
   # 处理音频最大码率参数
   - source:
@@ -960,10 +814,6 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.AacSettings.Bitrate"
       value: "$1000"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
         
   # 处理音频归一化参数
   - source:
@@ -971,10 +821,7 @@ rules:
       type: "number"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].AudioNormalizationSettings.TargetLkfs"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
+
         
   # 处理音频流布局参数
   - source:
@@ -983,10 +830,7 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.AacSettings.CodingMode"
       transform: "audio_layout_format"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
+
         
   # 处理音频同步参数
   - source:
@@ -1000,13 +844,15 @@ rules:
   - source:
       path: "audio_volume"
       type: "number"
+      condition:
+        operator: NOT
+        condition:
+          source_path: "audio_normalization"
+          operator: "exists"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].AudioNormalizationSettings.TargetLkfs"
       transform: "audio_volume_format"
-      condition:
-        source_path: "audio_normalization"
-        operator: "exists"
-        value: false
+
         
   # 处理恒定平均码率参数
   - source:
@@ -1016,10 +862,6 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode"
       transform: "cabr_format"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
         
   # 处理字幕时间偏移参数
   - source:
@@ -1114,10 +956,6 @@ rules:
     target:
       path: "Settings.OutputGroups[0].OutputGroupSettings.FileGroupSettings.Destination"
       value: "S3_OUTPUT_URL"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
         
   # 处理对白标准化阈值参数
   - source:
@@ -1144,10 +982,6 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.InterlaceMode"
       transform: "force_interlaced_format"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
         
   # 处理MP4文件类型参数
   - source:
@@ -1156,11 +990,7 @@ rules:
       default: "mp42"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].ContainerSettings.Mp4Settings.Mp4MajorBrand"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
-        
+      
   # 处理硬CBR参数
   - source:
       path: "hard_cbr"
@@ -1169,10 +999,6 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode"
       transform: "hard_cbr_format"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
         
   # 处理保持宽高比参数
   - source:
@@ -1182,10 +1008,6 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.ScalingBehavior"
       transform: "keep_aspect_ratio_format"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
         
   # 处理关键帧间隔参数
   - source:
@@ -1193,10 +1015,7 @@ rules:
       type: "number"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.GopSize"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
+
         
   # 处理H.264编码级别参数
   - source:
@@ -1205,36 +1024,32 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.CodecLevel"
       transform: "level_format"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
         
   # 处理音频响度模式参数
   - source:
       path: "loudness_mode"
       type: "string"
+      condition:
+        operator: "ne"
+        value: ""
     target:
       path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].AudioNormalizationSettings.Algorithm"
       transform: "loudness_mode_format"
-      condition:
-        source_path: "loudness_mode"
-        operator: "ne"
-        value: ""
+
         
   # 处理最大码率参数
   - source:
       path: "maxrate"
       type: "string"
       regex: "(\\d+)k"
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.MaxBitrate"
-      value: "$1000"
       condition:
         source_path: "maxrate"
         operator: "ne"
         value: ""
-        
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.MaxBitrate"
+      value: "$1000"
+
         
   # 处理像素宽高比参数
   - source:
@@ -1246,22 +1061,10 @@ rules:
     target:
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.ParControl"
         value: "SPECIFIED"
-        condition:
-          source_path: "output"
-          operator: "eq"
-          value: "mp4"
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.ParNumerator"
         value: 1
-        condition:
-          source_path: "output"
-          operator: "eq"
-          value: "mp4"
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.ParDenominator"
         value: 1
-        condition:
-          source_path: "output"
-          operator: "eq"
-          value: "mp4"
           
   - source:
       path: "pixel_aspect_ratio"
@@ -1272,22 +1075,10 @@ rules:
     target:
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.ParControl"
         value: "SPECIFIED"
-        condition:
-          source_path: "output"
-          operator: "eq"
-          value: "mp4"
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.ParNumerator"
         value: 16
-        condition:
-          source_path: "output"
-          operator: "eq"
-          value: "mp4"
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.ParDenominator"
         value: 9
-        condition:
-          source_path: "output"
-          operator: "eq"
-          value: "mp4"
           
   - source:
       path: "pixel_aspect_ratio"
@@ -1298,10 +1089,6 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.ParControl"
       value: "INITIALIZE_FROM_SOURCE"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
         
   # 处理编码配置文件参数
   - source:
@@ -1310,24 +1097,28 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.CodecProfile"
       transform: "profile_format"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
         
   # 处理turbo参数
   - source:
       path: "turbo"
       type: "string"
-      default: "no"
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.QualityTuningLevel"
-      transform: "turbo_format"
       condition:
-        source_path: "output"
         operator: "eq"
-        value: "mp4"
-        
+        value: "yes"
+    target:
+      path: "AccelerationSettings.Mode"
+      value: "ENABLED"
+
+  # 处理twin_turbo参数
+  - source:
+      path: "twin_turbo"
+      type: "string"
+      condition:
+        operator: "eq"
+        value: "yes"
+    target:
+      path: "AccelerationSettings.Mode"
+      value: "ENABLED"
         
   # 处理视频编码器熵编码参数
   - source:
@@ -1336,10 +1127,6 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.EntropyEncoding"
       transform: "coder_format"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
         
   # 处理视频编码器直接预测参数
   - source:
@@ -1347,10 +1134,7 @@ rules:
       type: "number"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.Slices"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
+
         
   # 处理视频编码器GOP大小参数
   - source:
@@ -1358,10 +1142,7 @@ rules:
       type: "number"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.GopSize"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
+
         
   # 处理视频编码器关键帧参数
   - source:
@@ -1369,10 +1150,7 @@ rules:
       type: "number"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.GopClosedCadence"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
+
         
   # 处理视频编码器最大关键帧间隔参数
   - source:
@@ -1380,10 +1158,7 @@ rules:
       type: "number"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.GopSize"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
+
         
   # 处理视频编码器配置文件参数
   - source:
@@ -1392,10 +1167,6 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.CodecProfile"
       transform: "profile_format"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
         
   # 处理视频编码器vprofile参数
   - source:
@@ -1404,32 +1175,25 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.CodecProfile"
       transform: "profile_format"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
-        
+
   # 处理视频编码器B帧策略参数
   - source:
       path: "video_codec_parameters.b_strategy"
       type: "number"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.NumberBFramesBetweenReferenceFrames"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
+
         
   # 处理音频峰值限制器阈值参数
   - source:
       path: "prolimiter_max_peak"
       type: "number"
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].AudioNormalizationSettings.TruePeakLimiterThreshold"
       condition:
-        source_path: "prolimiter_max_peak"
         operator: "ne"
         value: ""
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].AudioNormalizationSettings.TruePeakLimiterThreshold"
+
         
   # 处理设置宽高比参数
   - source:
@@ -1441,10 +1205,7 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.ParControl"
       value: "INITIALIZE_FROM_SOURCE"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
+
         
   - source:
       path: "set_aspect_ratio"
@@ -1455,22 +1216,10 @@ rules:
     target:
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.ParControl"
         value: "SPECIFIED"
-        condition:
-          source_path: "output"
-          operator: "eq"
-          value: "mp4"
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.ParNumerator"
         value: 16
-        condition:
-          source_path: "output"
-          operator: "eq"
-          value: "mp4"
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.ParDenominator"
         value: 9
-        condition:
-          source_path: "output"
-          operator: "eq"
-          value: "mp4"
 
 # Additional rules
   # 处理视频编码器加权预测参数
@@ -1479,10 +1228,7 @@ rules:
       type: "number"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.Softness"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
+
         
   # 处理视频编码器最小关键帧间隔参数
   - source:
@@ -1490,10 +1236,7 @@ rules:
       type: "number"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.MinIInterval"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
+
         
   # 处理视频编码器B帧策略参数
   - source:
@@ -1501,10 +1244,7 @@ rules:
       type: "number"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.NumberBFramesBetweenReferenceFrames"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
+
         
   # 处理视频编码器参考帧数量参数
   - source:
@@ -1512,22 +1252,15 @@ rules:
       type: "number"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.NumberReferenceFrames"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
-        
+
   # 处理视频编码器级别参数
   - source:
       path: "video_codec_parameters.level"
-      type: "string"
+      type: "number"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.CodecLevel"
       transform: "h264_level_format"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
+
         
   # 处理视频编码器场景变化检测阈值参数
   - source:
@@ -1536,10 +1269,7 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.SceneChangeDetect"
       transform: "sc_threshold_format"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
+
   
   # 处理视频编码器最小关键帧间隔参数
   - source:
@@ -1547,31 +1277,15 @@ rules:
       type: "number"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.MinIInterval"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
-  # 处理视频编码器级别参数
-  - source:
-      path: "video_codec_parameters.level"
-      type: "string"
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.CodecLevel"
-      transform: "h264_level_format"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
+
+
   # 处理视频编码器参考帧数量参数
   - source:
       path: "video_codec_parameters.refs"
       type: "number"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.NumberReferenceFrames"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
+
   # 处理视频编码器场景变化检测阈值参数
   - source:
       path: "video_codec_parameters.sc_threshold"
@@ -1579,10 +1293,7 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.SceneChangeDetect"
       transform: "sc_threshold_format"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
+
 
   # 处理视频同步参数
   - source:
@@ -1594,17 +1305,9 @@ rules:
     target:
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateControl"
         value: "SPECIFIED"
-        condition:
-          source_path: "output"
-          operator: "eq"
-          value: "mp4"
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateConversionAlgorithm"
         value: "DUPLICATE_DROP"
-        condition:
-          source_path: "output"
-          operator: "eq"
-          value: "mp4"
-          
+
   - source:
       path: "video_sync"
       type: "string"
@@ -1614,10 +1317,6 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateControl"
       value: "INITIALIZE_FROM_SOURCE"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
 
 # Multi-stream handling with iteration (for HLS/DASH)
   - source:
@@ -1770,12 +1469,13 @@ rules:
   - source:
       path: "copy_timestamps"
       type: "string"
-    target:
-      path: "Settings.TimecodeConfig.Source"
-      value: "EMBEDDED"
       condition:
         operator: "eq"
         value: "yes"
+    target:
+      path: "Settings.TimecodeConfig.Source"
+      value: "EMBEDDED"
+
 
 transformers:
   output_group_type:
@@ -1838,23 +1538,23 @@ transformers:
     "baseline": "BASELINE"
     
   h264_level_format:
-    "10": "LEVEL_1"
-    "11": "LEVEL_1_1"
-    "12": "LEVEL_1_2"
-    "13": "LEVEL_1_3"
-    "20": "LEVEL_2"
-    "21": "LEVEL_2_1"
-    "22": "LEVEL_2_2"
-    "30": "LEVEL_3"
-    "31": "LEVEL_3_1"
-    "32": "LEVEL_3_2"
-    "4": "LEVEL_4"
-    "40": "LEVEL_4"
-    "41": "LEVEL_4_1"
-    "42": "LEVEL_4_2"
-    "50": "LEVEL_5"
-    "51": "LEVEL_5_1"
-    "52": "LEVEL_5_2"
+    '10': "LEVEL_1"
+    '11': "LEVEL_1_1"
+    '12': "LEVEL_1_2"
+    '13': "LEVEL_1_3"
+    '20': "LEVEL_2"
+    '21': "LEVEL_2_1"
+    '22': "LEVEL_2_2"
+    '30': "LEVEL_3"
+    '31': "LEVEL_3_1"
+    '32': "LEVEL_3_2"
+    '4': "LEVEL_4"
+    '40': "LEVEL_4"
+    '41': "LEVEL_4_1"
+    '42': "LEVEL_4_2"
+    '50': "LEVEL_5"
+    '51': "LEVEL_5_1"
+    '52': "LEVEL_5_2"
     
   language_code_format:
     "es": "SPA"
@@ -1927,9 +1627,6 @@ transformers:
     "1770-1-di": "ITU_BS_1770_1"
     "1770-2": "ITU_BS_1770_2"
     
-  turbo_format:
-    "yes": "SINGLE_PASS"
-    "no": "MULTI_PASS_HQ"
     
   coder_format:
     "0": "CABAC"
@@ -1946,10 +1643,6 @@ transformers:
     
   timecode_track_format:
     "yes": "EMBEDDED"
-    
-  twin_turbo_format:
-    "yes": "SINGLE_PASS"
-    "no": "MULTI_PASS_HQ"
 
   two_pass_format:
     "yes": "MULTI_PASS_HQ"

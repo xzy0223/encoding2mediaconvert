@@ -1,0 +1,89 @@
+Error submitting MediaConvert job for 836
+Timestamp: 2025-05-20T07:07:19.903026
+
+Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/numberBFramesBetweenReferenceFrames: Should be less than or equal to 7
+
+Job settings:
+{
+  "Settings": {
+    "Inputs": [
+      {
+        "TimecodeSource": "ZEROBASED",
+        "VideoSelector": {},
+        "AudioSelectors": {
+          "Audio Selector 1": {
+            "DefaultSelection": "DEFAULT"
+          }
+        },
+        "FileInput": "s3://fw-mc-test/mp4/836/836_882684514_source.mp4",
+        "DeblockFilter": "ENABLED"
+      }
+    ],
+    "OutputGroups": [
+      {
+        "Name": "File Group",
+        "OutputGroupSettings": {
+          "Type": "FILE_GROUP_SETTINGS",
+          "FileGroupSettings": {
+            "Destination": "s3://fw-mc-test/mp4/836/"
+          }
+        },
+        "Outputs": [
+          {
+            "ContainerSettings": {
+              "Container": "MP4",
+              "Mp4Settings": {}
+            },
+            "VideoDescription": {
+              "CodecSettings": {
+                "H264Settings": {
+                  "RateControlMode": "CBR",
+                  "Bitrate": 1400000,
+                  "CodecProfile": "MAIN",
+                  "CodecLevel": "LEVEL_3",
+                  "GopSize": 125,
+                  "ParControl": "SPECIFIED",
+                  "ParNumerator": 16,
+                  "ParDenominator": 9,
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateConversionAlgorithm": "DUPLICATE_DROP",
+                  "FramerateNumerator": 25,
+                  "FramerateDenominator": 1,
+                  "QualityTuningLevel": "MULTI_PASS_HQ",
+                  "MinIInterval": 1,
+                  "NumberReferenceFrames": 4,
+                  "NumberBFramesBetweenReferenceFrames": 16
+                },
+                "Codec": "H_264"
+              },
+              "ScalingBehavior": "DEFAULT",
+              "Width": 1024,
+              "Height": 576
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 128000,
+                    "CodingMode": "CODING_MODE_2_0",
+                    "SampleRate": 48000
+                  }
+                },
+                "AudioNormalizationSettings": {
+                  "TargetLkfs": 17.23
+                }
+              }
+            ],
+            "NameModifier": "_1024x576_1400000_mc"
+          }
+        ]
+      }
+    ],
+    "TimecodeConfig": {
+      "Source": "ZEROBASED"
+    },
+    "FollowSource": 1
+  },
+  "Role": "arn:aws:iam::935206693453:role/MediaConvertRole"
+}

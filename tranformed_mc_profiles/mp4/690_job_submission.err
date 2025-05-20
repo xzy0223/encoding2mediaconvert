@@ -1,0 +1,83 @@
+Error submitting MediaConvert job for 690
+Timestamp: 2025-05-20T07:06:09.201253
+
+Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/numberBFramesBetweenReferenceFrames: Should be less than or equal to 7
+
+Job settings:
+{
+  "Settings": {
+    "Inputs": [
+      {
+        "TimecodeSource": "ZEROBASED",
+        "VideoSelector": {},
+        "AudioSelectors": {
+          "Audio Selector 1": {
+            "DefaultSelection": "DEFAULT"
+          }
+        },
+        "FileInput": "s3://fw-mc-test/mp4/690/690_787925323_source.mp4",
+        "DeblockFilter": "ENABLED"
+      }
+    ],
+    "OutputGroups": [
+      {
+        "Name": "File Group",
+        "OutputGroupSettings": {
+          "Type": "FILE_GROUP_SETTINGS",
+          "FileGroupSettings": {
+            "Destination": "s3://fw-mc-test/mp4/690/"
+          }
+        },
+        "Outputs": [
+          {
+            "ContainerSettings": {
+              "Container": "MP4",
+              "Mp4Settings": {}
+            },
+            "VideoDescription": {
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "GopSize": 125,
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateNumerator": 25,
+                  "FramerateDenominator": 1,
+                  "QualityTuningLevel": "MULTI_PASS_HQ",
+                  "MinIInterval": 1,
+                  "NumberReferenceFrames": 4,
+                  "NumberBFramesBetweenReferenceFrames": 16,
+                  "CodecProfile": "MAIN",
+                  "CodecLevel": "LEVEL_3"
+                }
+              },
+              "Width": 640,
+              "Height": 360,
+              "ScalingBehavior": "DEFAULT"
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 96000,
+                    "CodingMode": "CODING_MODE_2_0",
+                    "SampleRate": 48000
+                  }
+                },
+                "AudioNormalizationSettings": {
+                  "TargetLkfs": 17.23
+                }
+              }
+            ],
+            "NameModifier": "_640x360_mc"
+          }
+        ]
+      }
+    ],
+    "TimecodeConfig": {
+      "Source": "ZEROBASED"
+    },
+    "FollowSource": 1
+  },
+  "Role": "arn:aws:iam::935206693453:role/MediaConvertRole"
+}

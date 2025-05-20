@@ -1,0 +1,87 @@
+Error submitting MediaConvert job for 1008
+Timestamp: 2025-05-20T07:01:38.699373
+
+Error message: Parameter validation failed:
+Unknown parameter in Settings.OutputGroups[0].Outputs[0].VideoDescription: "ColorSpace", must be one of: AfdSignaling, AntiAlias, ChromaPositionMode, CodecSettings, ColorMetadata, Crop, DropFrameTimecode, FixedAfd, Height, Position, RespondToAfd, ScalingBehavior, Sharpness, TimecodeInsertion, TimecodeTrack, VideoPreprocessors, Width
+
+Job settings:
+{
+  "Settings": {
+    "Inputs": [
+      {
+        "TimecodeSource": "ZEROBASED",
+        "VideoSelector": {},
+        "AudioSelectors": {
+          "Audio Selector 1": {
+            "DefaultSelection": "DEFAULT"
+          }
+        },
+        "FileInput": "s3://fw-mc-test/mp4/1008/1008_589514071_source.mp4"
+      }
+    ],
+    "OutputGroups": [
+      {
+        "Name": "File Group",
+        "OutputGroupSettings": {
+          "Type": "FILE_GROUP_SETTINGS",
+          "FileGroupSettings": {
+            "Destination": "s3://fw-mc-test/mp4/1008/"
+          }
+        },
+        "Outputs": [
+          {
+            "ContainerSettings": {
+              "Container": "MP4",
+              "Mp4Settings": {}
+            },
+            "VideoDescription": {
+              "CodecSettings": {
+                "H264Settings": {
+                  "RateControlMode": "VBR",
+                  "Bitrate": 4500000,
+                  "MaxBitrate": 11250000,
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateNumerator": 25,
+                  "FramerateDenominator": 1,
+                  "CodecProfile": "MAIN",
+                  "CodecLevel": "LEVEL_4"
+                },
+                "Codec": "H_264"
+              },
+              "Width": 1920,
+              "Height": 1080,
+              "VideoPreprocessors": {
+                "ColorCorrector": {
+                  "ColorSpaceConversion": "FORCE_709"
+                }
+              },
+              "ColorMetadata": "INSERT",
+              "ColorSpace": "REC_709"
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 128000,
+                    "SampleRate": 48000
+                  }
+                },
+                "AudioNormalizationSettings": {
+                  "TargetLkfs": -23.0,
+                  "TruePeakLimiterThreshold": -1.5
+                }
+              }
+            ],
+            "NameModifier": "_1920x1080_4500000_mc"
+          }
+        ]
+      }
+    ],
+    "TimecodeConfig": {
+      "Source": "ZEROBASED"
+    },
+    "FollowSource": 1
+  },
+  "Role": "arn:aws:iam::935206693453:role/MediaConvertRole"
+}

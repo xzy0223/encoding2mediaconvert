@@ -144,24 +144,6 @@ class ConfigConverter:
             except (ValueError, TypeError):
                 self.logger.warning(f"Invalid audio_volume value: {value}")
                 return value
-                
-        # Special case for audio_channels_format
-        if transform_name == "audio_channels_format":
-            try:
-                # Convert audio channels number to coding mode
-                channels = int(value)
-                if channels == 1:
-                    return "CODING_MODE_1_0"
-                elif channels == 2:
-                    return "CODING_MODE_2_0"
-                elif channels == 6:
-                    return "CODING_MODE_5_1"
-                else:
-                    self.logger.warning(f"Unsupported audio channels number: {channels}, defaulting to 2.0")
-                    return "CODING_MODE_2_0"
-            except (ValueError, TypeError):
-                self.logger.warning(f"Invalid audio_channels_number value: {value}")
-                return "CODING_MODE_2_0"
             
         # Check if it's a predefined transformation mapping
         if transform_name in self.transformers:

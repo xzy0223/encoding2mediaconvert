@@ -750,6 +750,49 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.AacSettings.SampleRate"
 
+  # 处理音频通道数参数
+  - source:
+      path: "audio_channels_number"
+      type: "number"
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.AacSettings.CodingMode"
+      transform: "audio_channels_format"
+        
+  # 处理音频最大码率参数
+  - source:
+      path: "audio_maxrate"
+      type: "string"
+      regex: "(\\d+)k"
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.AacSettings.Bitrate"
+      value: "$1000"
+      
+  # 处理音频下混模式参数
+  - source:
+      path: "downmix_mode"
+      type: "string"
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.AacSettings.CodingMode"
+      transform: "downmix_mode_format"
+
+  # 处理音频流布局参数
+  - source:
+      path: "audio_stream.layout"
+      type: "string"
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.AacSettings.CodingMode"
+      transform: "audio_layout_format"
+
+
+  # 处理对白标准化阈值参数
+  - source:
+      path: "dialnorm_threshold"
+      type: "number"
+      condition:
+        operator: "exists"
+        value: true
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.Ac3Settings.Dialnorm"
       
   # Audio normalization
   - source:
@@ -766,17 +809,6 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].AudioNormalizationSettings.TruePeakLimiterThreshold"
 
-
-  # 处理色彩空间参数
-  - source:
-      path: "video_codec_parameters.color_primaries"
-      type: "number"
-      condition:
-        operator: "eq"
-        value: 1
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.ColorSpace"
-      value: "REC_709"
 
   # 处理色彩范围参数
   - source:
@@ -798,22 +830,6 @@ rules:
       path: "Settings.TimecodeConfig.Source"
       transform: "timecode_source_format"
       
-  # 处理音频通道数参数
-  - source:
-      path: "audio_channels_number"
-      type: "number"
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.AacSettings.CodingMode"
-      transform: "audio_channels_format"
-        
-  # 处理音频最大码率参数
-  - source:
-      path: "audio_maxrate"
-      type: "string"
-      regex: "(\\d+)k"
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.AacSettings.Bitrate"
-      value: "$1000"
         
   # 处理音频归一化参数
   - source:
@@ -822,14 +838,6 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].AudioNormalizationSettings.TargetLkfs"
 
-        
-  # 处理音频流布局参数
-  - source:
-      path: "audio_stream.layout"
-      type: "string"
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.AacSettings.CodingMode"
-      transform: "audio_layout_format"
 
         
   # 处理音频同步参数
@@ -957,23 +965,6 @@ rules:
       path: "Settings.OutputGroups[0].OutputGroupSettings.FileGroupSettings.Destination"
       value: "S3_OUTPUT_URL"
         
-  # 处理对白标准化阈值参数
-  - source:
-      path: "dialnorm_threshold"
-      type: "number"
-      condition:
-        operator: "exists"
-        value: true
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.Ac3Settings.Dialnorm"
-      
-  # 处理音频下混模式参数
-  - source:
-      path: "downmix_mode"
-      type: "string"
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.AacSettings.CodingMode"
-      transform: "downmix_mode_format"
       
   # 处理强制隔行参数
   - source:
@@ -1510,7 +1501,7 @@ transformers:
     "libx264": "H_264"
     "libx265": "H_265"
     "vp9": "VP9"
-    "hevc": "H_265"
+    "hevc": "H_264"
     "libvpx": "VP9"
     "mpeg2video": "MPEG2"
     "mpeg4": "H_264"

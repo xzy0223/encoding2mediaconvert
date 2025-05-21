@@ -1,45 +1,27 @@
 {
   "Settings": {
-    "Inputs": [
-      {
-        "TimecodeSource": "ZEROBASED",
-        "VideoSelector": {},
-        "AudioSelectors": {
-          "Audio Selector 1": {
-            "DefaultSelection": "DEFAULT"
-          }
-        },
-        "FileInput": "{SOURCE_S3_URL}",
-        "DeblockFilter": "DISABLED"
-      }
-    ],
     "OutputGroups": [
       {
-        "Name": "File Group",
-        "OutputGroupSettings": {
-          "Type": "FILE_GROUP_SETTINGS",
-          "FileGroupSettings": {
-            "Destination": "S3_OUTPUT_URL"
-          }
-        },
         "Outputs": [
           {
-            "ContainerSettings": {
-              "Container": "MP4",
-              "Mp4Settings": {}
-            },
             "VideoDescription": {
-              "Width": 320,
-              "Height": 240,
-              "ScalingBehavior": "DEFAULT",
               "CodecSettings": {
-                "Codec": "H_264",
                 "H264Settings": {
+                  "RateControlMode": "VBR",
+                  "Bitrate": 256000,
+                  "MaxBitrate": 640000,
                   "CodecProfile": "MAIN",
                   "QualityTuningLevel": "SINGLE_PASS_HQ",
                   "GopSize": 300
-                }
-              }
+                },
+                "Codec": "H_264"
+              },
+              "Width": 320,
+              "Height": 240,
+              "ScalingBehavior": "DEFAULT"
+            },
+            "ContainerSettings": {
+              "Container": "MP4"
             },
             "AudioDescriptions": [
               {
@@ -55,14 +37,21 @@
                 }
               }
             ],
-            "NameModifier": "_320x240_mc"
+            "NameModifier": "_320x240_256000_mc"
           }
-        ]
+        ],
+        "OutputGroupSettings": {
+          "Type": "FILE_GROUP_SETTINGS",
+          "FileGroupSettings": {
+            "Destination": "S3_OUTPUT_URL"
+          }
+        }
       }
     ],
-    "TimecodeConfig": {
-      "Source": "ZEROBASED"
-    },
-    "FollowSource": 1
+    "Inputs": [
+      {
+        "DeblockFilter": "DISABLED"
+      }
+    ]
   }
 }

@@ -919,6 +919,10 @@ class ConfigConverter:
                 self._set_nested_value(target_data, f"{target_path}.CodecSettings.AacSettings.SampleRate", 48000)
                 self.logger.info(f"Set AudioDescriptions[0].CodecSettings.AacSettings.SampleRate to default value 48000")
                 
+                # Set default coding mode to stereo
+                self._set_nested_value(target_data, f"{target_path}.CodecSettings.AacSettings.CodingMode", "CODING_MODE_2_0")
+                self.logger.info(f"Set AudioDescriptions[0].CodecSettings.AacSettings.CodingMode to CODING_MODE_2_0 (default stereo)")
+                
                 # iv. Override bitrate if specified
                 if audio_bitrate:
                     self._set_nested_value(target_data, f"{target_path}.CodecSettings.AacSettings.Bitrate", audio_bitrate)
@@ -989,6 +993,10 @@ class ConfigConverter:
             # c. Set default sample rate
             self._set_nested_value(target_data, f"{target_path}.CodecSettings.AacSettings.SampleRate", 48000)
             self.logger.info(f"Set AudioDescriptions[0].CodecSettings.AacSettings.SampleRate to default value 48000")
+            
+            # Set default coding mode to stereo
+            self._set_nested_value(target_data, f"{target_path}.CodecSettings.AacSettings.CodingMode", "CODING_MODE_2_0")
+            self.logger.info(f"Set AudioDescriptions[0].CodecSettings.AacSettings.CodingMode to CODING_MODE_2_0 (default stereo)")
             
             # d. Override bitrate if specified
             if audio_bitrate:

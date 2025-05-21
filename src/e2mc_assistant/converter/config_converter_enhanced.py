@@ -864,6 +864,29 @@ class ConfigConverter:
         # Return processed parameters
         return len(processed_params) > 0
     
+    def _process_video_codec_settings(self, source_data: Dict, target_data: Dict) -> bool:
+        """
+        Process video codec settings, setting defaults if needed
+        
+        Args:
+            source_data: Source data dictionary
+            target_data: Target data dictionary to update
+            
+        Returns:
+            True if video codec settings were processed, False otherwise
+        """
+        # Check if video_codec exists
+        video_codec = self.get_value_by_path(source_data, 'video_codec')
+        
+        # If video_codec doesn't exist, set default to AVC (H.264)
+        if not video_codec:
+            target_path = "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Codec"
+            self._set_nested_value(target_data, target_path, "H_264")
+            self.logger.info(f"Set {target_path} to H_264 (default because <video_codec> not specified)")
+            return {'video_codec'}
+        
+        return set()
+    
     def _process_audio_settings(self, source_data: Dict, target_data: Dict) -> bool:
         """
         Process audio codec settings based on complex rules
@@ -1055,6 +1078,12 @@ class ConfigConverter:
         if audio_processed_params:
             processed_params.update(audio_processed_params)
             self.logger.info(f"Audio parameters processed by custom audio settings handler")
+            
+        # Process video codec settings (set default if needed)
+        video_processed_params = self._process_video_codec_settings(source_data, target_data)
+        if video_processed_params:
+            processed_params.update(video_processed_params)
+            self.logger.info(f"Video codec parameters processed by custom video codec handler")
         
         # Create a rule lookup dictionary for faster access
         rule_lookup = {}

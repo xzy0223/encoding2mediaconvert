@@ -140,7 +140,7 @@ class ConfigConverter:
             try:
                 # (Calculate -27 + 25 * value) / 100
                 volume_value = float(value)
-                return (-27 + 25 * volume_value) / 100
+                return -27 + (25 * volume_value / 100)
             except (ValueError, TypeError):
                 self.logger.warning(f"Invalid audio_volume value: {value}")
                 return value
@@ -864,6 +864,155 @@ class ConfigConverter:
         # Return processed parameters
         return len(processed_params) > 0
     
+    def _process_audio_settings(self, source_data: Dict, target_data: Dict) -> bool:
+        """
+        Process audio codec settings based on complex rules
+        
+        Args:
+            source_data: Source data dictionary
+            target_data: Target data dictionary to update
+            
+        Returns:
+            True if audio settings were processed, False otherwise
+        """
+        # Get relevant source parameters
+        audio_codec = self.get_value_by_path(source_data, 'audio_codec')
+        audio_bitrate_str = self.get_value_by_path(source_data, 'audio_bitrate')
+        audio_sample_rate = self.get_value_by_path(source_data, 'audio_sample_rate')
+        audio_maxrate_str = self.get_value_by_path(source_data, 'audio_maxrate')
+        audio_minrate_str = self.get_value_by_path(source_data, 'audio_minrate')
+        
+        # Track if we've processed these parameters
+        processed_params = set()
+        
+        # Get the target path for AudioDescriptions
+        target_path = "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0]"
+        
+        # Parse audio bitrate value
+        audio_bitrate = None
+        if audio_bitrate_str:
+            processed_params.add('audio_bitrate')
+            bitrate_match = re.match(r'(\d+)k', audio_bitrate_str)
+            if bitrate_match:
+                audio_bitrate = int(bitrate_match.group(1)) * 1000
+            else:
+                try:
+                    audio_bitrate = int(audio_bitrate_str)
+                except (ValueError, TypeError):
+                    self.logger.warning(f"Failed to parse audio_bitrate: {audio_bitrate_str}")
+        
+        # Case 1: If <audio_codec> exists and is not empty
+        if audio_codec:
+            processed_params.add('audio_codec')
+            
+            # Case 1.a: audio_codec is one of the AAC variants
+            if audio_codec in ["dolby_aac", "dolby_heaac", "libfaac"]:
+                # i. Set codec to AAC
+                self._set_nested_value(target_data, f"{target_path}.CodecSettings.Codec", "AAC")
+                self.logger.info(f"Set AudioDescriptions[0].CodecSettings.Codec to AAC from <audio_codec>={audio_codec}")
+                
+                # ii. Set default bitrate
+                self._set_nested_value(target_data, f"{target_path}.CodecSettings.AacSettings.Bitrate", 96000)
+                self.logger.info(f"Set AudioDescriptions[0].CodecSettings.AacSettings.Bitrate to default value 96000")
+                
+                # iii. Set default sample rate
+                self._set_nested_value(target_data, f"{target_path}.CodecSettings.AacSettings.SampleRate", 48000)
+                self.logger.info(f"Set AudioDescriptions[0].CodecSettings.AacSettings.SampleRate to default value 48000")
+                
+                # iv. Override bitrate if specified
+                if audio_bitrate:
+                    self._set_nested_value(target_data, f"{target_path}.CodecSettings.AacSettings.Bitrate", audio_bitrate)
+                    self.logger.info(f"Set AudioDescriptions[0].CodecSettings.AacSettings.Bitrate to {audio_bitrate} from <audio_bitrate>={audio_bitrate_str}")
+                
+                # v. Override sample rate if specified
+                if audio_sample_rate:
+                    processed_params.add('audio_sample_rate')
+                    self._set_nested_value(target_data, f"{target_path}.CodecSettings.AacSettings.SampleRate", audio_sample_rate)
+                    self.logger.info(f"Set AudioDescriptions[0].CodecSettings.AacSettings.SampleRate to {audio_sample_rate} from <audio_sample_rate>={audio_sample_rate}")
+                
+                # vi. Log if audio_maxrate or audio_minrate are ignored
+                if audio_maxrate_str:
+                    processed_params.add('audio_maxrate')
+                    self.logger.info(f"Ignoring <audio_maxrate>={audio_maxrate_str} (not supported for AAC in MediaConvert)")
+                
+                if audio_minrate_str:
+                    processed_params.add('audio_minrate')
+                    self.logger.info(f"Ignoring <audio_minrate>={audio_minrate_str} (not supported for AAC in MediaConvert)")
+            
+            # Case 1.b: audio_codec is AC3
+            elif audio_codec == "ac3":
+                # i. Set codec to AC3
+                self._set_nested_value(target_data, f"{target_path}.CodecSettings.Codec", "AC3")
+                self.logger.info(f"Set AudioDescriptions[0].CodecSettings.Codec to AC3 from <audio_codec>={audio_codec}")
+                
+                # ii. Set bitrate if specified
+                if audio_bitrate:
+                    self._set_nested_value(target_data, f"{target_path}.CodecSettings.Ac3Settings.Bitrate", audio_bitrate)
+                    self.logger.info(f"Set AudioDescriptions[0].CodecSettings.Ac3Settings.Bitrate to {audio_bitrate} from <audio_bitrate>={audio_bitrate_str}")
+                
+                # Log if audio_sample_rate, audio_maxrate or audio_minrate are ignored
+                if audio_sample_rate:
+                    processed_params.add('audio_sample_rate')
+                    self.logger.info(f"Ignoring <audio_sample_rate>={audio_sample_rate} (not supported for AC3 in MediaConvert)")
+                
+                if audio_maxrate_str:
+                    processed_params.add('audio_maxrate')
+                    self.logger.info(f"Ignoring <audio_maxrate>={audio_maxrate_str} (not supported for AC3 in MediaConvert)")
+                
+                if audio_minrate_str:
+                    processed_params.add('audio_minrate')
+                    self.logger.info(f"Ignoring <audio_minrate>={audio_minrate_str} (not supported for AC3 in MediaConvert)")
+            
+            # Case 1.c: audio_codec is something else
+            else:
+                self.logger.warning(f"Unsupported <audio_codec>={audio_codec}. Manual conversion logic needed.")
+                # Still mark as processed to avoid double processing
+                if audio_bitrate_str:
+                    processed_params.add('audio_bitrate')
+                if audio_sample_rate:
+                    processed_params.add('audio_sample_rate')
+                if audio_maxrate_str:
+                    processed_params.add('audio_maxrate')
+                if audio_minrate_str:
+                    processed_params.add('audio_minrate')
+        
+        # Case 2: If <audio_codec> doesn't exist or is empty
+        else:
+            # a. Set codec to AAC
+            self._set_nested_value(target_data, f"{target_path}.CodecSettings.Codec", "AAC")
+            self.logger.info(f"Set AudioDescriptions[0].CodecSettings.Codec to AAC (default because <audio_codec> not specified)")
+            
+            # b. Set default bitrate
+            self._set_nested_value(target_data, f"{target_path}.CodecSettings.AacSettings.Bitrate", 96000)
+            self.logger.info(f"Set AudioDescriptions[0].CodecSettings.AacSettings.Bitrate to default value 96000")
+            
+            # c. Set default sample rate
+            self._set_nested_value(target_data, f"{target_path}.CodecSettings.AacSettings.SampleRate", 48000)
+            self.logger.info(f"Set AudioDescriptions[0].CodecSettings.AacSettings.SampleRate to default value 48000")
+            
+            # d. Override bitrate if specified
+            if audio_bitrate:
+                self._set_nested_value(target_data, f"{target_path}.CodecSettings.AacSettings.Bitrate", audio_bitrate)
+                self.logger.info(f"Set AudioDescriptions[0].CodecSettings.AacSettings.Bitrate to {audio_bitrate} from <audio_bitrate>={audio_bitrate_str}")
+            
+            # e. Override sample rate if specified
+            if audio_sample_rate:
+                processed_params.add('audio_sample_rate')
+                self._set_nested_value(target_data, f"{target_path}.CodecSettings.AacSettings.SampleRate", audio_sample_rate)
+                self.logger.info(f"Set AudioDescriptions[0].CodecSettings.AacSettings.SampleRate to {audio_sample_rate} from <audio_sample_rate>={audio_sample_rate}")
+            
+            # f. Log if audio_maxrate or audio_minrate are ignored
+            if audio_maxrate_str:
+                processed_params.add('audio_maxrate')
+                self.logger.info(f"Ignoring <audio_maxrate>={audio_maxrate_str} (not supported for AAC in MediaConvert)")
+            
+            if audio_minrate_str:
+                processed_params.add('audio_minrate')
+                self.logger.info(f"Ignoring <audio_minrate>={audio_minrate_str} (not supported for AAC in MediaConvert)")
+        
+        # Return processed parameters
+        return processed_params
+    
     def convert(self, source_file: str, template_file: str = None) -> Dict:
         """Execute configuration conversion using an XML-first approach"""
         # Parse source file
@@ -892,6 +1041,12 @@ class ConfigConverter:
                 if self.get_value_by_path(source_data, param) is not None:
                     processed_params.add(param)
                     self.logger.info(f"Parameter {param} processed by custom rate control handler")
+        
+        # Process audio settings next (special handling for audio codec and related settings)
+        audio_processed_params = self._process_audio_settings(source_data, target_data)
+        if audio_processed_params:
+            processed_params.update(audio_processed_params)
+            self.logger.info(f"Audio parameters processed by custom audio settings handler")
         
         # Create a rule lookup dictionary for faster access
         rule_lookup = {}

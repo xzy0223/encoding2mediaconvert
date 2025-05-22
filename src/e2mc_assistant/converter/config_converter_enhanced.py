@@ -24,6 +24,7 @@ class ConfigConverter:
         self.transformers = self.config.get('transformers', {})
         self.custom_functions = {}
         self.logger = logging.getLogger('ConfigConverter')
+        self.original_source_data = None
         
         # Register built-in custom functions
         self.register_custom_function('process_streams', self._process_streams)
@@ -200,9 +201,15 @@ class ConfigConverter:
         
         # Handle simple condition (backward compatible with existing rules)
         # If condition has source_path, get value from there instead
-        if 'source_path' in condition and source_data:
-            source_value = self.get_value_by_path(source_data, condition['source_path'])
-            self.logger.debug(f"Condition using source_path {condition['source_path']}, value: {source_value}")
+        if 'source_path' in condition:
+            # First try to get value from original source data (to handle already processed parameters)
+            if hasattr(self, 'original_source_data') and self.original_source_data is not None:
+                source_value = self.get_value_by_path(self.original_source_data, condition['source_path'])
+                self.logger.debug(f"Condition using source_path {condition['source_path']} from original data, value: {source_value}")
+            # Fall back to current source data if original not available
+            elif source_data:
+                source_value = self.get_value_by_path(source_data, condition['source_path'])
+                self.logger.debug(f"Condition using source_path {condition['source_path']} from current data, value: {source_value}")
             
         op = condition.get('operator', 'eq')
         compare_value = condition.get('value')
@@ -211,6 +218,20 @@ class ConfigConverter:
         if isinstance(source_value, str) and isinstance(compare_value, str):
             source_value = source_value.lower().strip()
             compare_value = compare_value.lower().strip()
+        
+        # Handle number and string comparison (e.g., 30 and "30")
+        if isinstance(source_value, int) and isinstance(compare_value, str):
+            try:
+                compare_value = int(compare_value)
+                self.logger.debug(f"Converted compare_value to int: {compare_value}")
+            except ValueError:
+                pass
+        elif isinstance(source_value, str) and isinstance(compare_value, int):
+            try:
+                source_value = int(source_value)
+                self.logger.debug(f"Converted source_value to int: {source_value}")
+            except ValueError:
+                pass
         
         if op == 'eq':
             result = source_value == compare_value
@@ -1049,9 +1070,13 @@ class ConfigConverter:
         # Parse source file
         if source_file.endswith('.xml'):
             source_data = self.parse_xml(source_file)
+            # Save original source data
+            self.original_source_data = source_data.copy()
         else:
             with open(source_file, 'r') as f:
                 source_data = json.load(f)
+                # Save original source data
+                self.original_source_data = source_data.copy()
         
         # Load target template (if provided)
         if template_file:

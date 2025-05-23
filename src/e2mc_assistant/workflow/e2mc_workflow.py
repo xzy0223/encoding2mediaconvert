@@ -182,7 +182,7 @@ class E2MCWorkflow:
         print(f"Detailed conversion logs saved to {log_file} and individual files in {output_dir}")
         return converted_files
 
-    def submit_mediaconvert_jobs(self, config_dir: str, s3_source_path: str, wait_for_completion: bool = True) -> Dict[str, str]:
+    def submit_mediaconvert_jobs(self, config_dir: str, s3_source_path: str, wait_for_completion: bool = True, include_ids: Optional[List[str]] = None, exclude_ids: Optional[List[str]] = None) -> Dict[str, str]:
         """
         Submit MediaConvert jobs for each configuration file.
 
@@ -190,6 +190,8 @@ class E2MCWorkflow:
             config_dir: Directory containing MediaConvert configuration files
             s3_source_path: S3 path where source videos are stored
             wait_for_completion: Whether to wait for each job to complete before submitting the next
+            include_ids: Optional list of IDs to include (only these IDs will be processed)
+            exclude_ids: Optional list of IDs to exclude from processing
 
         Returns:
             Dictionary mapping job IDs to their status
@@ -200,18 +202,12 @@ class E2MCWorkflow:
             role_arn=self.role_arn
         )
         
-        # Configure logging for job submitter
-        job_submitter_logger = logging.getLogger('MediaConvertJobSubmitter')
-        job_submitter_logger.setLevel(logging.INFO)
-        
         # Track job IDs and status
         job_results = {}
         
         # Process each JSON file in the config directory
         for filename in sorted(os.listdir(config_dir)):
             if filename.endswith('.json'):
-                config_file = os.path.join(config_dir, filename)
-                
                 # Extract ID from filename (assuming it's a number at the beginning)
                 id_match = re.match(r'^(\d+)', filename)
                 if id_match:
@@ -219,55 +215,52 @@ class E2MCWorkflow:
                 else:
                     file_id = os.path.splitext(filename)[0]
                 
-                # Create a job log file in the same directory as the config file
-                job_log_file = os.path.join(config_dir, f"{file_id}_job_submission.log")
-                file_handler = logging.FileHandler(job_log_file)
-                file_handler.setLevel(logging.INFO)
-                file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-                job_submitter_logger.addHandler(file_handler)
-                
-                # Find source video in S3
-                source_video = self._find_source_video(s3_source_path, file_id)
-                if not source_video:
-                    logger.warning(f"No source video found for ID {file_id}, skipping")
+                # Check if this ID should be included/excluded
+                if include_ids and file_id not in include_ids:
+                    continue
+                if exclude_ids and file_id in exclude_ids:
                     continue
                 
-                # Define output destination - normalize path to avoid double slashes
-                s3_path_normalized = s3_source_path.rstrip('/')
-                output_destination = f"{s3_path_normalized}/{file_id}/"
+                config_file = os.path.join(config_dir, filename)
+                
+                # Create a job log file in the same directory as the config file
+                job_log_file = os.path.join(config_dir, f"{file_id}_job_submission.log")
                 
                 try:
                     # Load job profile
                     job_profile = self.job_submitter.load_job_profile(config_file)
                     
+                    # Find source video
+                    source_video = self._find_source_video(s3_source_path, file_id)
+                    if not source_video:
+                        logger.warning(f"No source video found for ID {file_id}, skipping")
+                        continue
+                    
+                    # Ensure Inputs section exists and has FileInput
+                    if not job_profile['Settings'].get('Inputs'):
+                        job_profile['Settings']['Inputs'] = [{}]
+                    if not job_profile['Settings']['Inputs'][0]:
+                        job_profile['Settings']['Inputs'][0] = {}
+                    
                     # Update input URL and output destination
-                    job_profile = self.job_submitter.update_input_url(job_profile, source_video)
+                    job_profile['Settings']['Inputs'][0]['FileInput'] = source_video
+                    output_destination = f"{s3_source_path.rstrip('/')}/{file_id}/"
                     job_profile = self.job_submitter.update_output_destination(job_profile, output_destination)
                     
                     # Submit the job
                     response = self.job_submitter.submit_job(job_profile)
                     job_id = response['Job']['Id']
                     logger.info(f"Submitted job for {file_id} with job ID: {job_id}")
-                    job_submitter_logger.info(f"Submitted job for {file_id} with job ID: {job_id}")
-                    job_submitter_logger.info(f"Job settings: {json.dumps(job_profile, indent=2)}")
                     
                     # Wait for job completion if requested
                     if wait_for_completion:
                         logger.info(f"Waiting for job {job_id} to complete...")
-                        job_submitter_logger.info(f"Waiting for job {job_id} to complete...")
                         job = self.job_submitter.track_job(job_id)
                         job_results[job_id] = job['Status']
                         
                         # Log job completion status
-                        job_submitter_logger.info(f"Job {job_id} completed with status: {job['Status']}")
-                        try:
-                            job_submitter_logger.info(f"Job details: {json.dumps(job, indent=2, default=str)}")
-                        except Exception as json_err:
-                            job_submitter_logger.error(f"Could not serialize job details: {str(json_err)}")
-                        
                         if job['Status'] != MediaConvertJobSubmitter.STATUS_COMPLETE:
                             logger.warning(f"Job {job_id} completed with status: {job['Status']}")
-                            job_submitter_logger.warning(f"Job {job_id} completed with status: {job['Status']}")
                             
                             # Create error log file for failed jobs
                             if job['Status'] == MediaConvertJobSubmitter.STATUS_ERROR:
@@ -290,14 +283,12 @@ class E2MCWorkflow:
                                         f.write(job['ErrorCode'])
                                         
                                 logger.error(f"Job {job_id} failed. Error details written to {error_file}")
-                                job_submitter_logger.error(f"Job {job_id} failed. Error details written to {error_file}")
                     else:
                         job_results[job_id] = "SUBMITTED"
                     
                 except Exception as e:
                     error_msg = f"Error submitting job for {file_id}: {str(e)}"
                     logger.error(error_msg)
-                    job_submitter_logger.error(error_msg)
                     job_results[file_id] = f"ERROR: {str(e)}"
                     
                     # Create error log file for submission errors
@@ -313,11 +304,6 @@ class E2MCWorkflow:
                             f.write(f"Could not serialize job profile: {str(json_err)}")
                     
                     logger.error(f"Job submission error details written to {error_file}")
-                    job_submitter_logger.error(f"Job submission error details written to {error_file}")
-                
-                # Remove the file-specific handler
-                job_submitter_logger.removeHandler(file_handler)
-                file_handler.close()
         
         return job_results
 
@@ -335,23 +321,53 @@ class E2MCWorkflow:
         # Parse S3 path
         bucket_name, prefix = self._parse_s3_path(s3_path)
         
-        # Create the prefix to search for
-        search_prefix = f"{prefix}/{file_id}/" if prefix else f"{file_id}/"
-        
         try:
-            # List objects with the prefix
+            # Construct the full prefix for the specific ID
+            id_prefix = f"{prefix}/{file_id}/" if prefix else f"{file_id}/"
+            
+            # List objects in the specific ID directory
             response = self.s3_client.list_objects_v2(
                 Bucket=bucket_name,
-                Prefix=search_prefix
+                Prefix=id_prefix
             )
             
-            # Look for source video files
+            if not response.get('Contents'):
+                logger.warning(f"No files found in {s3_path}/{file_id}")
+                return None
+            
+            # Look for source video files with pattern: {id}_*_source.{suffix}
+            # Explicitly exclude files containing "_output" or "_mc" in their names
+            video_extensions = ['.mp4', '.mov', '.mpg', '.mpeg', '.mxf', '.webm']
+            source_files = []
+            
             for obj in response.get('Contents', []):
                 key = obj['Key']
-                if '_source.' in key.lower():
-                    return f"s3://{bucket_name}/{key}"
+                filename = os.path.basename(key)
+                ext = os.path.splitext(filename)[1].lower()
+                
+                # Skip files with _mc or _output in their names
+                if "_mc" in filename or "_output" in filename:
+                    continue
+                
+                # First priority: files with _source in their name
+                if "_source." in filename and ext in video_extensions:
+                    source_files.append(key)
+                    continue
+                
+                # Second priority: any video file that matches the ID pattern
+                if ext in video_extensions and filename.startswith(f"{file_id}_"):
+                    source_files.append(key)
             
+            if source_files:
+                # Sort files to ensure consistent selection
+                source_files.sort()
+                selected_file = source_files[0]
+                logger.debug(f"Selected source file: {selected_file}")
+                return f"s3://{bucket_name}/{selected_file}"
+            
+            logger.warning(f"No suitable source video found for ID {file_id}")
             return None
+            
         except Exception as e:
             logger.error(f"Error searching for source video: {str(e)}")
             return None
@@ -381,12 +397,14 @@ class E2MCWorkflow:
         
         return bucket, prefix
 
-    def analyze_videos(self, s3_path: str) -> Dict[str, Any]:
+    def analyze_videos(self, s3_path: str, include_ids: Optional[List[str]] = None, exclude_ids: Optional[List[str]] = None) -> Dict[str, Any]:
         """
         Analyze and compare videos in the given S3 path.
 
         Args:
             s3_path: S3 path containing videos to analyze
+            include_ids: Optional list of video IDs to include (only these IDs will be analyzed)
+            exclude_ids: Optional list of video IDs to exclude from analysis
 
         Returns:
             Dictionary containing analysis results
@@ -397,98 +415,255 @@ class E2MCWorkflow:
         # Parse S3 path
         bucket_name, prefix = self._parse_s3_path(s3_path)
         
-        # Find all prefixes (directories) in the S3 path
-        prefixes = self._list_s3_prefixes(bucket_name, prefix)
-        
-        # Track analysis results
-        analysis_results = {}
-        
-        # Process each prefix (each should correspond to a file ID)
-        for prefix_path in prefixes:
-            # Extract ID from prefix
-            prefix_parts = prefix_path.rstrip('/').split('/')
-            file_id = prefix_parts[-1]
+        # Get list of all subdirectories (video IDs)
+        video_ids = self._list_video_ids(bucket_name, prefix)
+        if not video_ids:
+            logger.warning(f"No video IDs found in {s3_path}")
+            return {}
             
-            # Create report directory structure
-            normalized_prefix = prefix_path.rstrip('/')
-            report_prefix = f"{normalized_prefix}/reports"
+        # Filter video IDs based on include/exclude lists
+        if include_ids:
+            video_ids = [vid for vid in video_ids if vid in include_ids]
+            logger.info(f"Filtered to include only IDs: {video_ids}")
+        if exclude_ids:
+            video_ids = [vid for vid in video_ids if vid not in exclude_ids]
+            logger.info(f"Excluded IDs: {exclude_ids}")
+            
+        results = {}
+        for video_id in video_ids:
+            logger.info(f"Starting analysis for video ID: {video_id}")
             
             # Find target videos (original and MediaConvert)
-            original_video = self._find_original_video(bucket_name, prefix_path)
-            mc_video = self._find_mc_video(bucket_name, prefix_path)
+            original_file = self._find_target_video(bucket_name, f"{prefix}/{video_id}")
+            mc_file = self._find_mc_video(bucket_name, f"{prefix}/{video_id}")
             
-            if not original_video or not mc_video:
-                logger.warning(f"Missing videos for ID {file_id}, skipping")
+            if not original_file or not mc_file:
+                logger.warning(f"Missing files for video ID {video_id}")
+                logger.warning(f"Original file: {original_file}")
+                logger.warning(f"MC file: {mc_file}")
+                self._save_analysis_summary(video_id, "FAILED", "Missing files")
                 continue
             
             try:
-                # Extract video information
-                logger.info(f"Analyzing videos for ID {file_id}")
-                original_info = self.video_analyzer.extract_video_info(original_video)
-                mc_info = self.video_analyzer.extract_video_info(mc_video)
+                # Check file extension to determine analysis method
+                original_ext = os.path.splitext(original_file)[1].lower()
+                mc_ext = os.path.splitext(mc_file)[1].lower()
                 
-                # Generate comprehensive report
-                report = self.video_analyzer.generate_report(
-                    original_info=original_info,
-                    mc_info=mc_info,
-                    s3_client=self.s3_client,
-                    bucket_name=bucket_name,
-                    report_prefix=report_prefix
-                )
+                # For HLS manifests (.m3u8), use ffmpeg analysis
+                if original_ext == '.m3u8' and mc_ext == '.m3u8':
+                    logger.info(f"Analyzing HLS streams for video ID {video_id}")
+                    original_info = self.video_analyzer.extract_video_info(original_file)
+                    mc_info = self.video_analyzer.extract_video_info(mc_file)
+                    
+                    # Generate comprehensive report
+                    report = self.video_analyzer.generate_report(
+                        original_info=original_info,
+                        mc_info=mc_info,
+                        s3_client=self.s3_client,
+                        bucket_name=bucket_name,
+                        report_prefix=f"{prefix}/{video_id}/reports"
+                    )
+                    
+                    # Add to results
+                    results[video_id] = {
+                        'original_video': original_file,
+                        'mc_video': mc_file,
+                        'has_differences': bool(report.get('differences')),
+                        'report_paths': report.get('report_paths', {})
+                    }
+                    
+                    # Save analysis summary
+                    self._save_analysis_summary(video_id, "SUCCESS", "HLS analysis completed", 
+                                             has_differences=bool(report.get('differences')))
                 
-                # Add to results
-                analysis_results[file_id] = {
-                    'original_video': original_video,
-                    'mc_video': mc_video,
-                    'has_differences': bool(report.get('differences')),
-                    'report_paths': report.get('report_paths', {})
-                }
+                # For DASH manifests (.mpd), compare manifest content
+                elif original_ext == '.mpd' and mc_ext == '.mpd':
+                    logger.info(f"Analyzing DASH manifests for video ID {video_id}")
+                    
+                    # Download manifests from S3
+                    original_content = self._get_s3_content(bucket_name, original_file.replace(f"s3://{bucket_name}/", ""))
+                    mc_content = self._get_s3_content(bucket_name, mc_file.replace(f"s3://{bucket_name}/", ""))
+                    
+                    # Create report directory
+                    report_prefix = f"{prefix}/{video_id}/reports"
+                    
+                    # Save manifests and create a simple comparison report
+                    report = {
+                        'original_manifest': original_content,
+                        'mc_manifest': mc_content,
+                        'has_differences': original_content != mc_content
+                    }
+                    
+                    # Save report to S3
+                    report_key = f"{report_prefix}/manifest_comparison.json"
+                    self._save_to_s3(bucket_name, report_key, json.dumps(report, indent=2))
+                    
+                    # Add to results
+                    results[video_id] = {
+                        'original_manifest': original_file,
+                        'mc_manifest': mc_file,
+                        'has_differences': report['has_differences'],
+                        'report_paths': {
+                            'manifest_comparison': f"s3://{bucket_name}/{report_key}"
+                        }
+                    }
+                    
+                    # Save analysis summary
+                    self._save_analysis_summary(video_id, "SUCCESS", "DASH analysis completed", 
+                                             has_differences=report['has_differences'])
                 
-                logger.info(f"Completed analysis for ID {file_id}")
+                # For MP4 files, use ffmpeg analysis
+                elif original_ext == '.mp4' and mc_ext == '.mp4':
+                    logger.info(f"Analyzing MP4 files for video ID {video_id}")
+                    original_info = self.video_analyzer.extract_video_info(original_file)
+                    mc_info = self.video_analyzer.extract_video_info(mc_file)
+                    
+                    # Generate comprehensive report
+                    report = self.video_analyzer.generate_report(
+                        original_info=original_info,
+                        mc_info=mc_info,
+                        s3_client=self.s3_client,
+                        bucket_name=bucket_name,
+                        report_prefix=f"{prefix}/{video_id}/reports"
+                    )
+                    
+                    # Add to results
+                    results[video_id] = {
+                        'original_video': original_file,
+                        'mc_video': mc_file,
+                        'has_differences': bool(report.get('differences')),
+                        'report_paths': report.get('report_paths', {})
+                    }
+                    
+                    # Save analysis summary
+                    self._save_analysis_summary(video_id, "SUCCESS", "MP4 analysis completed", 
+                                             has_differences=bool(report.get('differences')))
+                
+                else:
+                    error_msg = f"Unsupported file types: original={original_ext}, mc={mc_ext}"
+                    logger.error(error_msg)
+                    self._save_analysis_summary(video_id, "FAILED", error_msg)
+                    results[video_id] = {
+                        'error': error_msg
+                    }
+                
+                logger.info(f"Completed analysis for video ID {video_id}")
                 
             except Exception as e:
-                logger.error(f"Error analyzing videos for ID {file_id}: {str(e)}")
-                analysis_results[file_id] = {
-                    'original_video': original_video,
-                    'mc_video': mc_video,
-                    'error': str(e)
+                error_msg = f"Error analyzing files: {str(e)}"
+                logger.error(f"Error analyzing video ID {video_id}: {error_msg}")
+                self._save_analysis_summary(video_id, "FAILED", error_msg)
+                results[video_id] = {
+                    'original_file': original_file,
+                    'mc_file': mc_file,
+                    'error': error_msg
                 }
         
-        return analysis_results
+        return results
 
-    def _list_s3_prefixes(self, bucket_name: str, prefix: str) -> List[str]:
+    def _save_analysis_summary(self, video_id: str, status: str, message: str, has_differences: bool = None):
         """
-        List all prefixes (directories) in the given S3 path.
+        Save analysis summary to a local file.
+
+        Args:
+            video_id: Video ID
+            status: Analysis status (SUCCESS/FAILED)
+            message: Status message
+            has_differences: Whether differences were found (optional)
+        """
+        summary_file = "analysis_summary.json"
+        
+        # Load existing summary if it exists
+        if os.path.exists(summary_file):
+            with open(summary_file, 'r') as f:
+                summary = json.load(f)
+        else:
+            summary = {'analyzed_videos': []}
+        
+        # Add new entry
+        entry = {
+            'video_id': video_id,
+            'status': status,
+            'message': message,
+            'timestamp': datetime.now().isoformat()
+        }
+        if has_differences is not None:
+            entry['has_differences'] = has_differences
+        
+        # Update or add entry
+        updated = False
+        for i, item in enumerate(summary['analyzed_videos']):
+            if item['video_id'] == video_id:
+                summary['analyzed_videos'][i] = entry
+                updated = True
+                break
+        
+        if not updated:
+            summary['analyzed_videos'].append(entry)
+        
+        # Save summary
+        with open(summary_file, 'w') as f:
+            json.dump(summary, f, indent=2)
+            
+    def _get_s3_content(self, bucket_name: str, key: str) -> str:
+        """
+        Get content of an S3 object as string.
+
+        Args:
+            bucket_name: S3 bucket name
+            key: S3 object key
+
+        Returns:
+            Content of the S3 object as string
+        """
+        try:
+            response = self.s3_client.get_object(Bucket=bucket_name, Key=key)
+            return response['Body'].read().decode('utf-8')
+        except Exception as e:
+            logger.error(f"Error reading S3 object {key}: {str(e)}")
+            return ""
+
+    def _list_video_ids(self, bucket_name: str, prefix: str) -> List[str]:
+        """
+        List all video IDs (subdirectories) in the given S3 path.
 
         Args:
             bucket_name: S3 bucket name
             prefix: S3 prefix to list
 
         Returns:
-            List of prefixes
+            List of video IDs
         """
-        prefixes = []
-        
-        # Ensure prefix ends with a slash
-        if prefix and not prefix.endswith('/'):
-            prefix = f"{prefix}/"
+        video_ids = []
         
         try:
+            # Ensure prefix ends with a slash
+            if prefix and not prefix.endswith('/'):
+                prefix = f"{prefix}/"
+            
             # Use delimiter to list "directories"
             paginator = self.s3_client.get_paginator('list_objects_v2')
             for page in paginator.paginate(Bucket=bucket_name, Prefix=prefix, Delimiter='/'):
                 for prefix_obj in page.get('CommonPrefixes', []):
-                    prefixes.append(prefix_obj['Prefix'])
+                    # Extract the ID from the prefix
+                    prefix_path = prefix_obj['Prefix']
+                    if prefix_path.startswith(prefix):
+                        prefix_path = prefix_path[len(prefix):]
+                    video_id = prefix_path.rstrip('/').split('/')[0]
+                    if video_id.isdigit():  # Only include numeric IDs
+                        video_ids.append(video_id)
+            
+            return sorted(list(set(video_ids)))  # Remove duplicates and sort
+            
         except Exception as e:
-            logger.error(f"Error listing S3 prefixes: {str(e)}")
-        
-        return prefixes
+            logger.error(f"Error listing video IDs: {str(e)}")
+            return []
 
 
 
-    def _find_original_video(self, bucket_name: str, prefix: str) -> Optional[str]:
+    def _find_target_video(self, bucket_name: str, prefix: str) -> Optional[str]:
         """
-        Find the original target video in S3 with pattern {id}_{可忽略的字符串}_target.{suffix}
+        Find the target video in S3 with pattern *_target.{suffix}
 
         Args:
             bucket_name: S3 bucket name
@@ -504,31 +679,88 @@ class E2MCWorkflow:
                 Prefix=prefix
             )
             
-            # Extract ID from prefix for matching
-            prefix_parts = prefix.rstrip('/').split('/')
-            file_id = prefix_parts[-1]
+            if not response.get('Contents'):
+                logger.warning(f"No files found in {prefix}")
+                return None
             
-            # Look for files matching the pattern {id}_{可忽略的字符串}_target.{suffix}
-            import re
-            pattern = re.compile(f"^{re.escape(prefix)}{re.escape(file_id)}_.*_target\\.[a-zA-Z0-9]+$", re.IGNORECASE)
-            
+            # Look for files matching the pattern *_target.{suffix}
+            matching_files = []
             for obj in response.get('Contents', []):
                 key = obj['Key']
-                if pattern.match(key):
-                    logger.debug(f"Found original video: {key}")
-                    return f"s3://{bucket_name}/{key}"
+                filename = os.path.basename(key)
+                if "_target." in filename and not any(x in filename for x in ["_mc", "_output"]):
+                    matching_files.append(key)
             
-            # Fallback to simpler pattern if regex didn't match
-            for obj in response.get('Contents', []):
-                key = obj['Key']
-                if "_target." in key.lower() and not "_mc." in key.lower():
-                    logger.debug(f"Found original video (fallback): {key}")
-                    return f"s3://{bucket_name}/{key}"
+            # If we found exactly one matching file, use it
+            if len(matching_files) == 1:
+                key = matching_files[0]
+                logger.debug(f"Found unique target video: {key}")
+                return f"s3://{bucket_name}/{key}"
             
-            logger.warning(f"No original video found in {prefix}")
-            return None
+            # If we found multiple matching files, use the first one
+            elif len(matching_files) > 1:
+                key = matching_files[0]
+                logger.debug(f"Using first target video: {key}")
+                return f"s3://{bucket_name}/{key}"
+            
+            # If we found no matching files, log a warning
+            else:
+                logger.warning(f"No target video found in {prefix}")
+                return None
+                
         except Exception as e:
-            logger.error(f"Error searching for original video: {str(e)}")
+            logger.error(f"Error searching for target video: {str(e)}")
+            return None
+
+    def _find_mc_video(self, bucket_name: str, prefix: str) -> Optional[str]:
+        """
+        Find the MediaConvert video in S3 with pattern *_mc.{suffix}
+
+        Args:
+            bucket_name: S3 bucket name
+            prefix: S3 prefix to search in
+
+        Returns:
+            S3 URL of the video if found, None otherwise
+        """
+        try:
+            # List objects with the prefix
+            response = self.s3_client.list_objects_v2(
+                Bucket=bucket_name,
+                Prefix=prefix
+            )
+            
+            if not response.get('Contents'):
+                logger.warning(f"No files found in {prefix}")
+                return None
+            
+            # Look for files matching the pattern *_mc.{suffix}
+            matching_files = []
+            for obj in response.get('Contents', []):
+                key = obj['Key']
+                filename = os.path.basename(key)
+                if "_mc." in filename and not any(x in filename for x in ["_1280", "_320", "_512", "_640", "_768", "_audio"]):
+                    matching_files.append(key)
+            
+            # If we found exactly one matching file, use it
+            if len(matching_files) == 1:
+                key = matching_files[0]
+                logger.debug(f"Found unique MC video: {key}")
+                return f"s3://{bucket_name}/{key}"
+            
+            # If we found multiple matching files, use the first one
+            elif len(matching_files) > 1:
+                key = matching_files[0]
+                logger.debug(f"Using first MC video: {key}")
+                return f"s3://{bucket_name}/{key}"
+            
+            # If we found no matching files, log a warning
+            else:
+                logger.warning(f"No MediaConvert video found in {prefix}")
+                return None
+                
+        except Exception as e:
+            logger.error(f"Error searching for MediaConvert video: {str(e)}")
             return None
             
     def _find_mc_video(self, bucket_name: str, prefix: str) -> Optional[str]:
@@ -553,9 +785,9 @@ class E2MCWorkflow:
             prefix_parts = prefix.rstrip('/').split('/')
             file_id = prefix_parts[-1]
             
-            # Look for files matching the pattern {id}_{可忽略的字符串}_source_{可忽略的字符串}_{可忽略的字符串}_mc.{suffix}
+            # Look for files matching the pattern {id}_*_mc.{suffix}
             import re
-            pattern = re.compile(f"^{re.escape(prefix)}{re.escape(file_id)}_.*_source_.*_.*_mc\\.[a-zA-Z0-9]+$", re.IGNORECASE)
+            pattern = re.compile(f"^{re.escape(prefix)}{re.escape(file_id)}_.*_mc\\.[a-zA-Z0-9]+$", re.IGNORECASE)
             
             for obj in response.get('Contents', []):
                 key = obj['Key']
@@ -675,6 +907,14 @@ def parse_arguments():
         action='store_true',
         help='Do not wait for jobs to complete before submitting the next'
     )
+    submit_parser.add_argument(
+        '--include',
+        help='Comma-separated list of video IDs to include'
+    )
+    submit_parser.add_argument(
+        '--exclude',
+        help='Comma-separated list of video IDs to exclude'
+    )
     
     # Analyze command
     analyze_parser = subparsers.add_parser(
@@ -695,6 +935,14 @@ def parse_arguments():
         '--use-llm',
         action='store_true',
         help='Use LLM (Amazon Bedrock) to analyze video differences'
+    )
+    analyze_parser.add_argument(
+        '--include',
+        help='Comma-separated list of video IDs to include'
+    )
+    analyze_parser.add_argument(
+        '--exclude',
+        help='Comma-separated list of video IDs to exclude'
     )
     
     # Full workflow command
@@ -740,6 +988,14 @@ def parse_arguments():
         action='store_true',
         help='Do not wait for jobs to complete before submitting the next'
     )
+    workflow_parser.add_argument(
+        '--include',
+        help='Comma-separated list of video IDs to include'
+    )
+    workflow_parser.add_argument(
+        '--exclude',
+        help='Comma-separated list of video IDs to exclude'
+    )
     
     return parser.parse_args()
 
@@ -773,11 +1029,22 @@ def main():
             return 0
             
         elif args.command == 'submit':
+            # 处理 include 和 exclude 参数
+            include_ids = args.include.split(',') if args.include else None
+            exclude_ids = args.exclude.split(',') if args.exclude else None
+            
+            if include_ids:
+                print(f"Including only IDs: {include_ids}")
+            if exclude_ids:
+                print(f"Excluding IDs: {exclude_ids}")
+            
             # Submit MediaConvert jobs
             job_results = workflow.submit_mediaconvert_jobs(
                 config_dir=args.config_dir,
                 s3_source_path=args.s3_source_path,
-                wait_for_completion=not args.no_wait
+                wait_for_completion=not args.no_wait,
+                include_ids=include_ids,
+                exclude_ids=exclude_ids
             )
             
             print(f"Submitted {len(job_results)} MediaConvert jobs")
@@ -787,9 +1054,20 @@ def main():
             return 0
             
         elif args.command == 'analyze':
+            # Process include and exclude parameters
+            include_ids = args.include.split(',') if args.include else None
+            exclude_ids = args.exclude.split(',') if args.exclude else None
+            
+            if include_ids:
+                print(f"Including only IDs: {include_ids}")
+            if exclude_ids:
+                print(f"Excluding IDs: {exclude_ids}")
+            
             # Analyze videos
             analysis_results = workflow.analyze_videos(
-                s3_path=args.s3_path
+                s3_path=args.s3_path,
+                include_ids=include_ids,
+                exclude_ids=exclude_ids
             )
             
             print(f"Analyzed {len(analysis_results)} video pairs")
@@ -809,6 +1087,15 @@ def main():
         elif args.command == 'workflow':
             # Run the complete workflow
             
+            # 处理 include 和 exclude 参数
+            include_ids = args.include.split(',') if args.include else None
+            exclude_ids = args.exclude.split(',') if args.exclude else None
+            
+            if include_ids:
+                print(f"Including only IDs: {include_ids}")
+            if exclude_ids:
+                print(f"Excluding IDs: {exclude_ids}")
+            
             # Step 1: Convert configuration files
             print("Step 1: Converting configuration files...")
             converted_files = workflow.convert_configs(
@@ -824,7 +1111,9 @@ def main():
             job_results = workflow.submit_mediaconvert_jobs(
                 config_dir=args.output_dir,
                 s3_source_path=args.s3_source_path,
-                wait_for_completion=not args.no_wait
+                wait_for_completion=not args.no_wait,
+                include_ids=include_ids,
+                exclude_ids=exclude_ids
             )
             print(f"Submitted {len(job_results)} MediaConvert jobs")
             
@@ -836,7 +1125,9 @@ def main():
             # Step 3: Analyze videos
             print("\nStep 3: Analyzing videos...")
             analysis_results = workflow.analyze_videos(
-                s3_path=args.s3_source_path
+                s3_path=args.s3_source_path,
+                include_ids=include_ids,
+                exclude_ids=exclude_ids
             )
             
             print(f"Analyzed {len(analysis_results)} video pairs")

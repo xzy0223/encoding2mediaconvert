@@ -33,13 +33,22 @@
                   "RateControlMode": "VBR",
                   "Bitrate": 3500000,
                   "MaxBitrate": 8750000
-                }
+                },
+                "Codec": "H_264"
               },
               "Width": 1920,
               "Height": 1080
             },
             "AudioDescriptions": [
               {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 96000,
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
+                },
                 "AudioNormalizationSettings": {
                   "TargetLkfs": -24.0
                 }

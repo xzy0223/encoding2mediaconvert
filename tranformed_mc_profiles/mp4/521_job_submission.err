@@ -1,5 +1,5 @@
 Error submitting MediaConvert job for 521
-Timestamp: 2025-05-20T07:05:01.820122
+Timestamp: 2025-05-21T08:26:37.148330
 
 Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings: Your job contains values for the following settings that are incompatible: Rate control mode, Bitrate, and Max bitrate. Adjust your settings and resubmit your job. Some valid combinations of settings are these: Set Rate control mode to QVBR, specify a value for Max bitrate, and don't specify a value for Bitrate. Or, set Rate control mode to CBR, specify a value for Bitrate, and don't specify a value for Max bitrate.
 
@@ -34,6 +34,22 @@ Job settings:
               "Container": "MP4",
               "Mp4Settings": {}
             },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 128000,
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
+                },
+                "AudioNormalizationSettings": {
+                  "Algorithm": "ITU_BS_1770_2",
+                  "TargetLkfs": -24.0
+                }
+              }
+            ],
             "VideoDescription": {
               "CodecSettings": {
                 "H264Settings": {
@@ -52,21 +68,6 @@ Job settings:
               "Width": 1280,
               "Height": 720
             },
-            "AudioDescriptions": [
-              {
-                "CodecSettings": {
-                  "Codec": "AAC",
-                  "AacSettings": {
-                    "Bitrate": 128000,
-                    "CodingMode": "CODING_MODE_2_0"
-                  }
-                },
-                "AudioNormalizationSettings": {
-                  "Algorithm": "ITU_BS_1770_2",
-                  "TargetLkfs": -24.0
-                }
-              }
-            ],
             "NameModifier": "_1280x720_mc"
           }
         ]

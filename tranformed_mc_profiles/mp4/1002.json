@@ -48,8 +48,7 @@
                   "ColorSpaceConversion": "FORCE_709"
                 }
               },
-              "ColorMetadata": "INSERT",
-              "ColorSpace": "REC_709"
+              "ColorMetadata": "INSERT"
             },
             "AudioDescriptions": [
               {
@@ -57,7 +56,8 @@
                   "Codec": "AAC",
                   "AacSettings": {
                     "Bitrate": 24000,
-                    "SampleRate": 48000
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
                   }
                 },
                 "AudioNormalizationSettings": {

@@ -1,0 +1,239 @@
+{
+  "Settings": {
+    "TimecodeConfig": {
+      "Source": "ZEROBASED"
+    },
+    "OutputGroups": [
+      {
+        "Name": "CMAF",
+        "Outputs": [
+          {
+            "ContainerSettings": {
+              "Container": "CMFC"
+            },
+            "AudioDescriptions": [
+              {
+                "AudioSourceName": "Audio Selector 1",
+                "AudioNormalizationSettings": {
+                  "TargetLkfs": -2
+                },
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "AudioDescriptionBroadcasterMix": "NORMAL",
+                    "Bitrate": 96000,
+                    "CodingMode": "CODING_MODE_2_0",
+                    "SampleRate": 48000
+                  }
+                }
+              }
+            ],
+            "NameModifier": "_AAC_96K"
+          },
+          {
+            "ContainerSettings": {
+              "Container": "CMFC"
+            },
+            "VideoDescription": {
+              "Width": 320,
+              "Height": 180,
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "FramerateDenominator": 1,
+                  "GopSize": 30,
+                  "Bitrate": 180000,
+                  "FramerateControl": "SPECIFIED",
+                  "RateControlMode": "VBR",
+                  "CodecProfile": "MAIN",
+                  "FramerateNumerator": 30,
+                  "CodecLevel": "LEVEL_3_1",
+                  "SceneChangeDetect": "DISABLED",
+                  "QualityTuningLevel": "MULTI_PASS_HQ",
+                  "GopSizeUnits": "FRAMES"
+                }
+              }
+            },
+            "NameModifier": "_320_180_180K"
+          },
+          {
+            "ContainerSettings": {
+              "Container": "CMFC"
+            },
+            "VideoDescription": {
+              "Width": 320,
+              "Height": 180,
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "FramerateDenominator": 1,
+                  "GopSize": 30,
+                  "Bitrate": 270000,
+                  "FramerateControl": "SPECIFIED",
+                  "RateControlMode": "VBR",
+                  "CodecProfile": "MAIN",
+                  "FramerateNumerator": 30,
+                  "CodecLevel": "LEVEL_3_1",
+                  "SceneChangeDetect": "DISABLED",
+                  "QualityTuningLevel": "MULTI_PASS_HQ",
+                  "GopSizeUnits": "FRAMES"
+                }
+              }
+            },
+            "NameModifier": "_320_180_270K"
+          },
+          {
+            "ContainerSettings": {
+              "Container": "CMFC"
+            },
+            "VideoDescription": {
+              "Width": 512,
+              "Height": 288,
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "FramerateDenominator": 1,
+                  "GopSize": 30,
+                  "Bitrate": 450000,
+                  "FramerateControl": "SPECIFIED",
+                  "RateControlMode": "VBR",
+                  "CodecProfile": "MAIN",
+                  "FramerateNumerator": 30,
+                  "CodecLevel": "LEVEL_3_1",
+                  "SceneChangeDetect": "DISABLED",
+                  "QualityTuningLevel": "MULTI_PASS_HQ",
+                  "GopSizeUnits": "FRAMES"
+                }
+              }
+            },
+            "NameModifier": "_512_288_450K"
+          },
+          {
+            "ContainerSettings": {
+              "Container": "CMFC"
+            },
+            "VideoDescription": {
+              "Width": 640,
+              "Height": 360,
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "FramerateDenominator": 1,
+                  "GopSize": 30,
+                  "Bitrate": 675000,
+                  "FramerateControl": "SPECIFIED",
+                  "RateControlMode": "VBR",
+                  "CodecProfile": "MAIN",
+                  "FramerateNumerator": 30,
+                  "CodecLevel": "LEVEL_3_1",
+                  "SceneChangeDetect": "DISABLED",
+                  "QualityTuningLevel": "MULTI_PASS_HQ",
+                  "GopSizeUnits": "FRAMES"
+                }
+              }
+            },
+            "NameModifier": "_640_360_675K"
+          },
+          {
+            "ContainerSettings": {
+              "Container": "CMFC"
+            },
+            "VideoDescription": {
+              "Width": 768,
+              "Height": 432,
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "FramerateDenominator": 1,
+                  "GopSize": 30,
+                  "Bitrate": 1080000,
+                  "FramerateControl": "SPECIFIED",
+                  "RateControlMode": "VBR",
+                  "CodecProfile": "MAIN",
+                  "FramerateNumerator": 30,
+                  "CodecLevel": "LEVEL_3_1",
+                  "SceneChangeDetect": "DISABLED",
+                  "QualityTuningLevel": "MULTI_PASS_HQ",
+                  "GopSizeUnits": "FRAMES"
+                }
+              }
+            },
+            "NameModifier": "_768_432_1080K"
+          },
+          {
+            "ContainerSettings": {
+              "Container": "CMFC"
+            },
+            "VideoDescription": {
+              "Width": 1280,
+              "Height": 720,
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "FramerateDenominator": 1,
+                  "GopSize": 30,
+                  "Bitrate": 1800000,
+                  "FramerateControl": "SPECIFIED",
+                  "RateControlMode": "VBR",
+                  "CodecProfile": "MAIN",
+                  "FramerateNumerator": 30,
+                  "CodecLevel": "LEVEL_3_1",
+                  "SceneChangeDetect": "DISABLED",
+                  "QualityTuningLevel": "MULTI_PASS_HQ",
+                  "GopSizeUnits": "FRAMES"
+                }
+              }
+            },
+            "NameModifier": "_1280_720_1800K"
+          }
+        ],
+        "OutputGroupSettings": {
+          "Type": "CMAF_GROUP_SETTINGS",
+          "CmafGroupSettings": {
+            "WriteDashManifest": "DISABLED",
+            "SegmentLength": 2,
+            "Destination": "S3_OUTPUT_URL",
+            "FragmentLength": 2,
+            "SegmentControl": "SEGMENTED_FILES",
+            "ManifestDurationFormat": "FLOATING_POINT",
+            "ManifestCompression": "GZIP"
+          }
+        }
+      }
+    ],
+    "FollowSource": 1,
+    "Inputs": [
+      {
+        "AudioSelectors": {
+          "Audio Selector 1": {
+            "DefaultSelection": "DEFAULT"
+          }
+        },
+        "VideoSelector": {},
+        "TimecodeSource": "ZEROBASED",
+        "FileInput": "{SOURCE_S3_URL}"
+      }
+    ]
+  },
+  "AccelerationSettings": {
+    "Mode": "PREFERRED"
+  }
+}

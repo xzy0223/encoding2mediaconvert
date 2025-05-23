@@ -1,0 +1,261 @@
+{
+  "Settings": {
+    "TimecodeConfig": {
+      "Source": "ZEROBASED"
+    },
+    "OutputGroups": [
+      {
+        "CustomName": "advanced_dash",
+        "Name": "DASH ISO",
+        "Outputs": [
+          {
+            "ContainerSettings": {
+              "Container": "MPD"
+            },
+            "VideoDescription": {
+              "Width": 320,
+              "ScalingBehavior": "DEFAULT",
+              "Height": 180,
+              "VideoPreprocessors": {
+                "Deinterlacer": {
+                  "Algorithm": "INTERPOLATE",
+                  "Mode": "DEINTERLACE"
+                }
+              },
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "FramerateDenominator": 1,
+                  "GopSize": 30,
+                  "MaxBitrate": 180000,
+                  "FramerateControl": "SPECIFIED",
+                  "RateControlMode": "QVBR",
+                  "CodecProfile": "MAIN",
+                  "FramerateNumerator": 30,
+                  "CodecLevel": "LEVEL_3_1",
+                  "SceneChangeDetect": "DISABLED",
+                  "QualityTuningLevel": "SINGLE_PASS",
+                  "GopSizeUnits": "FRAMES"
+                }
+              }
+            },
+            "NameModifier": "_320_180_180k"
+          },
+          {
+            "ContainerSettings": {
+              "Container": "MPD"
+            },
+            "VideoDescription": {
+              "Width": 320,
+              "ScalingBehavior": "DEFAULT",
+              "Height": 180,
+              "VideoPreprocessors": {
+                "Deinterlacer": {
+                  "Algorithm": "INTERPOLATE",
+                  "Mode": "DEINTERLACE"
+                }
+              },
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "FramerateDenominator": 1,
+                  "GopSize": 30,
+                  "MaxBitrate": 270000,
+                  "FramerateControl": "SPECIFIED",
+                  "RateControlMode": "QVBR",
+                  "CodecProfile": "MAIN",
+                  "FramerateNumerator": 30,
+                  "CodecLevel": "LEVEL_3_1",
+                  "SceneChangeDetect": "DISABLED",
+                  "QualityTuningLevel": "SINGLE_PASS",
+                  "GopSizeUnits": "FRAMES"
+                }
+              }
+            },
+            "NameModifier": "_320_180_270k"
+          },
+          {
+            "ContainerSettings": {
+              "Container": "MPD"
+            },
+            "VideoDescription": {
+              "Width": 512,
+              "ScalingBehavior": "DEFAULT",
+              "Height": 288,
+              "VideoPreprocessors": {
+                "Deinterlacer": {
+                  "Algorithm": "INTERPOLATE",
+                  "Mode": "DEINTERLACE"
+                }
+              },
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "FramerateDenominator": 1,
+                  "GopSize": 30,
+                  "MaxBitrate": 450000,
+                  "FramerateControl": "SPECIFIED",
+                  "RateControlMode": "QVBR",
+                  "CodecProfile": "MAIN",
+                  "FramerateNumerator": 30,
+                  "CodecLevel": "LEVEL_3_1",
+                  "SceneChangeDetect": "DISABLED",
+                  "QualityTuningLevel": "SINGLE_PASS",
+                  "GopSizeUnits": "FRAMES"
+                }
+              }
+            },
+            "NameModifier": "_512_288_450k"
+          },
+          {
+            "ContainerSettings": {
+              "Container": "MPD"
+            },
+            "VideoDescription": {
+              "Width": 640,
+              "ScalingBehavior": "DEFAULT",
+              "Height": 360,
+              "VideoPreprocessors": {
+                "Deinterlacer": {
+                  "Algorithm": "INTERPOLATE",
+                  "Mode": "DEINTERLACE"
+                }
+              },
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "FramerateDenominator": 1,
+                  "GopSize": 30,
+                  "MaxBitrate": 675000,
+                  "FramerateControl": "SPECIFIED",
+                  "RateControlMode": "QVBR",
+                  "CodecProfile": "MAIN",
+                  "FramerateNumerator": 30,
+                  "CodecLevel": "LEVEL_3_1",
+                  "SceneChangeDetect": "DISABLED",
+                  "QualityTuningLevel": "SINGLE_PASS",
+                  "GopSizeUnits": "FRAMES"
+                }
+              }
+            },
+            "NameModifier": "_640_360_675k"
+          },
+          {
+            "ContainerSettings": {
+              "Container": "MPD"
+            },
+            "VideoDescription": {
+              "Width": 768,
+              "ScalingBehavior": "DEFAULT",
+              "Height": 432,
+              "VideoPreprocessors": {
+                "Deinterlacer": {
+                  "Algorithm": "INTERPOLATE",
+                  "Mode": "DEINTERLACE"
+                }
+              },
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "FramerateDenominator": 1,
+                  "GopSize": 30,
+                  "MaxBitrate": 1080000,
+                  "FramerateControl": "SPECIFIED",
+                  "RateControlMode": "QVBR",
+                  "CodecProfile": "MAIN",
+                  "FramerateNumerator": 30,
+                  "CodecLevel": "LEVEL_3_1",
+                  "SceneChangeDetect": "DISABLED",
+                  "QualityTuningLevel": "SINGLE_PASS",
+                  "GopSizeUnits": "FRAMES"
+                }
+              }
+            },
+            "NameModifier": "_768_432_1080k"
+          },
+          {
+            "ContainerSettings": {
+              "Container": "MPD"
+            },
+            "VideoDescription": {
+              "Width": 1280,
+              "ScalingBehavior": "DEFAULT",
+              "Height": 720,
+              "VideoPreprocessors": {
+                "Deinterlacer": {
+                  "Algorithm": "INTERPOLATE",
+                  "Mode": "DEINTERLACE"
+                }
+              },
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "FramerateDenominator": 1,
+                  "GopSize": 30,
+                  "MaxBitrate": 1800000,
+                  "FramerateControl": "SPECIFIED",
+                  "RateControlMode": "QVBR",
+                  "CodecProfile": "MAIN",
+                  "FramerateNumerator": 30,
+                  "CodecLevel": "LEVEL_3_1",
+                  "SceneChangeDetect": "DISABLED",
+                  "QualityTuningLevel": "SINGLE_PASS",
+                  "GopSizeUnits": "FRAMES"
+                }
+              }
+            },
+            "NameModifier": "_1280_720_1800k"
+          },
+          {
+            "ContainerSettings": {
+              "Container": "MPD"
+            },
+            "AudioDescriptions": [
+              {
+                "AudioSourceName": "Audio Selector 1",
+                "AudioNormalizationSettings": {
+                  "TargetLkfs": -2
+                },
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 96000,
+                    "CodingMode": "CODING_MODE_2_0",
+                    "SampleRate": 48000
+                  }
+                }
+              }
+            ],
+            "NameModifier": "_audio_96k"
+          }
+        ],
+        "OutputGroupSettings": {
+          "Type": "DASH_ISO_GROUP_SETTINGS",
+          "DashIsoGroupSettings": {
+            "SegmentLength": 2,
+            "FragmentLength": 2,
+            "MpdProfile": "MAIN_PROFILE"
+          }
+        }
+      }
+    ],
+    "Inputs": [
+      {
+        "AudioSelectors": {
+          "Audio Selector 1": {
+            "DefaultSelection": "DEFAULT"
+          }
+        },
+        "VideoSelector": {},
+        "DeblockFilter": "ENABLED",
+        "TimecodeSource": "ZEROBASED"
+      }
+    ]
+  },
+  "AccelerationSettings": {
+    "Mode": "DISABLED"
+  },
+  "StatusUpdateInterval": "SECONDS_60",
+  "Priority": 0,
+  "HopDestinations": []
+}

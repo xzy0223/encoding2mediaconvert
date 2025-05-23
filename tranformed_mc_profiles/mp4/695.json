@@ -58,12 +58,12 @@
                   "Codec": "AAC",
                   "AacSettings": {
                     "Bitrate": 96000,
-                    "CodingMode": "CODING_MODE_2_0",
-                    "SampleRate": 48000
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
                   }
                 },
                 "AudioNormalizationSettings": {
-                  "TargetLkfs": 17.23
+                  "TargetLkfs": -9.5
                 }
               }
             ],

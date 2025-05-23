@@ -241,6 +241,9 @@ rules:
   - source:
       path: "video_codec_parameters.bf"
       type: "number"
+      condition:
+        operator: "lte"
+        value: 7
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.NumberBFramesBetweenReferenceFrames"
 
@@ -754,8 +757,23 @@ rules:
   - source:
       path: "audio_channels_number"
       type: "number"
+      condition:
+        source_path: "audio_codec"
+        operator: "in"
+        value: ["dolby_aac", "dolby_heaac", "libfaac"]
     target:
       path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.AacSettings.CodingMode"
+      transform: "audio_channels_format"
+
+  - source:
+      path: "audio_channels_number"
+      type: "number"
+      condition:
+        source_path: "audio_codec"
+        operator: "eq"
+        value: "ac3"
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.Ac3Settings.CodingMode"
       transform: "audio_channels_format"
         
   # 处理音频最大码率参数
@@ -779,8 +797,23 @@ rules:
   - source:
       path: "audio_stream.layout"
       type: "string"
+      condition:
+        source_path: "audio_codec"
+        operator: "in"
+        value: ["dolby_aac", "dolby_heaac", "libfaac"]
     target:
       path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.AacSettings.CodingMode"
+      transform: "audio_layout_format"
+
+  - source:
+      path: "audio_stream.layout"
+      type: "string"
+      condition:
+        source_path: "audio_codec"
+        operator: "eq"
+        value: "ac3"
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.Ac3Settings.CodingMode"
       transform: "audio_layout_format"
 
 
@@ -789,8 +822,9 @@ rules:
       path: "dialnorm_threshold"
       type: "number"
       condition:
-        operator: "exists"
-        value: true
+        source_path: "audio_codec"
+        operator: "eq"
+        value: "ac3"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.Ac3Settings.Dialnorm"
       
@@ -1008,13 +1042,6 @@ rules:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.GopSize"
 
         
-  # 处理H.264编码级别参数
-  - source:
-      path: "level"
-      type: "string"
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.CodecLevel"
-      transform: "level_format"
         
   # 处理音频响度模式参数
   - source:
@@ -1081,13 +1108,6 @@ rules:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.ParControl"
       value: "INITIALIZE_FROM_SOURCE"
         
-  # 处理编码配置文件参数
-  - source:
-      path: "profile"
-      type: "string"
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.CodecProfile"
-      transform: "profile_format"
         
   # 处理turbo参数
   - source:
@@ -1112,12 +1132,40 @@ rules:
       value: "ENABLED"
         
   # 处理视频编码器熵编码参数
+
   - source:
       path: "video_codec_parameters.coder"
       type: "string"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.EntropyEncoding"
       transform: "coder_format"
+      
+  - source:
+      path: "video_codec_parameters.coder"
+      type: "string"
+      condition:
+        operator: "AND"
+        conditions:
+          - operator: "OR"
+            conditions:
+              - operator: "eq"
+                source_path: "level"
+                value: 30
+              - operator: "eq"
+                source_path: "video_codec_parameters.level"
+                value: 30
+          - operator: "OR"
+            conditions:
+              - operator: "eq"
+                source_path: "profile"
+                value: "baseline"
+              - operator: "eq"
+                source_path: "video_codec_parameters.vprofile"
+                value: "baseline"
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.EntropyEncoding"
+      value: "CAVLC"
+
         
   # 处理视频编码器直接预测参数
   - source:
@@ -1167,10 +1215,21 @@ rules:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.CodecProfile"
       transform: "profile_format"
 
+  # 处理编码配置文件参数
+  - source:
+      path: "profile"
+      type: "string"
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.CodecProfile"
+      transform: "profile_format"
+
   # 处理视频编码器B帧策略参数
   - source:
       path: "video_codec_parameters.b_strategy"
       type: "number"
+      condition:
+        operator: "lte"
+        value: 7
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.NumberBFramesBetweenReferenceFrames"
 
@@ -1198,19 +1257,19 @@ rules:
       value: "INITIALIZE_FROM_SOURCE"
 
         
-  - source:
-      path: "set_aspect_ratio"
-      type: "string"
-      condition:
-        operator: "eq"
-        value: "16:9"
-    target:
-      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.ParControl"
-        value: "SPECIFIED"
-      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.ParNumerator"
-        value: 16
-      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.ParDenominator"
-        value: 9
+  # - source:
+  #     path: "set_aspect_ratio"
+  #     type: "string"
+  #     condition:
+  #       operator: "eq"
+  #       value: "16:9"
+  #   target:
+  #     - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.ParControl"
+  #       value: "SPECIFIED"
+  #     - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.ParNumerator"
+  #       value: 16
+  #     - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.ParDenominator"
+  #       value: 9
 
 # Additional rules
   # 处理视频编码器加权预测参数
@@ -1247,10 +1306,18 @@ rules:
   # 处理视频编码器级别参数
   - source:
       path: "video_codec_parameters.level"
-      type: "number"
+      type: "dummy"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.CodecLevel"
       transform: "h264_level_format"
+
+  # 处理H.264编码级别参数
+  - source:
+      path: "level"
+      type: "dummy"
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.CodecLevel"
+      transform: "level_format"
 
         
   # 处理视频编码器场景变化检测阈值参数
@@ -1309,151 +1376,6 @@ rules:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateControl"
       value: "INITIALIZE_FROM_SOURCE"
 
-# Multi-stream handling with iteration (for HLS/DASH)
-  - source:
-      path: "stream"
-      type: "iteration"
-      rules:
-        # Video settings
-        - source:
-            path: "size"
-            type: "string"
-            regex: "(\\d+)x(\\d+)"
-          target:
-            - path: "VideoDescription.Width"
-              value: "$1"
-            - path: "VideoDescription.Height"
-              value: "$2"
-            
-        - source:
-            path: "bitrate"
-            type: "string"
-            regex: "(\\d+)k"
-          target:
-            path: "VideoDescription.CodecSettings.H264Settings.Bitrate"
-            value: "$1000"
-            
-        - source:
-            path: "framerate"
-            type: "number"
-            default: 30
-          target:
-            path: "VideoDescription.CodecSettings.H264Settings.FramerateNumerator"
-            
-        - source:
-            path: "framerate"
-            type: "number"
-          target:
-            path: "VideoDescription.CodecSettings.H264Settings.FramerateDenominator"
-            value: "1"
-            
-        - source:
-            path: "framerate"
-            type: "number"
-          target:
-            path: "VideoDescription.CodecSettings.H264Settings.FramerateControl"
-            value: "SPECIFIED"
-            
-        - source:
-            path: "cbr"
-            type: "string"
-            default: "no"
-          target:
-            path: "VideoDescription.CodecSettings.H264Settings.RateControlMode"
-            transform: "rate_control_mode"
-            
-        - source:
-            path: "video_codec"
-            type: "string"
-            default: "libx264"
-          target:
-            path: "VideoDescription.CodecSettings.Codec"
-            transform: "video_codec_format"
-            
-        - source:
-            path: "profile"
-            type: "string"
-          target:
-            path: "VideoDescription.CodecSettings.H264Settings.Profile"
-            transform: "profile_format"
-            
-        # Audio settings
-        - source:
-            path: "audio_bitrate"
-            type: "string"
-            regex: "(\\d+)k"
-          target:
-            path: "AudioDescriptions[0].CodecSettings.AacSettings.Bitrate"
-            value: "$1000"
-            
-        - source:
-            path: "audio_sample_rate"
-            type: "number"
-            default: 48000
-          target:
-            path: "AudioDescriptions[0].CodecSettings.AacSettings.SampleRate"
-            
-        - source:
-            path: "audio_codec"
-            type: "string"
-          target:
-            path: "AudioDescriptions[0].CodecSettings.Codec"
-            transform: "audio_codec_format"
-            
-        - source:
-            path: "audio_channels_number"
-            type: "number"
-            condition:
-              operator: "eq"
-              value: 2
-          target:
-            path: "AudioDescriptions[0].CodecSettings.AacSettings.CodingMode"
-            value: "CODING_MODE_2_0"
-            
-        - source:
-            path: "audio_channels_number"
-            type: "number"
-            condition:
-              operator: "eq"
-              value: 1
-          target:
-            path: "AudioDescriptions[0].CodecSettings.AacSettings.CodingMode"
-            value: "CODING_MODE_1_0"
-            
-        # 全局设置，不使用条件判断
-        - source:
-            path: "dummy"
-            type: "string"
-            default: "dummy"
-          target:
-            path: "ContainerSettings.Container"
-            value: "M3U8"
-              
-        - source:
-            path: "dummy"
-            type: "string"
-            default: "dummy"
-          target:
-            path: "ContainerSettings.M3u8Settings"
-            value: {}
-              
-        - source:
-            path: "dummy"
-            type: "string"
-            default: "dummy"
-          target:
-            path: "OutputSettings.HlsSettings"
-            value: {}
-    target_base_path: "Settings.OutputGroups[0].Outputs"
-    name_modifier:
-      template: "_{size}_{bitrate}"
-      replacements:
-        "bitrate": 
-          regex: "(\\d+)k"
-          format: "$1K"
-        "size":
-          regex: "(\\d+)x(\\d+)"
-          format: "$1x$2"
 
 # Transformation functions
   # 处理时间码复制参数

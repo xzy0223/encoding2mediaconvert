@@ -38,6 +38,18 @@
               },
               "ScalingBehavior": "DEFAULT"
             },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 96000,
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
+                }
+              }
+            ],
             "NameModifier": "_mc"
           }
         ]

@@ -1,5 +1,5 @@
-MediaConvert job 1747724594334-ryj2ha failed
-Timestamp: 2025-05-20T07:03:24.869163
+MediaConvert job 1747815835906-4117rq failed
+Timestamp: 2025-05-21T08:24:06.422677
 
 Job details:
 {
@@ -7,13 +7,13 @@ Job details:
     "Mode": "DISABLED"
   },
   "AccelerationStatus": "NOT_APPLICABLE",
-  "Arn": "arn:aws:mediaconvert:us-east-1:935206693453:jobs/1747724594334-ryj2ha",
+  "Arn": "arn:aws:mediaconvert:us-east-1:935206693453:jobs/1747815835906-4117rq",
   "BillingTagsSource": "JOB",
-  "ClientRequestToken": "6a34da6f-2765-402e-97ec-69ae8a1c6fc7",
-  "CreatedAt": "2025-05-20 07:03:14+00:00",
+  "ClientRequestToken": "a92cef7a-df66-432c-990b-7c9f9eb7e88c",
+  "CreatedAt": "2025-05-21 08:23:56+00:00",
   "ErrorCode": 1040,
   "ErrorMessage": "Error initializing encoder for video target [1] [initialization failed: Invalid level specified for the selected buffer size.]",
-  "Id": "1747724594334-ryj2ha",
+  "Id": "1747815835906-4117rq",
   "Messages": {
     "Info": [],
     "Warning": []
@@ -99,9 +99,9 @@ Job details:
   "Status": "ERROR",
   "StatusUpdateInterval": "SECONDS_60",
   "Timing": {
-    "FinishTime": "2025-05-20 07:03:19+00:00",
-    "StartTime": "2025-05-20 07:03:15+00:00",
-    "SubmitTime": "2025-05-20 07:03:14+00:00"
+    "FinishTime": "2025-05-21 08:24:00+00:00",
+    "StartTime": "2025-05-21 08:23:56+00:00",
+    "SubmitTime": "2025-05-21 08:23:56+00:00"
   },
   "UserMetadata": {}
 }

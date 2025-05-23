@@ -33,7 +33,8 @@
                   "RateControlMode": "VBR",
                   "Bitrate": 2000000,
                   "MaxBitrate": 5000000
-                }
+                },
+                "Codec": "H_264"
               },
               "Width": 1280,
               "Height": 720
@@ -41,8 +42,11 @@
             "AudioDescriptions": [
               {
                 "CodecSettings": {
+                  "Codec": "AAC",
                   "AacSettings": {
-                    "Bitrate": 128000
+                    "Bitrate": 128000,
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
                   }
                 }
               }

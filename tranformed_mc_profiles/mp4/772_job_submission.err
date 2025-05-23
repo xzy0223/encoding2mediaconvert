@@ -1,5 +1,5 @@
 Error submitting MediaConvert job for 772
-Timestamp: 2025-05-20T07:07:04.805822
+Timestamp: 2025-05-21T08:33:12.002424
 
 Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 1808
 

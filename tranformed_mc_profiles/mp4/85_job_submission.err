@@ -1,5 +1,5 @@
 Error submitting MediaConvert job for 85
-Timestamp: 2025-05-20T07:07:20.714855
+Timestamp: 2025-05-23T12:05:27.058653
 
 Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/codecProfile: Should match all dependencies: See other errors for more details | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings: Should match exactly one schema defined in "oneOf" | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/entropyEncoding: Must be CAVLC | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/codecProfile: Should be equal to one of the allowed values in ["HIGH","HIGH_10BIT","HIGH_422","HIGH_422_10BIT","MAIN"]
 
@@ -15,7 +15,7 @@ Job settings:
             "DefaultSelection": "DEFAULT"
           }
         },
-        "FileInput": "s3://fw-mc-test/mp4/85/85_881366425_source.mpg"
+        "FileInput": "s3://fw-mc-test/mp4/85/{SOURCE_S3_URL}"
       }
     ],
     "OutputGroups": [
@@ -57,8 +57,8 @@ Job settings:
                   "Codec": "AAC",
                   "AacSettings": {
                     "Bitrate": 96000,
-                    "CodingMode": "CODING_MODE_2_0",
-                    "SampleRate": 48000
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
                   }
                 }
               }

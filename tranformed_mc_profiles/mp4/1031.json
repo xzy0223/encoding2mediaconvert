@@ -39,7 +39,7 @@
                   "FramerateDenominator": 1,
                   "QualityTuningLevel": "MULTI_PASS_HQ"
                 },
-                "Codec": "H_265"
+                "Codec": "H_264"
               },
               "Width": 1920,
               "Height": 1080
@@ -47,13 +47,11 @@
             "AudioDescriptions": [
               {
                 "CodecSettings": {
+                  "Codec": "AAC",
                   "AacSettings": {
                     "Bitrate": 192000,
-                    "CodingMode": "CODING_MODE_2_0",
-                    "SampleRate": 48000
-                  },
-                  "Ac3Settings": {
-                    "Dialnorm": 1
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
                   }
                 },
                 "AudioNormalizationSettings": {

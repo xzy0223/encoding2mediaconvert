@@ -1,5 +1,5 @@
 Error submitting MediaConvert job for 430
-Timestamp: 2025-05-20T07:03:13.531916
+Timestamp: 2025-05-21T08:23:55.083211
 
 Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/audioDescriptions/0/codecSettings/aacSettings: sampleRate is a required property
 
@@ -58,8 +58,10 @@ Job settings:
               {
                 "CodecSettings": {
                   "Codec": "AC3",
+                  "Ac3Settings": {
+                    "Bitrate": 384000
+                  },
                   "AacSettings": {
-                    "Bitrate": 384000,
                     "CodingMode": "CODING_MODE_5_1"
                   }
                 }

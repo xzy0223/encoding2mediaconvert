@@ -1,0 +1,4 @@
+Validation failed for /home/ec2-user/e2mc_assistant/tranformed_mc_profiles/mp4/430.json
+Validation errors:
+Found 1 schema validation errors:
+1. Schema error at OutputGroups -> 0 -> Outputs -> 0 -> AudioDescriptions -> 0 -> CodecSettings -> Ac3Settings -> CodingMode: 'CODING_MODE_5_1' is not one of ['CODING_MODE_1_0', 'CODING_MODE_1_1', 'CODING_MODE_2_0', 'CODING_MODE_3_2_LFE']

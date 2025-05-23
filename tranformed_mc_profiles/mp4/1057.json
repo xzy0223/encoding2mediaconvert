@@ -33,14 +33,10 @@
                 "H264Settings": {
                   "RateControlMode": "CBR",
                   "Bitrate": 12000000,
-                  "ParControl": "SPECIFIED",
-                  "ParNumerator": 16,
-                  "ParDenominator": 9,
                   "FramerateControl": "SPECIFIED",
                   "FramerateNumerator": 60000,
                   "FramerateDenominator": 1001,
                   "CodecProfile": "HIGH",
-                  "CodecLevel": "LEVEL_4_1",
                   "NumberReferenceFrames": 3,
                   "GopClosedCadence": 90
                 },
@@ -55,8 +51,8 @@
                   "Codec": "AAC",
                   "AacSettings": {
                     "Bitrate": 256000,
-                    "CodingMode": "CODING_MODE_1_0",
-                    "SampleRate": 48000
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_1_0"
                   }
                 }
               }

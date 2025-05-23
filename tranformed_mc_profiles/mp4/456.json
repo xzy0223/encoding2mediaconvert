@@ -40,6 +40,18 @@
               "Width": 1280,
               "Height": 720
             },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 96000,
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
+                }
+              }
+            ],
             "NameModifier": "_1280x720_700000_mc"
           }
         ]

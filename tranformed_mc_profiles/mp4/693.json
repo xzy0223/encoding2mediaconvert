@@ -45,8 +45,7 @@
                   "FramerateDenominator": 1,
                   "QualityTuningLevel": "MULTI_PASS_HQ",
                   "MinIInterval": 1,
-                  "NumberReferenceFrames": 4,
-                  "NumberBFramesBetweenReferenceFrames": 16
+                  "NumberReferenceFrames": 4
                 },
                 "Codec": "H_264"
               },
@@ -60,12 +59,12 @@
                   "Codec": "AAC",
                   "AacSettings": {
                     "Bitrate": 96000,
-                    "CodingMode": "CODING_MODE_2_0",
-                    "SampleRate": 48000
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
                   }
                 },
                 "AudioNormalizationSettings": {
-                  "TargetLkfs": 17.23
+                  "TargetLkfs": -9.5
                 }
               }
             ],

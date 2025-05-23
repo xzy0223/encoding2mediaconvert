@@ -28,6 +28,22 @@
               "Container": "MP4",
               "Mp4Settings": {}
             },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 128000,
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
+                },
+                "AudioNormalizationSettings": {
+                  "Algorithm": "ITU_BS_1770_2",
+                  "TargetLkfs": -24.0
+                }
+              }
+            ],
             "VideoDescription": {
               "CodecSettings": {
                 "H264Settings": {
@@ -46,21 +62,6 @@
               "Width": 640,
               "Height": 360
             },
-            "AudioDescriptions": [
-              {
-                "CodecSettings": {
-                  "Codec": "AAC",
-                  "AacSettings": {
-                    "Bitrate": 128000,
-                    "CodingMode": "CODING_MODE_2_0"
-                  }
-                },
-                "AudioNormalizationSettings": {
-                  "Algorithm": "ITU_BS_1770_2",
-                  "TargetLkfs": -24.0
-                }
-              }
-            ],
             "NameModifier": "_640x360_mc"
           }
         ]

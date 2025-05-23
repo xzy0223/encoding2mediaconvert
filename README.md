@@ -1,13 +1,34 @@
 # Encoding.com to AWS MediaConvert Assistant
 
 This project provides tools for converting Encoding.com configurations to AWS MediaConvert,
-analyzing configurations, and making API requests.
+analyzing configurations, managing pilot programs, and performing error analysis.
+
+## Project Structure
+
+- `encoding_profiles/` - Contains encoding profile configurations
+- `source_profile/` - Original source profile files
+- `tranformed_mc_profiles/` - Transformed MediaConvert profiles
+- `utils/` - Utility functions and helper scripts
+- `src/` - Core source code for the converter and analyzer
 
 ## Components
+
+### Core Components
 
 - **Converter**: Converts Encoding.com XML configuration files to AWS MediaConvert JSON configuration files
 - **Video Analyzer**: Analyzes video files, compares them, and identifies differences using Claude 3.5 on Bedrock
 - **Requester**: Makes API requests to AWS MediaConvert
+
+### Analysis Tools
+
+- **Error Analyzer** (`analyze_errors_with_ids.py`): Analyzes and categorizes errors in MediaConvert jobs
+- **Error Summary** (`error_summary_with_ids.md`): Detailed documentation of error patterns and solutions
+- **Analysis Summary** (`analysis_summary.json`): JSON format summary of analysis results
+
+### Pilot Program Tools
+
+- **Profile Organizer** (`organize_pilot_files.py`): Organizes and manages pilot program files
+- **Format Specifications** (`pilot_formats_v2.csv`): Defines supported formats for the pilot program
 
 ## Installation
 
@@ -42,9 +63,16 @@ python -m e2mc_assistant.analyzer.video_analyzer compare s3://bucket-name/video1
 
 # Analyze differences using Claude 3.5
 python -m e2mc_assistant.analyzer.video_analyzer analyze s3://bucket-name/video1.mp4 s3://bucket-name/video2.mp4 --output analysis.txt
+```
 
-# Analyze differences from a JSON file
-python -m e2mc_assistant.analyzer.video_analyzer analyze-json differences.json --output analysis.txt
+### Error Analysis
+
+```bash
+# Analyze errors with job IDs
+python analyze_errors_with_ids.py --input-file error_logs.json --output-file error_summary.md
+
+# Organize pilot files
+python organize_pilot_files.py --input-csv pilot_formats_v2.csv --output-dir organized_profiles
 ```
 
 ### Python API
@@ -70,6 +98,15 @@ For detailed documentation on each component, please refer to the README.md file
 - [Converter Documentation](src/e2mc_assistant/converter/README.md)
 - [Converter API Documentation](src/e2mc_assistant/converter/documentation.md)
 - [Video Analyzer Documentation](src/e2mc_assistant/analyzer/README.md)
+- [Error Analysis Documentation](error_summary_with_ids.md)
+
+## Project Files
+
+- `mc_template.json` - Base template for MediaConvert job configurations
+- `setup.py` - Project setup and dependencies
+- `MANIFEST.in` - Installation manifest
+- `.gitignore` - Git ignore rules
+- `analysis_summary.json` - Summary of analysis results
 
 ## License
 

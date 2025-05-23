@@ -33,12 +33,11 @@
               }
             },
             "VideoDescription": {
-              "Width": 640,
-              "Height": 360,
-              "ScalingBehavior": "DEFAULT",
               "CodecSettings": {
-                "Codec": "H_264",
                 "H264Settings": {
+                  "RateControlMode": "VBR",
+                  "Bitrate": 500000,
+                  "MaxBitrate": 1250000,
                   "CodecProfile": "BASELINE",
                   "CodecLevel": "LEVEL_3",
                   "EntropyEncoding": "CABAC",
@@ -49,28 +48,31 @@
                   "NumberReferenceFrames": 3,
                   "Softness": 0,
                   "QualityTuningLevel": "MULTI_PASS_HQ",
-                  "RateControlMode": "VBR",
                   "FramerateControl": "INITIALIZE_FROM_SOURCE",
                   "GopSize": 300
-                }
-              }
+                },
+                "Codec": "H_264"
+              },
+              "Width": 640,
+              "Height": 360,
+              "ScalingBehavior": "DEFAULT"
             },
             "AudioDescriptions": [
               {
                 "CodecSettings": {
+                  "Codec": "AAC",
                   "AacSettings": {
                     "Bitrate": 64000,
                     "SampleRate": 44100,
                     "CodingMode": "CODING_MODE_2_0"
-                  },
-                  "Codec": "AAC"
+                  }
                 },
                 "AudioNormalizationSettings": {
-                  "TargetLkfs": 24.73
+                  "TargetLkfs": -2.0
                 }
               }
             ],
-            "NameModifier": "_640x360_mc"
+            "NameModifier": "_640x360_500000_mc"
           }
         ]
       }

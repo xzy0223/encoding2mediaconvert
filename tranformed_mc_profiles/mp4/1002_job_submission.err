@@ -1,8 +1,7 @@
 Error submitting MediaConvert job for 1002
-Timestamp: 2025-05-20T07:01:37.291964
+Timestamp: 2025-05-21T08:11:20.359513
 
-Error message: Parameter validation failed:
-Unknown parameter in Settings.OutputGroups[0].Outputs[0].VideoDescription: "ColorSpace", must be one of: AfdSignaling, AntiAlias, ChromaPositionMode, CodecSettings, ColorMetadata, Crop, DropFrameTimecode, FixedAfd, Height, Position, RespondToAfd, ScalingBehavior, Sharpness, TimecodeInsertion, TimecodeTrack, VideoPreprocessors, Width
+Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/codecProfile: Should match all dependencies: See other errors for more details | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings: Should match exactly one schema defined in "oneOf" | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings: entropyEncoding is a required property | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/codecProfile: Should be equal to one of the allowed values in ["HIGH","HIGH_10BIT","HIGH_422","HIGH_422_10BIT","MAIN"]
 
 Job settings:
 {
@@ -55,8 +54,7 @@ Job settings:
                   "ColorSpaceConversion": "FORCE_709"
                 }
               },
-              "ColorMetadata": "INSERT",
-              "ColorSpace": "REC_709"
+              "ColorMetadata": "INSERT"
             },
             "AudioDescriptions": [
               {
@@ -64,7 +62,8 @@ Job settings:
                   "Codec": "AAC",
                   "AacSettings": {
                     "Bitrate": 24000,
-                    "SampleRate": 48000
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
                   }
                 },
                 "AudioNormalizationSettings": {

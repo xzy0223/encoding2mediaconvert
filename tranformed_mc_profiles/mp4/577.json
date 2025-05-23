@@ -56,8 +56,8 @@
                   "Codec": "AAC",
                   "AacSettings": {
                     "Bitrate": 128000,
-                    "CodingMode": "CODING_MODE_2_0",
-                    "SampleRate": 44100
+                    "SampleRate": 44100,
+                    "CodingMode": "CODING_MODE_2_0"
                   }
                 }
               }

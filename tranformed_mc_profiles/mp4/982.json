@@ -39,7 +39,7 @@
                   "CodecProfile": "HIGH",
                   "CodecLevel": "LEVEL_5_2"
                 },
-                "Codec": "H_265"
+                "Codec": "H_264"
               },
               "Width": 2560,
               "Height": 1440,
@@ -55,7 +55,8 @@
                   "Codec": "AAC",
                   "AacSettings": {
                     "Bitrate": 320000,
-                    "SampleRate": 48000
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
                   }
                 },
                 "AudioNormalizationSettings": {

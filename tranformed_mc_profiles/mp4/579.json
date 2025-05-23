@@ -60,15 +60,15 @@
             "AudioDescriptions": [
               {
                 "CodecSettings": {
+                  "Codec": "AAC",
                   "AacSettings": {
                     "Bitrate": 56000,
-                    "CodingMode": "CODING_MODE_2_0",
-                    "SampleRate": 44100
-                  },
-                  "Codec": "AAC"
+                    "SampleRate": 44100,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
                 },
                 "AudioNormalizationSettings": {
-                  "TargetLkfs": 24.73
+                  "TargetLkfs": -2.0
                 }
               }
             ],

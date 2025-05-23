@@ -52,7 +52,7 @@
               {
                 "CodecSettings": {
                   "Codec": "AC3",
-                  "AacSettings": {
+                  "Ac3Settings": {
                     "Bitrate": 384000,
                     "CodingMode": "CODING_MODE_5_1"
                   }

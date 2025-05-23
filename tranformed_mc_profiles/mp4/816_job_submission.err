@@ -1,5 +1,5 @@
 Error submitting MediaConvert job for 816
-Timestamp: 2025-05-20T07:07:18.007135
+Timestamp: 2025-05-21T08:33:25.301658
 
 Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 1808
 
@@ -61,6 +61,7 @@ Job settings:
                   "Codec": "AAC",
                   "AacSettings": {
                     "Bitrate": 192000,
+                    "SampleRate": 48000,
                     "CodingMode": "CODING_MODE_2_0"
                   }
                 },

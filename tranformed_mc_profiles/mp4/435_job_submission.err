@@ -1,7 +1,7 @@
 Error submitting MediaConvert job for 435
-Timestamp: 2025-05-20T07:03:13.961362
+Timestamp: 2025-05-21T08:23:55.529180
 
-Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/audioDescriptions/0/codecSettings/aacSettings: sampleRate is a required property
+Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 832
 
 Job settings:
 {
@@ -61,6 +61,7 @@ Job settings:
                   "Codec": "AAC",
                   "AacSettings": {
                     "Bitrate": 128000,
+                    "SampleRate": 48000,
                     "CodingMode": "CODING_MODE_2_0"
                   }
                 },

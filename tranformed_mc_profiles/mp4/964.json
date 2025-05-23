@@ -38,7 +38,7 @@
                   "FramerateDenominator": 1,
                   "CodecProfile": "HIGH"
                 },
-                "Codec": "H_265"
+                "Codec": "H_264"
               },
               "Width": 1280,
               "Height": 720
@@ -49,7 +49,8 @@
                   "Codec": "AAC",
                   "AacSettings": {
                     "Bitrate": 96000,
-                    "SampleRate": 48000
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
                   }
                 }
               }

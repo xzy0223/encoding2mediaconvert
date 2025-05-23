@@ -1,5 +1,5 @@
 Error submitting MediaConvert job for 1058
-Timestamp: 2025-05-20T07:02:03.472246
+Timestamp: 2025-05-21T08:16:50.503915
 
 Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/codecProfile: Should match all dependencies: See other errors for more details | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings: Should match exactly one schema defined in "oneOf" | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/entropyEncoding: Must be CAVLC | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/codecProfile: Should be equal to one of the allowed values in ["HIGH","HIGH_10BIT","HIGH_422","HIGH_422_10BIT","MAIN"]
 
@@ -39,12 +39,11 @@ Job settings:
               }
             },
             "VideoDescription": {
-              "Width": 640,
-              "Height": 360,
-              "ScalingBehavior": "DEFAULT",
               "CodecSettings": {
-                "Codec": "H_264",
                 "H264Settings": {
+                  "RateControlMode": "VBR",
+                  "Bitrate": 500000,
+                  "MaxBitrate": 1250000,
                   "CodecProfile": "BASELINE",
                   "CodecLevel": "LEVEL_3",
                   "EntropyEncoding": "CABAC",
@@ -55,28 +54,31 @@ Job settings:
                   "NumberReferenceFrames": 3,
                   "Softness": 0,
                   "QualityTuningLevel": "MULTI_PASS_HQ",
-                  "RateControlMode": "VBR",
                   "FramerateControl": "INITIALIZE_FROM_SOURCE",
                   "GopSize": 300
-                }
-              }
+                },
+                "Codec": "H_264"
+              },
+              "Width": 640,
+              "Height": 360,
+              "ScalingBehavior": "DEFAULT"
             },
             "AudioDescriptions": [
               {
                 "CodecSettings": {
+                  "Codec": "AAC",
                   "AacSettings": {
                     "Bitrate": 64000,
                     "SampleRate": 44100,
                     "CodingMode": "CODING_MODE_2_0"
-                  },
-                  "Codec": "AAC"
+                  }
                 },
                 "AudioNormalizationSettings": {
-                  "TargetLkfs": 24.73
+                  "TargetLkfs": -2.0
                 }
               }
             ],
-            "NameModifier": "_640x360_mc"
+            "NameModifier": "_640x360_500000_mc"
           }
         ]
       }

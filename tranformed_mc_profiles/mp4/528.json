@@ -34,11 +34,24 @@
                   "Bitrate": 600000,
                   "MaxBitrate": 1500000,
                   "QualityTuningLevel": "MULTI_PASS_HQ"
-                }
+                },
+                "Codec": "H_264"
               },
               "Width": 480,
               "ScalingBehavior": "DEFAULT"
             },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 96000,
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
+                }
+              }
+            ],
             "NameModifier": "_mc"
           }
         ]

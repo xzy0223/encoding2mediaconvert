@@ -1,7 +1,7 @@
 Error submitting MediaConvert job for 913
-Timestamp: 2025-05-20T07:08:28.682621
+Timestamp: 2025-05-21T08:36:08.711575
 
-Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/numberBFramesBetweenReferenceFrames: Should be less than or equal to 7
+Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/captionDescriptions/0/destinationSettings/burninDestinationSettings: Should match all dependencies: See other errors for more details | /outputGroups/0/outputs/0/captionDescriptions/0/destinationSettings/destinationType: Must be BURN_IN
 
 Job settings:
 {
@@ -34,21 +34,12 @@ Job settings:
               "Container": "MP4",
               "Mp4Settings": {}
             },
-            "CaptionDescriptions": [
-              {
-                "DestinationSettings": {
-                  "DestinationType": "EMBEDDED",
-                  "BurninDestinationSettings": {
-                    "FontSize": 16,
-                    "BackgroundOpacity": 255
-                  }
-                }
-              }
-            ],
             "VideoDescription": {
               "CodecSettings": {
-                "Codec": "H_264",
                 "H264Settings": {
+                  "RateControlMode": "VBR",
+                  "Bitrate": 1100000,
+                  "MaxBitrate": 2750000,
                   "GopSize": 125,
                   "FramerateControl": "SPECIFIED",
                   "FramerateNumerator": 25,
@@ -56,10 +47,10 @@ Job settings:
                   "QualityTuningLevel": "MULTI_PASS_HQ",
                   "MinIInterval": 1,
                   "NumberReferenceFrames": 4,
-                  "NumberBFramesBetweenReferenceFrames": 16,
                   "CodecProfile": "MAIN",
                   "CodecLevel": "LEVEL_3"
-                }
+                },
+                "Codec": "H_264"
               },
               "Width": 1024,
               "Height": 576,
@@ -71,16 +62,27 @@ Job settings:
                   "Codec": "AAC",
                   "AacSettings": {
                     "Bitrate": 128000,
-                    "CodingMode": "CODING_MODE_2_0",
-                    "SampleRate": 48000
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
                   }
                 },
                 "AudioNormalizationSettings": {
-                  "TargetLkfs": 17.23
+                  "TargetLkfs": -9.5
                 }
               }
             ],
-            "NameModifier": "_1024x576_mc"
+            "CaptionDescriptions": [
+              {
+                "DestinationSettings": {
+                  "DestinationType": "EMBEDDED",
+                  "BurninDestinationSettings": {
+                    "FontSize": 16,
+                    "BackgroundOpacity": 255
+                  }
+                }
+              }
+            ],
+            "NameModifier": "_1024x576_1100000_mc"
           }
         ]
       }

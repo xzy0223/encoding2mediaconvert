@@ -28,7 +28,8 @@
                 }
               }
             ],
-            "NameModifier": "_AAC_96K"
+            "NameModifier": "_AAC_96K",
+            "Extension": "m4s"
           },
           {
             "ContainerSettings": {
@@ -57,7 +58,8 @@
                 }
               }
             },
-            "NameModifier": "_320_180_180K"
+            "NameModifier": "_320_180_180K",
+            "Extension": "m4s"
           },
           {
             "ContainerSettings": {
@@ -86,7 +88,8 @@
                 }
               }
             },
-            "NameModifier": "_320_180_270K"
+            "NameModifier": "_320_180_270K",
+            "Extension": "m4s"
           },
           {
             "ContainerSettings": {
@@ -115,7 +118,8 @@
                 }
               }
             },
-            "NameModifier": "_512_288_450K"
+            "NameModifier": "_512_288_450K",
+            "Extension": "m4s"
           },
           {
             "ContainerSettings": {
@@ -144,7 +148,8 @@
                 }
               }
             },
-            "NameModifier": "_640_360_675K"
+            "NameModifier": "_640_360_675K",
+            "Extension": "m4s"
           },
           {
             "ContainerSettings": {
@@ -173,7 +178,8 @@
                 }
               }
             },
-            "NameModifier": "_768_432_1080K"
+            "NameModifier": "_768_432_1080K",
+            "Extension": "m4s"
           },
           {
             "ContainerSettings": {
@@ -202,7 +208,8 @@
                 }
               }
             },
-            "NameModifier": "_1280_720_1800K"
+            "NameModifier": "_1280_720_1800K",
+            "Extension": "m4s"
           }
         ],
         "OutputGroupSettings": {

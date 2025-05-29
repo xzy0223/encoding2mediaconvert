@@ -1,3 +1,9 @@
+Error submitting MediaConvert job for 430
+Timestamp: 2025-05-26T05:04:34.318293
+
+Error message: An error occurred (BadRequestException) when calling the CreateJob operation: The request could not be interpreted.
+
+Job settings:
 {
   "Settings": {
     "Inputs": [
@@ -9,7 +15,7 @@
             "DefaultSelection": "DEFAULT"
           }
         },
-        "FileInput": "{SOURCE_S3_URL}"
+        "FileInput": "s3://fw-mc-test/mp4/430/430_882843476_source.mpg"
       }
     ],
     "OutputGroups": [
@@ -18,7 +24,7 @@
         "OutputGroupSettings": {
           "Type": "FILE_GROUP_SETTINGS",
           "FileGroupSettings": {
-            "Destination": "S3_OUTPUT_URL"
+            "Destination": "s3://fw-mc-test/mp4/430/"
           }
         },
         "Outputs": [
@@ -31,18 +37,17 @@
               "CodecSettings": {
                 "H264Settings": {
                   "RateControlMode": "CBR",
-                  "Bitrate": 12000000,
+                  "Bitrate": 6500000,
                   "FramerateControl": "SPECIFIED",
-                  "FramerateNumerator": 60000,
+                  "FramerateNumerator": 30000,
                   "FramerateDenominator": 1001,
-                  "CodecProfile": "HIGH",
-                  "NumberReferenceFrames": 3,
-                  "GopClosedCadence": 90
+                  "CodecProfile": "MAIN",
+                  "NumberReferenceFrames": 3
                 },
                 "Codec": "H_264"
               },
-              "Width": 1280,
-              "Height": 720,
+              "Width": 1920,
+              "Height": 1080,
               "VideoPreprocessors": {
                 "Deinterlacer": {}
               }
@@ -50,16 +55,15 @@
             "AudioDescriptions": [
               {
                 "CodecSettings": {
-                  "Codec": "AAC",
-                  "AacSettings": {
-                    "Bitrate": 256000,
-                    "SampleRate": 48000,
-                    "CodingMode": "CODING_MODE_1_0"
+                  "Codec": "AC3",
+                  "Ac3Settings": {
+                    "Bitrate": 384000,
+                    "CodingMode": "CODING_MODE_5_1"
                   }
                 }
               }
             ],
-            "NameModifier": "_1280x720_12000000_mc"
+            "NameModifier": "_1920x1080_6500000_mc"
           }
         ]
       }
@@ -68,5 +72,6 @@
       "Source": "ZEROBASED"
     },
     "FollowSource": 1
-  }
+  },
+  "Role": "arn:aws:iam::935206693453:role/MediaConvertRole"
 }

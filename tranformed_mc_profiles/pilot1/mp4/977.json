@@ -30,21 +30,15 @@
             "VideoDescription": {
               "CodecSettings": {
                 "H264Settings": {
-                  "RateControlMode": "CBR",
-                  "Bitrate": 12000000,
-                  "FramerateControl": "SPECIFIED",
-                  "FramerateNumerator": 60000,
-                  "FramerateDenominator": 1001,
-                  "CodecProfile": "HIGH",
-                  "NumberReferenceFrames": 3,
-                  "GopClosedCadence": 90
+                  "RateControlMode": "VBR",
+                  "Bitrate": 3072000,
+                  "MaxBitrate": 5120000,
+                  "GopSize": 300,
+                  "QualityTuningLevel": "SINGLE_PASS_HQ",
+                  "CodecProfile": "MAIN",
+                  "NumberReferenceFrames": 4
                 },
                 "Codec": "H_264"
-              },
-              "Width": 1280,
-              "Height": 720,
-              "VideoPreprocessors": {
-                "Deinterlacer": {}
               }
             },
             "AudioDescriptions": [
@@ -52,14 +46,17 @@
                 "CodecSettings": {
                   "Codec": "AAC",
                   "AacSettings": {
-                    "Bitrate": 256000,
+                    "Bitrate": 192000,
                     "SampleRate": 48000,
-                    "CodingMode": "CODING_MODE_1_0"
+                    "CodingMode": "CODING_MODE_2_0"
                   }
+                },
+                "AudioNormalizationSettings": {
+                  "TargetLkfs": -23.0
                 }
               }
             ],
-            "NameModifier": "_1280x720_12000000_mc"
+            "NameModifier": "_mc"
           }
         ]
       }

@@ -3,7 +3,9 @@
     "Inputs": [
       {
         "TimecodeSource": "ZEROBASED",
-        "VideoSelector": {},
+        "VideoSelector": {
+          "Rotate": "DEGREE_0"
+        },
         "AudioSelectors": {
           "Audio Selector 1": {
             "DefaultSelection": "DEFAULT"
@@ -25,24 +27,33 @@
           {
             "ContainerSettings": {
               "Container": "MP4",
-              "Mp4Settings": {}
+              "Mp4Settings": {
+                "Mp4MajorBrand": "mp42"
+              }
             },
             "VideoDescription": {
               "CodecSettings": {
                 "H264Settings": {
-                  "RateControlMode": "CBR",
-                  "Bitrate": 12000000,
-                  "FramerateControl": "SPECIFIED",
-                  "FramerateNumerator": 60000,
+                  "RateControlMode": "VBR",
+                  "Bitrate": 5000000,
+                  "MaxBitrate": 12500000,
+                  "CodecProfile": "MAIN",
+                  "FramerateControl": "INITIALIZE_FROM_SOURCE",
+                  "FramerateNumerator": 30000,
                   "FramerateDenominator": 1001,
-                  "CodecProfile": "HIGH",
-                  "NumberReferenceFrames": 3,
-                  "GopClosedCadence": 90
+                  "GopSize": 60,
+                  "EntropyEncoding": "CAVLC",
+                  "MinIInterval": 25,
+                  "SceneChangeDetect": "ENABLED",
+                  "NumberBFramesBetweenReferenceFrames": 1,
+                  "Slices": 1,
+                  "InterlaceMode": "PROGRESSIVE"
                 },
                 "Codec": "H_264"
               },
               "Width": 1280,
               "Height": 720,
+              "ScalingBehavior": "DEFAULT",
               "VideoPreprocessors": {
                 "Deinterlacer": {}
               }
@@ -52,14 +63,18 @@
                 "CodecSettings": {
                   "Codec": "AAC",
                   "AacSettings": {
-                    "Bitrate": 256000,
+                    "Bitrate": 96000,
                     "SampleRate": 48000,
-                    "CodingMode": "CODING_MODE_1_0"
+                    "CodingMode": "CODING_MODE_2_0"
                   }
+                },
+                "AudioNormalizationSettings": {
+                  "TargetLkfs": -24.0,
+                  "TruePeakLimiterThreshold": -2.0
                 }
               }
             ],
-            "NameModifier": "_1280x720_12000000_mc"
+            "NameModifier": "_1280x720_5000000_mc"
           }
         ]
       }

@@ -256,7 +256,7 @@ class E2MCWorkflow:
                     if wait_for_completion:
                         logger.info(f"Waiting for job {job_id} to complete...")
                         job = self.job_submitter.track_job(job_id)
-                        job_results[job_id] = job['Status']
+                        job_results[f"{file_id}:{job_id}"] = job['Status']  # Store with file_id prefix
                         
                         # Log job completion status
                         if job['Status'] != MediaConvertJobSubmitter.STATUS_COMPLETE:
@@ -283,8 +283,101 @@ class E2MCWorkflow:
                                         f.write(job['ErrorCode'])
                                         
                                 logger.error(f"Job {job_id} failed. Error details written to {error_file}")
+                        else:
+                            # Job completed successfully, upload JSON file with timestamp suffix
+                            try:
+                                # Parse S3 path
+                                bucket_name, prefix = self._parse_s3_path(s3_source_path)
+                                
+                                # Generate timestamp suffix for the JSON file
+                                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                                json_filename = f"{file_id}_{timestamp}.json"
+                                json_s3_key = f"{prefix}/{file_id}/{json_filename}"
+                                
+                                # Read the current JSON file content
+                                with open(config_file, 'r') as f:
+                                    current_json_content = f.read()
+                                
+                                # Check if there are previous JSON files in S3
+                                previous_json = self._find_previous_json(bucket_name, f"{prefix}/{file_id}")
+                                
+                                # Initialize update log content
+                                update_log_content = f"Update log for {file_id} - {timestamp}\n"
+                                update_log_content += f"Job ID: {job_id}\n"
+                                update_log_content += f"Status: {job['Status']}\n\n"
+                                
+                                # Compare with previous JSON if it exists
+                                if previous_json:
+                                    logger.info(f"Found previous JSON file: {previous_json}")
+                                    update_log_content += f"Comparing with previous JSON: {previous_json}\n\n"
+                                    
+                                    # Download previous JSON content
+                                    previous_json_key = previous_json.replace(f"s3://{bucket_name}/", "")
+                                    previous_json_content = self._get_s3_content(bucket_name, previous_json_key)
+                                    
+                                    # Compare JSON content
+                                    try:
+                                        import difflib
+                                        previous_json_obj = json.loads(previous_json_content)
+                                        current_json_obj = json.loads(current_json_content)
+                                        
+                                        # Convert to formatted JSON strings for better diff
+                                        previous_formatted = json.dumps(previous_json_obj, indent=2, sort_keys=True)
+                                        current_formatted = json.dumps(current_json_obj, indent=2, sort_keys=True)
+                                        
+                                        # Generate diff
+                                        diff = difflib.unified_diff(
+                                            previous_formatted.splitlines(),
+                                            current_formatted.splitlines(),
+                                            fromfile=previous_json,
+                                            tofile=json_filename,
+                                            lineterm=''
+                                        )
+                                        
+                                        # Add diff to update log
+                                        diff_content = '\n'.join(list(diff))
+                                        if diff_content:
+                                            update_log_content += "Changes found:\n"
+                                            update_log_content += diff_content
+                                            update_log_content += "\n\n"
+                                        else:
+                                            update_log_content += "No changes detected between JSON files.\n\n"
+                                    except Exception as e:
+                                        update_log_content += f"Error comparing JSON files: {str(e)}\n\n"
+                                else:
+                                    update_log_content += "No previous JSON file found. This is the first version.\n\n"
+                                
+                                # Upload the JSON file to S3
+                                self.s3_client.put_object(
+                                    Bucket=bucket_name,
+                                    Key=json_s3_key,
+                                    Body=current_json_content
+                                )
+                                logger.info(f"Uploaded JSON file to s3://{bucket_name}/{json_s3_key}")
+                                
+                                # Update the update.log file in the video ID's prefix directory
+                                update_log_key = f"{prefix}/{file_id}/update.log"
+                                
+                                # Check if update.log already exists
+                                try:
+                                    existing_log = self._get_s3_content(bucket_name, update_log_key)
+                                    update_log_content = existing_log + "\n" + update_log_content
+                                except Exception:
+                                    # Log doesn't exist yet, use the new content
+                                    pass
+                                
+                                # Upload the update log to S3
+                                self.s3_client.put_object(
+                                    Bucket=bucket_name,
+                                    Key=update_log_key,
+                                    Body=update_log_content
+                                )
+                                logger.info(f"Updated log file at s3://{bucket_name}/{update_log_key}")
+                                
+                            except Exception as e:
+                                logger.error(f"Error handling JSON upload for {file_id}: {str(e)}")
                     else:
-                        job_results[job_id] = "SUBMITTED"
+                        job_results[f"{file_id}:{job_id}"] = "SUBMITTED"  # Store with file_id prefix
                     
                 except Exception as e:
                     error_msg = f"Error submitting job for {file_id}: {str(e)}"
@@ -763,6 +856,53 @@ class E2MCWorkflow:
             logger.error(f"Error searching for MediaConvert video: {str(e)}")
             return None
             
+    def _find_previous_json(self, bucket_name: str, prefix: str) -> Optional[str]:
+        """
+        Find the most recent JSON file in the given S3 prefix.
+
+        Args:
+            bucket_name: S3 bucket name
+            prefix: S3 prefix to search in
+
+        Returns:
+            S3 URL of the most recent JSON file if found, None otherwise
+        """
+        try:
+            # List objects with the prefix
+            response = self.s3_client.list_objects_v2(
+                Bucket=bucket_name,
+                Prefix=prefix
+            )
+            
+            if not response.get('Contents'):
+                logger.debug(f"No files found in {prefix}")
+                return None
+            
+            # Look for JSON files
+            json_files = []
+            for obj in response.get('Contents', []):
+                key = obj['Key']
+                if key.endswith('.json'):
+                    json_files.append({
+                        'key': key,
+                        'last_modified': obj['LastModified']
+                    })
+            
+            # If we found JSON files, return the most recent one
+            if json_files:
+                # Sort by last modified date (newest first)
+                json_files.sort(key=lambda x: x['last_modified'], reverse=True)
+                most_recent = json_files[0]['key']
+                logger.debug(f"Found most recent JSON file: {most_recent}")
+                return f"s3://{bucket_name}/{most_recent}"
+            
+            logger.debug(f"No JSON files found in {prefix}")
+            return None
+                
+        except Exception as e:
+            logger.error(f"Error searching for JSON files: {str(e)}")
+            return None
+            
     def _find_mc_video(self, bucket_name: str, prefix: str) -> Optional[str]:
         """
         Find the MediaConvert video in S3 with pattern {id}_{可忽略的字符串}_source_{可忽略的字符串}_{可忽略的字符串}_mc.{suffix}
@@ -1047,9 +1187,58 @@ def main():
                 exclude_ids=exclude_ids
             )
             
+            # Create summary log file path
+            summary_log_file = os.path.join(args.config_dir, "job_execution_summary.log")
+            
+            # Get current timestamp
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            
+            # Create summary content
+            summary_content = f"\n--- Job Execution Summary ({timestamp}) ---\n"
+            summary_content += f"Submitted {len(job_results)} MediaConvert jobs\n"
+            
+            # Print summary to console
             print(f"Submitted {len(job_results)} MediaConvert jobs")
-            for job_id, status in job_results.items():
-                print(f"Job {job_id}: {status}")
+            
+            # Track success and failure counts
+            success_count = 0
+            error_count = 0
+            
+            for job_id, result in job_results.items():
+                # Extract file_id if available (it's in the format {file_id}: ERROR: {message})
+                file_id = None
+                if ":" in job_id and not job_id.startswith("ERROR"):
+                    file_id = job_id
+                    job_status = result
+                    if job_status == MediaConvertJobSubmitter.STATUS_COMPLETE:
+                        success_count += 1
+                    else:
+                        error_count += 1
+                    # Print to console with file ID
+                    print(f"File ID: {file_id}, Status: {job_status}")
+                    # Add to summary
+                    summary_content += f"File ID: {file_id}, Status: {job_status}\n"
+                else:
+                    # This is a regular job ID
+                    job_status = result
+                    if job_status == MediaConvertJobSubmitter.STATUS_COMPLETE:
+                        success_count += 1
+                    else:
+                        error_count += 1
+                    # Print to console
+                    print(f"Job {job_id}: {job_status}")
+                    # Add to summary
+                    summary_content += f"Job {job_id}: {job_status}\n"
+            
+            # Add success/error counts to summary
+            summary_content += f"Success: {success_count}, Errors: {error_count}\n"
+            summary_content += "--- End of Summary ---\n"
+            
+            # Append to summary log file
+            with open(summary_log_file, 'a') as f:
+                f.write(summary_content)
+            
+            print(f"Summary log appended to {summary_log_file}")
             
             return 0
             

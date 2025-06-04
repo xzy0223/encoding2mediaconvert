@@ -461,10 +461,7 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Codec"
       transform: "video_codec_format"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "mp4"
+
         
   # Add CMAF segment length settings
   - source:
@@ -712,6 +709,18 @@ rules:
             condition:
               operator: exists
               source_path: cabr  # 检查 cabr 参数存在
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.Bitrate"
+      value: "$1000"
+
+  - source:
+      path: "bitrate"
+      type: "string"
+      regex: "(\\d+)k"
+      condition:
+        operator: eq
+        source_path: hard_cbr
+        value: "yes"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.Bitrate"
       value: "$1000"
@@ -1323,7 +1332,7 @@ rules:
   # 处理视频编码器级别参数
   - source:
       path: "video_codec_parameters.level"
-      type: "dummy"
+      type: "string"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.CodecLevel"
       transform: "h264_level_format"
@@ -1331,7 +1340,7 @@ rules:
   # 处理H.264编码级别参数
   - source:
       path: "level"
-      type: "dummy"
+      type: "string"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.CodecLevel"
       transform: "level_format"

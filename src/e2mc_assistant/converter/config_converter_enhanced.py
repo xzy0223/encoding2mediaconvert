@@ -730,8 +730,8 @@ class ConfigConverter:
         """
         # Check if output is mp4, otherwise log warning and return
         output_format = self.get_value_by_path(source_data, 'output')
-        if output_format != 'mp4':
-            self.logger.warning(f"Rate control settings processing is only supported for MP4 output, got {output_format}. "
+        if output_format not in ['mp4', 'smooth_streaming']:
+            self.logger.warning(f"Rate control settings processing is only supported for MP4/smooth_streaming output, got {output_format}. "
                                "Need to add independent processing function for this format.")
             return False
             

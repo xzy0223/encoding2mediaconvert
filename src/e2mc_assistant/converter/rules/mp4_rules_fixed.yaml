@@ -1,5 +1,22 @@
 # Mapping rules for Encoding.com to AWS MediaConvert conversion with iteration rules
 rules:
+
+  # Stream handling with transform function
+  # - source:
+  #     path: "stream"
+  #     type: "string"
+  #   target:
+  #     path: "Settings.OutputGroups[0].Outputs"
+  #     transform: "generate_outputs_with_settings"
+      
+  # Alternate source handling with transform function
+  - source:
+      path: "alternate_source"
+      type: "string"
+    target:
+      path: "Settings.Inputs[0].AudioSelectors"
+      transform: "process_alternate_sources"
+
   # Parameters that don't need conversion but need to be recorded as processed
   - source:
       path: "VCodecParameters"
@@ -257,25 +274,6 @@ rules:
       path: "loudnorm_range"
       type: "dummy"  # 基于目前的统计，无需处理
       
-  # Audio selector settings - using iteration for multiple alternate_source elements
-  - source:
-      path: "alternate_source"
-      type: "iteration"
-      rules:
-        - source:
-            path: "audio_name"
-            type: "string"
-          target:
-            path: "CustomLanguageCode"
-            
-        - source:
-            path: "language"
-            type: "string"
-          target:
-            path: "LanguageCode"
-            transform: "language_code_format"
-    target_base_path: "Settings.Inputs[0].AudioSelectors"
-    key_format: "Audio Selector {index}"
   
   # Output format mapping with array targets
   - source:
@@ -328,7 +326,7 @@ rules:
         value: "fmp4_hls"
     target:
       - path: "Settings.OutputGroups[0].OutputGroupSettings.Type"
-        value: "HLS_GROUP_SETTINGS"
+        value: "CMAF_GROUP_SETTINGS"
         
   - source:
       path: "output"
@@ -421,6 +419,51 @@ rules:
         value: "FILE_GROUP_SETTINGS"
       - path: "Settings.OutputGroups[0].Outputs[0].ContainerSettings.Container"
         value: "WEBM"
+
+  # Single output video settings (for MP4)
+  - source:
+      path: "video_codec"
+      type: "string"
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Codec"
+      transform: "video_codec_format"
+
+  # Segment duration for streaming formats - CMAF
+  - source:
+      path: "split_segments"
+      type: "number"
+    target:
+      path: "Settings.OutputGroups[0].OutputGroupSettings.CmafGroupSettings.SegmentControl"
+      transform: "split_segments_format"
+      condition:
+        source_path: "output"
+        operator: "in"
+        value: ["fmp4_hls", "advanced_fmp4"]
+        
+  # Segment duration for streaming formats - HLS
+  - source:
+      path: "split_segments"
+      type: "number"
+    target:
+      path: "Settings.OutputGroups[0].OutputGroupSettings.HlsGroupSettings.SegmentControl"
+      transform: "split_segments_format"
+      condition:
+        source_path: "output"
+        operator: "eq"
+        value: "advanced_hls"
+        
+  # Segment duration for streaming formats - DASH
+  - source:
+      path: "split_segments"
+      type: "number"
+    target:
+      path: "Settings.OutputGroups[0].OutputGroupSettings.DashIsoGroupSettings.SegmentControl"
+      transform: "split_segments_format"
+      condition:
+        source_path: "output"
+        operator: "in"
+        value: ["mpeg_dash", "advanced_dash"]
+
   # Segment duration for streaming formats - CMAF
   - source:
       path: "segment_duration"
@@ -430,7 +473,7 @@ rules:
       condition:
         source_path: "output"
         operator: "in"
-        value: ["advanced_hls", "advanced_dash", "advanced_fmp4"]
+        value: ["fmp4_hls", "advanced_fmp4"]
         
   # Segment duration for streaming formats - HLS
   - source:
@@ -441,7 +484,7 @@ rules:
       condition:
         source_path: "output"
         operator: "eq"
-        value: "fmp4_hls"
+        value: "advanced_hls"
         
   # Segment duration for streaming formats - DASH
   - source:
@@ -451,29 +494,33 @@ rules:
       path: "Settings.OutputGroups[0].OutputGroupSettings.DashIsoGroupSettings.SegmentLength"
       condition:
         source_path: "output"
-        operator: "eq"
-        value: "mpeg_dash"
+        operator: "in"
+        value: ["mpeg_dash", "advanced_dash"]
 
-  # Single output video settings (for MP4)
+
+  # disable hls manifest in CmafGroupSettings
   - source:
-      path: "video_codec"
+      path: "hls_manifests"
       type: "string"
     target:
-      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Codec"
-      transform: "video_codec_format"
+      path: "Settings.OutputGroups[0].OutputGroupSettings.CmafGroupSettings.WriteHlsManifest"
+      transform: "hls_manifests_switch"
 
-        
-  # Add CMAF segment length settings
   - source:
-      path: "segment_duration"
-      type: "number"
+      path: "dash_manifests"
+      type: "string"
     target:
-      path: "Settings.OutputGroups[0].OutputGroupSettings.CmafGroupSettings.SegmentLength"
-      condition:
-        source_path: "output"
-        operator: "in"
-        value: ["advanced_hls", "advanced_dash", "advanced_fmp4"]
-      
+      path: "Settings.OutputGroups[0].OutputGroupSettings.CmafGroupSettings.WriteDashManifest"
+      transform: "dash_manifests_switch"
+
+  # configure segment extension
+  - source:
+      path: "segment_extension"
+      type: "string"
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].Extension"
+
+
   # 处理帧率参数
   - source:
       path: "framerate"
@@ -484,22 +531,11 @@ rules:
     target:
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateControl"
         value: "SPECIFIED"
-        condition:
-          source_path: "output"
-          operator: "eq"
-          value: "mp4"
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateNumerator"
         value: 24000
-        condition:
-          source_path: "output"
-          operator: "eq"
-          value: "mp4"
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateDenominator"
         value: 1001
-        condition:
-          source_path: "output"
-          operator: "eq"
-          value: "mp4"
+
           
   - source:
       path: "framerate"
@@ -751,6 +787,10 @@ rules:
       type: "string"
       regex: "(\\d+)k"
       default: "128k"
+      condition:
+        operator: in
+        source_path: audio_codec
+        value: ["dolby_aac", "dolby_heaac", "libfaac"]
     target:
       path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.AacSettings.Bitrate"
       value: "$1000"
@@ -759,6 +799,10 @@ rules:
   - source:
       path: "audio_sample_rate"
       type: "number"
+      condition:
+        operator: in
+        source_path: audio_codec
+        value: ["dolby_aac", "dolby_heaac", "libfaac"]
     target:
       path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.AacSettings.SampleRate"
 
@@ -1463,6 +1507,7 @@ transformers:
     "wmav2": "AAC"
     "libmp3lame": "MP3"
     "ac3": "AC3"
+    "eac3": "EAC3"
     "libvorbis": "VORBIS"
     "mp2": "MP2"
     
@@ -1620,3 +1665,14 @@ transformers:
     "bt601": "FORCE_601"
     "1": "FORCE_709"
   
+  hls_manifests_switch:
+    "no": "DISABLED"
+    "yes": "ENABLED"
+
+  dash_manifests_switch:
+    "no": "DISABLED"
+    "yes": "ENABLED"
+
+  split_segments_format:
+    "no": "SINGLE_FILE"
+    "yes": "SEGMENTED_FILES"

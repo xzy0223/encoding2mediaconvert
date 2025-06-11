@@ -157,6 +157,57 @@ rules:
         operator: "eq"
         value: "def"
 
+  - source:
+      path: "main_source.type"
+      type: "dummy"   
+
+  - source:
+      path: "playlist_version"
+      type: "dummy" 
+
+  # 处理字幕CEA数据字段参数
+  - source:
+      path: "closed_captions.cea_data_field"
+      type: "dummy"  # dummy type to indicate no actual conversion needed
+
+  - source:
+      path: "loudnorm_range"
+      type: "dummy"  # 基于目前的统计，无需处理
+
+  - source:
+      path: "pack_files"
+      type: "dummy" 
+
+  - source:
+      path: "pack_type"
+      type: "dummy" 
+
+  - source:
+      path: "pack_each_stream"
+      type: "dummy" 
+
+ # enc里这个参数都伴随output为fmp4，无需处理
+  - source:
+      path: "cmaf_conformant"
+      type: "dummy" 
+
+  - source:
+      path: "manifest.basename"
+      type: "dummy" 
+
+  - source:
+      path: "use_manifest"
+      type: "dummy" 
+
+  - source:
+      path: "use_main_source"
+      type: "dummy" 
+
+  # 不需要处理这个参数，有这个参数都会有alternate_source
+  - source:
+      path: "use_alternate_source"
+      type: "dummy" 
+
   # 处理视频旋转参数
   - source:
       path: "set_rotate"
@@ -265,15 +316,6 @@ rules:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.NumberBFramesBetweenReferenceFrames"
 
         
-  # 处理字幕CEA数据字段参数
-  - source:
-      path: "closed_captions.cea_data_field"
-      type: "dummy"  # dummy type to indicate no actual conversion needed
-
-  - source:
-      path: "loudnorm_range"
-      type: "dummy"  # 基于目前的统计，无需处理
-      
   
   # Output format mapping with array targets
   - source:
@@ -492,6 +534,61 @@ rules:
       type: "number"
     target:
       path: "Settings.OutputGroups[0].OutputGroupSettings.DashIsoGroupSettings.SegmentLength"
+      condition:
+        source_path: "output"
+        operator: "in"
+        value: ["mpeg_dash", "advanced_dash"]
+
+  - source:
+      path: "duration_precision"
+      type: "number"
+    target:
+      path: "Settings.OutputGroups[0].OutputGroupSettings.HlsGroupSettings.ManifestDurationFormat"
+      transform: duration_precision_format
+      condition:
+        source_path: "output"
+        operator: "eq"
+        value: "advanced_hls"
+
+  - source:
+      path: "duration_precision"
+      type: "number"
+    target:
+      path: "Settings.OutputGroups[0].OutputGroupSettings.CmafGroupSettings.ManifestDurationFormat"
+      transform: duration_precision_format
+      condition:
+        source_path: "output"
+        operator: "in"
+        value: ["fmp4_hls", "advanced_fmp4"]
+
+  - source:
+      path: "merge_small_segments"
+      type: "string"
+    target:
+      path: "Settings.OutputGroups[0].OutputGroupSettings.HlsGroupSettings.MinFinalSegmentLength"
+      transform: merge_small_segments_format
+      condition:
+        source_path: "output"
+        operator: "eq"
+        value: "advanced_hls"
+
+  - source:
+      path: "merge_small_segments"
+      type: "string"
+    target:
+      path: "Settings.OutputGroups[0].OutputGroupSettings.CmafGroupSettings.MinFinalSegmentLength"
+      transform: merge_small_segments_format
+      condition:
+        source_path: "output"
+        operator: "in"
+        value: ["fmp4_hls", "advanced_fmp4"]
+
+  - source:
+      path: "merge_small_segments"
+      type: "string"
+    target:
+      path: "Settings.OutputGroups[0].OutputGroupSettings.CmafGroupSettings.MinFinalSegmentLength"
+      transform: merge_small_segments_format
       condition:
         source_path: "output"
         operator: "in"
@@ -1446,6 +1543,27 @@ rules:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateControl"
       value: "INITIALIZE_FROM_SOURCE"
 
+  - source:
+      path: "manifest.add_audio_only"
+      type: "string"
+      condition:
+        source_path: "output"
+        operator: "eq"
+        value: "advanced_hls"
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].OutputSettings.HlsSettings.AudioTrackType"
+      transform: "add_audio_only_format"
+
+  - source:
+      path: "manifest.add_audio_only"
+      type: "string"
+      condition:
+        source_path: "output"
+        operator: "in"
+        value: ["advanced_fmp4", "fmp4_hls"]
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].ContainerSettings.CmfcSettings.AudioTrackType"
+      transform: "add_audio_only_format"
 
 # Transformation functions
   # 处理时间码复制参数
@@ -1676,3 +1794,14 @@ transformers:
   split_segments_format:
     "no": "SINGLE_FILE"
     "yes": "SEGMENTED_FILES"
+
+  duration_precision_format:
+    "3": "FLOATING_POINT"
+    "4": "FLOATING_POINT"
+    "5": "FLOATING_POINT"
+
+  merge_small_segments_format:
+    "yes": 1
+
+  add_audio_only_format:
+    "yes": "AUDIO_ONLY_VARIANT_STREAM"

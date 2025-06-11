@@ -26,11 +26,175 @@ class ConfigConverter:
         self.logger = logging.getLogger('ConfigConverter')
         
         # Register built-in custom functions
-        self.register_custom_function('process_streams', self._process_streams)
+        self.register_custom_function('process_alternate_sources', self._process_alternate_sources)
+        self.register_custom_function('generate_outputs_from_streams', self._generate_outputs_from_streams)
+        self.register_custom_function('generate_outputs_with_settings', self.generate_outputs_with_settings)
         
     def register_custom_function(self, name: str, func: Callable):
         """Register a custom transformation function"""
         self.custom_functions[name] = func
+        
+    def generate_outputs_with_settings(self, streams: List, context: Dict) -> List:
+        """
+        Generate outputs from streams and apply both rate control and audio settings
+        
+        This function combines _generate_outputs_from_streams with _process_rate_control_settings
+        and _process_audio_settings to create outputs with proper settings, while respecting
+        video-only and audio-only outputs. It also applies stream-specific rules from
+        mp4_rules_fixed.yaml.
+        
+        Args:
+            streams: List of stream dictionaries from Encoding.com format
+            context: Context dictionary with source_data and other information
+            
+        Returns:
+            List of output structures for MediaConvert with proper settings
+        """
+        # 添加防止递归调用的标记
+        if context.get('processing_streams'):
+            self.logger.warning("Detected recursive call to generate_outputs_with_settings, returning empty list to prevent infinite loop")
+            return []
+        
+        # 设置处理标记
+        context['processing_streams'] = True
+        
+        try:
+            # First, generate basic outputs from streams
+            outputs = self._generate_outputs_from_streams(streams, context)
+            source_data = context.get('source_data', {})
+            
+            # Track processed parameters
+            processed_params = set()
+            
+            # Process each output to apply rate control and audio settings
+            for i, output in enumerate(outputs):
+                # Create a temporary target data structure to use with processing methods
+                temp_target = {"Settings": {"OutputGroups": [{"Outputs": [output]}]}}
+                
+                # Check if this is a video-only output (no AudioDescriptions)
+                is_video_only = "AudioDescriptions" not in output
+                
+                # Check if this is an audio-only output (no VideoDescription)
+                is_audio_only = "VideoDescription" not in output
+                
+                # Get the corresponding stream data to use as source_data for processing
+                # This ensures we use stream-specific settings rather than global settings
+                stream_data = streams[i] if i < len(streams) else {}
+                
+                # Apply rate control settings for video (skip for audio-only outputs)
+                if not is_audio_only and "VideoDescription" in output:
+                    # Use stream data as source_data instead of global source_data
+                    # This ensures we get stream-specific settings like cbr, bitrate, etc.
+                    rate_control_processed = self._process_rate_control_settings(stream_data, temp_target)
+                    if rate_control_processed:
+                        processed_params.update(rate_control_processed)
+                    self.logger.debug(f"Applied rate control settings for output {i} using stream-specific data")
+                elif is_audio_only:
+                    self.logger.debug(f"Skipping rate control settings for audio-only output {i}")
+                
+                # Apply audio settings (skip for video-only outputs)
+                if not is_video_only and ("AudioDescriptions" in output or is_audio_only):
+                    # Use stream data for audio settings as well
+                    audio_processed = self._process_audio_settings(stream_data, temp_target)
+                    if audio_processed:
+                        processed_params.update(audio_processed)
+                    self.logger.debug(f"Applied audio settings for output {i} using stream-specific data")
+                elif is_video_only:
+                    self.logger.debug(f"Skipping audio settings for video-only output {i}")
+                    
+                # Extract the processed output back
+                processed_output = temp_target["Settings"]["OutputGroups"][0]["Outputs"][0]
+                
+                # Update the original output with processed settings
+                for key, value in processed_output.items():
+                    output[key] = value
+            
+            # Now load the rules from mp4_rules_fixed.yaml, but exclude stream rules
+            rules_file = os.path.join(os.path.dirname(__file__), 'rules/mp4_rules_fixed.yaml')
+            with open(rules_file, 'r') as f:
+                rules_data = yaml.safe_load(f)
+            
+            # Create a rule lookup dictionary for faster access
+            rule_lookup = {}
+            dummy_rules = []
+            
+            # Organize rules by their source path for easier lookup, but skip stream rules
+            for rule in rules_data.get('rules', []):
+                # Skip rules that target stream path to avoid recursion
+                if rule['source'].get('path') == 'stream':
+                    self.logger.info("Skipping stream rule to avoid recursion")
+                    continue
+                    
+                if rule['source'].get('type') == 'dummy':
+                    dummy_rules.append(rule)
+                    continue
+                    
+                source_path = rule['source']['path']
+                if source_path not in rule_lookup:
+                    rule_lookup[source_path] = []
+                rule_lookup[source_path].append(rule)
+            
+            # Process dummy rules to mark parameters as processed
+            for rule in dummy_rules:
+                source_path = rule['source']['path']
+                source_value = self.get_value_by_path(source_data, source_path)
+                self.logger.debug(f"Processing dummy rule for {source_path}")
+                processed_params.add(source_path)
+                # Log the dummy rule match
+                self.logger.debug(f"Mapped parameter: {source_path}={source_value} → [DUMMY RULE]")
+            
+            # Now process each stream individually with the rules
+            for i, stream in enumerate(streams):
+                # Create a temporary target data structure for this stream's output
+                temp_target = {"Settings": {"OutputGroups": [{"Outputs": [outputs[i]]}]}}
+                
+                # Create a separate processed_params set for each stream to avoid skipping parameters
+                # that were processed in previous streams
+                stream_processed_params = set()
+                
+                # Process each parameter in the stream using the rules
+                self.logger.info(f"Applying rules to stream {i+1}/{len(streams)}")
+                
+                # Process the stream with rules, but avoid recursive processing
+                # by not processing 'stream' paths
+                self._process_source_data(stream, "", rule_lookup, temp_target, stream_processed_params)
+                
+                # Extract the processed output back
+                processed_output = temp_target["Settings"]["OutputGroups"][0]["Outputs"][0]
+                
+                # Update the original output with processed settings
+                for key, value in processed_output.items():
+                    if key not in outputs[i]:
+                        outputs[i][key] = value
+                    elif isinstance(outputs[i][key], dict) and isinstance(value, dict):
+                        # Merge dictionaries for nested settings
+                        outputs[i][key].update(value)
+                
+                # Add the stream's processed parameters to the global set
+                processed_params.update(stream_processed_params)
+            
+            # Clean up outputs based on video_only and audio_only flags
+            for i, stream in enumerate(streams):
+                if i < len(outputs):
+                    # Check if this stream has video_only=yes
+                    if stream.get('video_only') == 'yes' and 'AudioDescriptions' in outputs[i]:
+                        self.logger.info(f"Removing AudioDescriptions from output {i} because video_only=yes is set")
+                        outputs[i].pop('AudioDescriptions', None)
+                    
+                    # Check if this stream has audio_only=yes
+                    if stream.get('audio_only') == 'yes' and 'VideoDescription' in outputs[i]:
+                        self.logger.info(f"Removing VideoDescription from output {i} because audio_only=yes is set")
+                        outputs[i].pop('VideoDescription', None)
+            
+            self.logger.info(f"Final outputs after cleanup: {len(outputs)} outputs")
+            return outputs
+                    
+            return outputs
+        finally:
+            # 确保无论如何都清除处理标记
+            if 'processing_streams' in context:
+                del context['processing_streams']
+        
         
     def parse_xml(self, xml_file: str) -> Dict:
         """Parse Encoding.com XML configuration file, returning only the format element content"""
@@ -133,6 +297,10 @@ class ConfigConverter:
         """Apply transformation function"""
         # Check if it's a custom function
         if transform_name in self.custom_functions:
+            # 防止递归调用
+            if transform_name == "generate_outputs_with_settings" and context and context.get('processing_streams'):
+                self.logger.warning(f"Detected potential recursive call to {transform_name}, skipping transformation")
+                return value
             return self.custom_functions[transform_name](value, context)
             
         # Special case for audio_volume_format
@@ -177,32 +345,32 @@ class ConfigConverter:
             
             if logical_op == 'AND':
                 # All subconditions must be true
-                self.logger.debug(f"Evaluating AND condition with {len(condition['conditions'])} subconditions")
+                self.logger.info(f"Evaluating AND condition with {len(condition['conditions'])} subconditions")
                 result = all(self.evaluate_condition(subcond, source_value, source_data) 
                           for subcond in condition['conditions'])
-                self.logger.debug(f"AND condition result: {result}")
+                self.logger.info(f"AND condition result: {result}")
                 return result
             
             elif logical_op == 'OR':
                 # Any subcondition can be true
-                self.logger.debug(f"Evaluating OR condition with {len(condition['conditions'])} subconditions")
+                self.logger.info(f"Evaluating OR condition with {len(condition['conditions'])} subconditions")
                 result = any(self.evaluate_condition(subcond, source_value, source_data) 
                           for subcond in condition['conditions'])
-                self.logger.debug(f"OR condition result: {result}")
+                self.logger.info(f"OR condition result: {result}")
                 return result
             
             elif logical_op == 'NOT':
                 # Negate the result of the subcondition
-                self.logger.debug(f"Evaluating NOT condition")
+                self.logger.info(f"Evaluating NOT condition")
                 result = not self.evaluate_condition(condition['condition'], source_value, source_data)
-                self.logger.debug(f"NOT condition result: {result}")
+                self.logger.info(f"NOT condition result: {result}")
                 return result
         
         # Handle simple condition (backward compatible with existing rules)
         # If condition has source_path, get value from there instead
         if 'source_path' in condition and source_data:
             source_value = self.get_value_by_path(source_data, condition['source_path'])
-            self.logger.debug(f"Condition using source_path {condition['source_path']}, value: {source_value}")
+            self.logger.info(f"Condition using source_path {condition['source_path']}, value: {source_value}")
             
         op = condition.get('operator', 'eq')
         compare_value = condition.get('value')
@@ -233,163 +401,252 @@ class ConfigConverter:
         else:
             result = False
             
-        self.logger.debug(f"Condition evaluation: {op} {source_value} {compare_value} = {result}")
+        self.logger.info(f"Condition evaluation: {op} {source_value} {compare_value} = {result}")
         return result
     
-    def _process_streams(self, streams: List, context: Dict) -> List:
-        """Process multiple streams for HLS/DASH outputs"""
+
+        
+    def _process_alternate_sources(self, alternate_sources: List, context: Dict) -> Dict:
+        """Process multiple alternate audio sources for HLS/DASH outputs
+        
+        This function processes alternate_source elements from Encoding.com format
+        and converts them to AWS MediaConvert audio selectors.
+        
+        Args:
+            alternate_sources: List of alternate_source dictionaries
+            context: Context dictionary with source_data and other information
+            
+        Returns:
+            Dictionary of audio selectors for MediaConvert
+        """
+        audio_selectors = {}
+        source_data = context.get('source_data', {})
+        
+        # Language code mapping
+        language_code_format = {
+            "es": "SPA",
+            "fr": "FRA",
+            "en": "ENG",
+            "de": "DEU",
+            "it": "ITA",
+            "ja": "JPN",
+            "ko": "KOR",
+            "pt": "POR",
+            "ru": "RUS",
+            "zh": "CHI"
+        }
+        
+        self.logger.debug(f"Processing {len(alternate_sources)} alternate audio sources")
+        
+        # Process each alternate source
+        for i, source in enumerate(alternate_sources):
+            # Create a unique selector name
+            selector_name = f"Audio Selector {i+1}"
+            
+            # Create base selector
+            selector = {}
+            
+            # Always add SelectorType as LANGUAGE_CODE
+            selector['SelectorType'] = "LANGUAGE_CODE"
+            
+            # Set language code if available
+            if 'language' in source:
+                language = source['language'].lower()
+                # Use the language code mapping
+                if language in language_code_format:
+                    selector['LanguageCode'] = language_code_format[language]
+                # Fallback to previous mappings for compatibility
+                elif language in ['eng', 'english']:
+                    selector['LanguageCode'] = 'ENG'
+                elif language in ['spa', 'spanish']:
+                    selector['LanguageCode'] = 'SPA'
+                elif language in ['fre', 'fra', 'french']:
+                    selector['LanguageCode'] = 'FRA'
+                elif language in ['ger', 'deu', 'german']:
+                    selector['LanguageCode'] = 'DEU'
+                else:
+                    # Use as is for other languages
+                    selector['LanguageCode'] = language.upper()
+            
+            # Set custom language name if available
+            if 'audio_name' in source:
+                selector['CustomLanguageCode'] = source['audio_name']
+            
+            # Set as default if specified
+            if source.get('alternate_default') == 'yes':
+                selector['DefaultSelection'] = 'DEFAULT'
+            else:
+                selector['DefaultSelection'] = 'NOT_DEFAULT'
+            
+            # Add to audio selectors dictionary
+            audio_selectors[selector_name] = selector
+            self.logger.debug(f"Created audio selector: {selector_name} with settings: {selector}")
+        
+        # If no selectors were created, add a default one
+        if not audio_selectors:
+            audio_selectors["Audio Selector 1"] = {
+                "DefaultSelection": "DEFAULT",
+                "SelectorType": "LANGUAGE_CODE"
+            }
+            self.logger.debug("Added default audio selector")
+        
+        return audio_selectors
+        
+    def _generate_outputs_from_streams(self, streams: List, context: Dict) -> List:
+        """Generate basic output structures from streams
+        
+        This function analyzes the streams in the Encoding.com format and generates
+        the corresponding basic output structures for AWS MediaConvert.
+        
+        Args:
+            streams: List of stream dictionaries from Encoding.com format
+            context: Context dictionary with source_data and other information
+            
+        Returns:
+            List of basic output structures for MediaConvert
+        """
         outputs = []
         source_data = context.get('source_data', {})
         output_format = self.get_value_by_path(source_data, 'output')
         
-        self.logger.debug(f"Processing streams for format: {output_format}")
-        self.logger.debug(f"Number of streams: {len(streams)}")
+        self.logger.debug(f"Generating outputs from {len(streams)} streams for format: {output_format}")
         
-        # Create template for output
+        # Count video and audio streams
+        video_streams = []
+        audio_streams = []
+        
+        for stream in streams:
+            if stream.get('audio_only') == 'yes':
+                audio_streams.append(stream)
+            elif stream.get('video_only') == 'yes':
+                video_streams.append(stream)
+            else:
+                # If not explicitly marked, check for typical video parameters
+                if 'size' in stream or 'bitrate' in stream:
+                    video_streams.append(stream)
+                # If it has audio parameters, consider it an audio stream too
+                if 'audio_bitrate' in stream or 'audio_sample_rate' in stream:
+                    audio_streams.append(stream)
+        
+        self.logger.debug(f"Found {len(video_streams)} video streams and {len(audio_streams)} audio streams")
+        
+        # Create template for output based on format
         if output_format == "advanced_hls":
             container = "M3U8"
-            template = {
-                "ContainerSettings": {
-                    "Container": container,
-                    "M3u8Settings": {}
-                },
-                "VideoDescription": {
-                    "CodecSettings": {
-                        "Codec": "H_264",
-                        "H264Settings": {
-                            "FramerateDenominator": 1,
-                            "FramerateControl": "SPECIFIED"
-                        }
-                    }
-                },
-                "AudioDescriptions": [
-                    {
-                        "CodecSettings": {
-                            "Codec": "AAC",
-                            "AacSettings": {}
-                        }
-                    }
-                ],
-                "OutputSettings": {
-                    "HlsSettings": {}
-                }
-            }
+            container_settings_key = "M3u8Settings"
+        elif output_format in ["fmp4_hls", "advanced_fmp4"]:
+            container = "CMFC"
+            container_settings_key = "CmfcSettings"
         elif output_format == "advanced_dash":
             container = "MPD"
-            template = {
+            container_settings_key = "MpdSettings"
+        elif output_format == "mp4":
+            container = "MP4"
+            container_settings_key = "Mp4Settings"
+        else:
+            container = "MP4"  # Default
+            container_settings_key = "Mp4Settings"
+            
+        # Generate outputs for video streams
+        for i, stream in enumerate(video_streams):
+            output = {
                 "ContainerSettings": {
                     "Container": container,
-                    "MpdSettings": {}
-                },
-                "VideoDescription": {
+                    container_settings_key: {}
+                }
+            }
+            
+            # Only add VideoDescription if not audio_only
+            if stream.get('audio_only') != 'yes':
+                output["VideoDescription"] = {
                     "CodecSettings": {
-                        "Codec": "H_264",
-                        "H264Settings": {
-                            "FramerateDenominator": 1,
-                            "FramerateControl": "SPECIFIED"
+                        "Codec": "H_264"
+                    }
+                }
+                
+                # Set basic video parameters based on stream data
+                if 'size' in stream:
+                    size_match = re.match(r'(\d+)x(\d+)', stream['size'])
+                    if size_match:
+                        width, height = size_match.groups()
+                        output['VideoDescription']['Width'] = int(width)
+                        output['VideoDescription']['Height'] = int(height)
+            
+            # Add basic name modifier
+            name_modifier = f"_video_{i+1}"
+            if 'size' in stream:
+                name_modifier = f"_{stream['size']}"
+            if 'bitrate' in stream:
+                bitrate_match = re.match(r'(\d+)k', stream['bitrate'])
+                if bitrate_match:
+                    name_modifier += f"_{bitrate_match.group(1)}K"
+            
+            output["NameModifier"] = name_modifier
+            
+            # Only add AudioDescriptions if not video_only
+            # Explicitly check for 'yes' to ensure we don't add AudioDescriptions for video_only streams
+            if stream.get('video_only') != 'yes':
+                output["AudioDescriptions"] = [
+                    {
+                        "CodecSettings": {
+                            "Codec": "AAC"
                         }
                     }
+                ]
+            
+            outputs.append(output)
+            self.logger.debug(f"Generated basic video output structure with name modifier: {name_modifier}")
+        
+        # Generate outputs for audio-only streams
+        for i, stream in enumerate(audio_streams):
+            # Skip if this stream was already included with video
+            if stream in video_streams and stream.get('audio_only') != 'yes':
+                continue
+                
+            output = {
+                "ContainerSettings": {
+                    "Container": container,
+                    container_settings_key: {}
                 },
                 "AudioDescriptions": [
                     {
                         "CodecSettings": {
-                            "Codec": "AAC",
-                            "AacSettings": {}
+                            "Codec": "AAC"
                         }
                     }
                 ]
             }
-        else:
-            self.logger.warning(f"Unsupported output format for streams: {output_format}")
-            return outputs
-        
-        # Process each stream
-        for i, stream in enumerate(streams):
-            output = copy.deepcopy(template)
             
-            # Check if this is audio-only or video-only stream
-            is_audio_only = stream.get('audio_only') == 'yes'
-            is_video_only = stream.get('video_only') == 'yes'
-            
-            self.logger.debug(f"Stream {i}: audio_only={is_audio_only}, video_only={is_video_only}")
-            
-            # Set size
-            if 'size' in stream and not is_audio_only:
-                size_match = re.match(r'(\d+)x(\d+)', stream['size'])
-                if size_match:
-                    width, height = size_match.groups()
-                    output['VideoDescription']['Width'] = int(width)
-                    output['VideoDescription']['Height'] = int(height)
-                    self.logger.debug(f"Stream {i}: Set size to {width}x{height}")
-            
-            # Set bitrate
-            if 'bitrate' in stream and not is_audio_only:
-                bitrate_match = re.match(r'(\d+)k', stream['bitrate'])
-                if bitrate_match:
-                    bitrate = int(bitrate_match.group(1)) * 1000
-                    output['VideoDescription']['CodecSettings']['H264Settings']['Bitrate'] = bitrate
-                    self.logger.debug(f"Stream {i}: Set video bitrate to {bitrate}")
-            
-            # Set framerate
-            if 'framerate' in stream and not is_audio_only:
-                output['VideoDescription']['CodecSettings']['H264Settings']['FramerateNumerator'] = int(stream['framerate'])
-                self.logger.debug(f"Stream {i}: Set framerate to {stream['framerate']}")
-            
-            # Set rate control mode
-            if 'cbr' in stream and not is_audio_only:
-                mode = 'CBR' if stream['cbr'] == 'yes' else 'QVBR'
-                output['VideoDescription']['CodecSettings']['H264Settings']['RateControlMode'] = mode
-                self.logger.debug(f"Stream {i}: Set rate control mode to {mode}")
-            
-            # Set audio bitrate
-            if 'audio_bitrate' in stream and not is_video_only:
+            # Add basic name modifier
+            name_modifier = f"_audio_{i+1}"
+            if 'audio_bitrate' in stream:
                 audio_bitrate_match = re.match(r'(\d+)k', stream['audio_bitrate'])
                 if audio_bitrate_match:
-                    audio_bitrate = int(audio_bitrate_match.group(1)) * 1000
-                    output['AudioDescriptions'][0]['CodecSettings']['AacSettings']['Bitrate'] = audio_bitrate
-                    self.logger.debug(f"Stream {i}: Set audio bitrate to {audio_bitrate}")
+                    name_modifier = f"_audio_{audio_bitrate_match.group(1)}K"
             
-            # Set audio sample rate
-            if 'audio_sample_rate' in stream and not is_video_only:
-                output['AudioDescriptions'][0]['CodecSettings']['AacSettings']['SampleRate'] = int(stream['audio_sample_rate'])
-                self.logger.debug(f"Stream {i}: Set audio sample rate to {stream['audio_sample_rate']}")
+            # Add codec info to name modifier
+            if 'audio_codec' in stream:
+                if stream['audio_codec'] == "eac3":
+                    name_modifier += "_eac3"
+                elif stream['audio_codec'] in ["dolby_aac", "dolby_heaac", "libfaac"]:
+                    name_modifier += "_aac"
             
-            # Set audio channels
-            if 'audio_channels_number' in stream and not is_video_only:
+            # Add channels info to name modifier
+            if 'audio_channels_number' in stream:
                 channels = int(stream['audio_channels_number'])
-                if channels == 2:
-                    output['AudioDescriptions'][0]['CodecSettings']['AacSettings']['CodingMode'] = 'CODING_MODE_2_0'
+                if channels == 6:
+                    name_modifier += "_surround"
+                elif channels == 2:
+                    name_modifier += "_stereo"
                 elif channels == 1:
-                    output['AudioDescriptions'][0]['CodecSettings']['AacSettings']['CodingMode'] = 'CODING_MODE_1_0'
-                self.logger.debug(f"Stream {i}: Set audio channels to {channels}")
+                    name_modifier += "_mono"
             
-            # Remove video description for audio-only streams
-            if is_audio_only:
-                output.pop('VideoDescription', None)
-                self.logger.debug(f"Stream {i}: Removed video description (audio-only)")
-            
-            # Remove audio descriptions for video-only streams
-            if is_video_only:
-                output.pop('AudioDescriptions', None)
-                self.logger.debug(f"Stream {i}: Removed audio description (video-only)")
-            
-            # Create name modifier based on resolution and bitrate
-            name_modifier = ""
-            if 'size' in stream and not is_audio_only:
-                name_modifier += f"_{stream['size'].replace('x', 'x')}"
-            if 'bitrate' in stream and not is_audio_only:
-                bitrate_match = re.match(r'(\d+)k', stream['bitrate'])
-                if bitrate_match:
-                    name_modifier += f"_{bitrate_match.group(1)}K"
-            elif is_audio_only:
-                name_modifier = "_audio"
-                
-            output['NameModifier'] = name_modifier
-            self.logger.debug(f"Stream {i}: Set name modifier to {name_modifier}")
+            output["NameModifier"] = name_modifier
             
             outputs.append(output)
+            self.logger.debug(f"Generated basic audio output structure with name modifier: {name_modifier}")
         
-        self.logger.debug(f"Processed {len(outputs)} streams")
+        self.logger.debug(f"Generated a total of {len(outputs)} basic output structures")
         return outputs
         
     def _merge_dicts(self, target: Dict, source: Dict) -> None:
@@ -453,169 +710,6 @@ class ConfigConverter:
                         current[part] = {}
                     current = current[part]
                     
-    def _process_iteration_rule(self, rule: Dict, source_data: Dict, target_data: Dict):
-        """Process iteration rules for array elements like streams or alternate_source"""
-        source_path = rule['source']['path']
-        source_array = self.get_value_by_path(source_data, source_path)
-        
-        if not source_array:
-            self.logger.debug(f"No array found at {source_path} or not a list")
-            return
-            
-        # Convert to list if it's a single item
-        if not isinstance(source_array, list):
-            source_array = [source_array]
-            self.logger.debug(f"Converted single item to list at {source_path}")
-        
-        sub_rules = rule['source'].get('rules', [])
-        target_base_path = rule['target_base_path']
-        name_modifier_config = rule.get('name_modifier')
-        key_format = rule.get('key_format')  # New parameter for key-value mapping
-        
-        # Get template structure if it exists
-        template_outputs = None
-        if not key_format:  # Only for array-type targets (not key-value)
-            parts = target_base_path.split('.')
-            current = target_data
-            for part in parts:
-                if part in current:
-                    current = current[part]
-                    if isinstance(current, list) and len(current) > 0:
-                        template_outputs = current[0]  # Use first item as template
-                        break
-        
-        # Create target array or object
-        if key_format:
-            # For key-value mapping, ensure the target path exists
-            self._ensure_path_exists(target_data, target_base_path)
-            target_dict = self._get_nested_dict(target_data, target_base_path)
-        else:
-            # For array mapping
-            target_array = []
-        
-        # Process each source element
-        for i, source_item in enumerate(source_array):
-            self.logger.debug(f"Processing {source_path}[{i}]")
-            
-            # Start with template structure if available
-            if template_outputs and not key_format:
-                target_item = copy.deepcopy(template_outputs)
-            else:
-                target_item = {}
-            
-            # Apply each sub-rule
-            for sub_rule in sub_rules:
-                sub_source_path = sub_rule['source']['path']
-                sub_source_value = source_item.get(sub_source_path)
-                
-                # Skip if value is None and no default
-                if sub_source_value is None:
-                    if 'default' in sub_rule['source']:
-                        sub_source_value = sub_rule['source']['default']
-                        self.logger.debug(f"Using default value for {sub_source_path}: {sub_source_value}")
-                    else:
-                        self.logger.debug(f"Skipping sub-rule for {sub_source_path} (no value and no default)")
-                        continue
-                
-                # Check condition if any
-                if 'condition' in sub_rule['source']:
-                    condition = sub_rule['source']['condition']
-                    if not self.evaluate_condition(condition, sub_source_value, source_item):
-                        self.logger.warning(f"Skipping sub-rule for {sub_source_path}={sub_source_value} due to condition not matching")
-                        continue
-                
-                # Process target (can be single or multiple)
-                sub_targets = sub_rule['target'] if isinstance(sub_rule['target'], list) else [sub_rule['target']]
-                
-                for sub_target in sub_targets:
-                    sub_target_path = sub_target['path']
-                    sub_transform = sub_target.get('transform')
-                    
-                    # Check target condition if any
-                    if 'condition' in sub_target:
-                        if not self.evaluate_condition(sub_target['condition'], sub_source_value, source_item):
-                            self.logger.warning(f"Skipping sub-target {sub_target_path} for source {sub_source_path}={sub_source_value} due to condition not matching")
-                            continue
-                    
-                    # Process value transformation
-                    if 'value' in sub_target:
-                        # Process with regex if specified
-                        source_regex = sub_rule['source'].get('regex')
-                        if source_regex:
-                            match = re.match(source_regex, str(sub_source_value))
-                            if match:
-                                value_template = sub_target['value']
-                                # Replace $1, $2, etc. with match groups
-                                for j, group in enumerate(match.groups(), 1):
-                                    value_template = value_template.replace(f'${j}', group)
-                                
-                                # Convert to appropriate type
-                                if value_template.isdigit():
-                                    sub_target_value = int(value_template)
-                                elif self._is_float(value_template):
-                                    sub_target_value = float(value_template)
-                                else:
-                                    sub_target_value = value_template
-                                
-                                self.logger.debug(f"Regex transformed {sub_source_value} to {sub_target_value}")
-                            else:
-                                self.logger.warning(f"Regex pattern {source_regex} did not match {sub_source_value} for {sub_source_path}")
-                                continue
-                        else:
-                            sub_target_value = sub_target['value']
-                            self.logger.debug(f"Using static value: {sub_target_value}")
-                    else:
-                        sub_target_value = sub_source_value
-                        
-                        # Apply transformation function
-                        if sub_transform:
-                            context = {'source_data': source_item, 'target_data': target_item}
-                            original_value = sub_target_value
-                            sub_target_value = self.apply_transform(sub_target_value, sub_transform, context)
-                            self.logger.debug(f"Transformed {original_value} using {sub_transform} to {type(sub_target_value)}")
-                    
-                    # Handle nested paths properly, especially for arrays like AudioDescriptions[0]
-                    self._set_nested_value(target_item, sub_target_path, sub_target_value)
-                    self.logger.debug(f"Set {sub_target_path}={sub_target_value} in {source_path} {i}")
-            
-            # Generate name modifier
-            if name_modifier_config and not key_format:
-                template = name_modifier_config.get('template', '')
-                name_modifier = template
-                
-                # Replace template variables
-                for var_name, replacement in name_modifier_config.get('replacements', {}).items():
-                    var_value = source_item.get(var_name, '')
-                    if var_value and 'regex' in replacement:
-                        regex = replacement['regex']
-                        format_str = replacement.get('format', '$1')
-                        
-                        match = re.match(regex, str(var_value))
-                        if match:
-                            replaced_value = format_str
-                            for j, group in enumerate(match.groups(), 1):
-                                replaced_value = replaced_value.replace(f'${j}', group)
-                            var_value = replaced_value
-                    
-                    name_modifier = name_modifier.replace(f"{{{var_name}}}", str(var_value))
-                
-                target_item['NameModifier'] = name_modifier
-                self.logger.debug(f"Generated NameModifier: {name_modifier} for {source_path} {i}")
-            
-            # Add to target array or object
-            if key_format:
-                # Generate key name using the format and index
-                key_name = key_format.replace('{index}', str(i + 1))
-                target_dict[key_name] = target_item
-                self.logger.debug(f"Added key-value pair with key: {key_name} for {source_path} {i}")
-            else:
-                target_array.append(target_item)
-        
-        # Set target array or object
-        if not key_format:
-            self.set_value_by_path(target_data, target_base_path, target_array)
-            self.logger.debug(f"Set {len(target_array)} items at {target_base_path}")
-            
     def _ensure_path_exists(self, data: Dict, path: str) -> None:
         """Ensure that a nested path exists in the dictionary"""
         parts = path.split('.')
@@ -696,7 +790,7 @@ class ConfigConverter:
                 self.logger.warning(f"Failed to parse bitrate: {bitrate_str}")
                 return 0
     
-    def _process_rate_control_settings(self, source_data: Dict, target_data: Dict) -> bool:
+    def _process_rate_control_settings(self, source_data: Dict, target_data: Dict) -> set:
         """
         Process rate control settings (CBR/VBR/QVBR) based on complex rules
         
@@ -705,14 +799,14 @@ class ConfigConverter:
             target_data: Target data dictionary to update
             
         Returns:
-            True if rate control settings were processed, False otherwise
+            Set of processed parameter names
         """
         # Check if output is mp4, otherwise log warning and return
         output_format = self.get_value_by_path(source_data, 'output')
-        if output_format != 'mp4':
-            self.logger.warning(f"Rate control settings processing is only supported for MP4 output, got {output_format}. "
-                               "Need to add independent processing function for this format.")
-            return False
+        # if output_format != 'mp4':
+        #     self.logger.warning(f"Rate control settings processing is only supported for MP4 output, got {output_format}. "
+        #                        "Need to add independent processing function for this format.")
+        #     return False
             
         # Get the target path for H264Settings
         target_path = "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings"
@@ -862,7 +956,7 @@ class ConfigConverter:
                     processed_params.add('minrate')
         
         # Return processed parameters
-        return len(processed_params) > 0
+        return processed_params
     
     def _process_video_codec_settings(self, source_data: Dict, target_data: Dict) -> bool:
         """
@@ -990,18 +1084,42 @@ class ConfigConverter:
                     processed_params.add('audio_minrate')
                     self.logger.info(f"Ignoring <audio_minrate>={audio_minrate_str} (not supported for AC3 in MediaConvert)")
             
-            # Case 1.c: audio_codec is something else
+            # Case 1.c: audio_codec is EAC3
+            elif audio_codec == "eac3":
+                # i. Set codec to EAC3
+                self._set_nested_value(target_data, f"{target_path}.CodecSettings.Codec", "EAC3")
+                self.logger.info(f"Set AudioDescriptions[0].CodecSettings.Codec to EAC3 from <audio_codec>={audio_codec}")
+                
+                # ii. Set bitrate if specified
+                if audio_bitrate:
+                    self._set_nested_value(target_data, f"{target_path}.CodecSettings.Eac3Settings.Bitrate", audio_bitrate)
+                    self.logger.info(f"Set AudioDescriptions[0].CodecSettings.Eac3Settings.Bitrate to {audio_bitrate} from <audio_bitrate>={audio_bitrate_str}")
+                
+                # Log if audio_sample_rate, audio_maxrate or audio_minrate are ignored
+                if audio_sample_rate:
+                    processed_params.add('audio_sample_rate')
+                    self.logger.info(f"Ignoring <audio_sample_rate>={audio_sample_rate} (not supported for EAC3 in MediaConvert)")
+                
+                if audio_maxrate_str:
+                    processed_params.add('audio_maxrate')
+                    self.logger.info(f"Ignoring <audio_maxrate>={audio_maxrate_str} (not supported for EAC3 in MediaConvert)")
+                
+                if audio_minrate_str:
+                    processed_params.add('audio_minrate')
+                    self.logger.info(f"Ignoring <audio_minrate>={audio_minrate_str} (not supported for EAC3 in MediaConvert)")
+            
+            # Case 1.d: audio_codec is something else
             else:
                 self.logger.warning(f"Unsupported <audio_codec>={audio_codec}. Manual conversion logic needed.")
                 # Still mark as processed to avoid double processing
-                if audio_bitrate_str:
-                    processed_params.add('audio_bitrate')
-                if audio_sample_rate:
-                    processed_params.add('audio_sample_rate')
-                if audio_maxrate_str:
-                    processed_params.add('audio_maxrate')
-                if audio_minrate_str:
-                    processed_params.add('audio_minrate')
+            if audio_bitrate_str:
+                processed_params.add('audio_bitrate')
+            if audio_sample_rate:
+                processed_params.add('audio_sample_rate')
+            if audio_maxrate_str:
+                processed_params.add('audio_maxrate')
+            if audio_minrate_str:
+                processed_params.add('audio_minrate')
         
         # Case 2: If <audio_codec> doesn't exist or is empty
         else:
@@ -1065,37 +1183,69 @@ class ConfigConverter:
         self.mapped_parameters = []  # Track successfully mapped parameters
         self.unmapped_parameters = []  # Track unmapped parameters
         
-        # Process rate control settings first (special handling for CBR/VBR/QVBR)
-        if self._process_rate_control_settings(source_data, target_data):
-            # Mark these parameters as processed
-            for param in ['cbr', 'cabr', 'bitrate', 'maxrate', 'minrate']:
-                if self.get_value_by_path(source_data, param) is not None:
-                    processed_params.add(param)
-                    self.logger.info(f"Parameter {param} processed by custom rate control handler")
+        # Check if this is a multi-stream configuration
+        streams = self.get_value_by_path(source_data, 'stream')
+        is_multi_stream = streams is not None and isinstance(streams, list) and len(streams) > 0
         
-        # Process audio settings next (special handling for audio codec and related settings)
-        audio_processed_params = self._process_audio_settings(source_data, target_data)
-        if audio_processed_params:
-            processed_params.update(audio_processed_params)
-            self.logger.info(f"Audio parameters processed by custom audio settings handler")
+        if is_multi_stream:
+            self.logger.info(f"Detected multi-stream configuration with {len(streams)} streams")
+            # Handle multi-stream scenario using specialized functions
+            context = {'source_data': source_data}
             
-        # Process video codec settings (set default if needed)
-        video_processed_params = self._process_video_codec_settings(source_data, target_data)
-        if video_processed_params:
-            processed_params.update(video_processed_params)
-            self.logger.info(f"Video codec parameters processed by custom video codec handler")
+            # Process streams directly using the specialized functions
+            # This avoids the need for stream path rules that could cause recursion
+            # outputs = self._generate_outputs_from_streams(streams, context)
+            
+            # Apply settings to the generated outputs
+            context = {'source_data': source_data}
+            outputs_with_settings = self.generate_outputs_with_settings(streams, context)
+            
+            # Add the outputs to the target data
+            if outputs_with_settings:
+                if 'Settings' not in target_data:
+                    target_data['Settings'] = {}
+                if 'OutputGroups' not in target_data['Settings']:
+                    target_data['Settings']['OutputGroups'] = [{}]
+                if not target_data['Settings']['OutputGroups']:
+                    target_data['Settings']['OutputGroups'] = [{}]
+                
+                # Add outputs to the first output group
+                if 'Outputs' not in target_data['Settings']['OutputGroups'][0]:
+                    target_data['Settings']['OutputGroups'][0]['Outputs'] = []
+                
+                target_data['Settings']['OutputGroups'][0]['Outputs'].extend(outputs_with_settings)
+            
+            # Mark stream parameter as processed
+            processed_params.add('stream')
+        else:
+            # Non-multi-stream scenario - use the original approach
+            # Process rate control settings first (special handling for CBR/VBR/QVBR)
+            if self._process_rate_control_settings(source_data, target_data):
+                # Mark these parameters as processed
+                for param in ['cbr', 'cabr', 'bitrate', 'maxrate', 'minrate']:
+                    if self.get_value_by_path(source_data, param) is not None:
+                        processed_params.add(param)
+                        self.logger.info(f"Parameter {param} processed by custom rate control handler")
+            
+            # Process audio settings next (special handling for audio codec and related settings)
+            audio_processed_params = self._process_audio_settings(source_data, target_data)
+            if audio_processed_params:
+                processed_params.update(audio_processed_params)
+                self.logger.info(f"Audio parameters processed by custom audio settings handler")
+                
+            # Process video codec settings (set default if needed)
+            video_processed_params = self._process_video_codec_settings(source_data, target_data)
+            if video_processed_params:
+                processed_params.update(video_processed_params)
+                self.logger.info(f"Video codec parameters processed by custom video codec handler")
         
         # Create a rule lookup dictionary for faster access
         rule_lookup = {}
-        iteration_rules = []
         dummy_rules = []
         
         # Organize rules by their source path for easier lookup
         for rule in self.rules:
-            if rule['source'].get('type') == 'iteration':
-                iteration_rules.append(rule)
-                continue
-            elif rule['source'].get('type') == 'dummy':
+            if rule['source'].get('type') == 'dummy':
                 dummy_rules.append(rule)
                 continue
                 
@@ -1104,13 +1254,7 @@ class ConfigConverter:
                 rule_lookup[source_path] = []
             rule_lookup[source_path].append(rule)
         
-        # First, process iteration rules (these handle special cases like streams)
-        for rule in iteration_rules:
-            self.logger.debug(f"Processing iteration rule for {rule['source']['path']}")
-            self._process_iteration_rule(rule, source_data, target_data)
-            processed_params.add(rule['source']['path'])
-        
-        # Next, process dummy rules to mark parameters as processed
+        # Process dummy rules to mark parameters as processed
         for rule in dummy_rules:
             source_path = rule['source']['path']
             source_value = self.get_value_by_path(source_data, source_path)
@@ -1211,30 +1355,90 @@ class ConfigConverter:
             
             # Skip already processed parameters
             if path in processed_params:
-                self.logger.debug(f"Skipping already processed parameter: {path}")
+                self.logger.info(f"Skipping already processed parameter: {path}={value}")
                 continue
                 
+            # Special handling for stream array
+            if key == 'stream' and isinstance(value, list):
+                self.logger.info(f"Processing stream array with {len(value)} elements")
+                self._process_stream_array(value, path, rule_lookup, target_data, processed_params)
+            
             # Check if we have rules for this path
             if path in rule_lookup:
+                self.logger.info(f"Found {len(rule_lookup[path])} rules for parameter: {path}={value}")
                 # Process all rules for this path
                 for rule in rule_lookup[path]:
                     self._process_rule(rule, path, value, source_data, target_data, processed_params)
+            else:
+                self.logger.info(f"No rules found for parameter: {path}={value}")
             
             # If this is a dictionary, process it recursively
             if isinstance(value, dict):
                 self._process_source_data(value, path, rule_lookup, target_data, processed_params)
             # If this is a list, process each item if they are dictionaries
-            elif isinstance(value, list):
+            elif isinstance(value, list) and key != 'stream':  # Skip stream array as it's handled specially
                 for i, item in enumerate(value):
                     if isinstance(item, dict):
                         list_path = f"{path}[{i}]"
                         self._process_source_data(item, list_path, rule_lookup, target_data, processed_params)
+                        
+    def _process_stream_array(self, streams, path, rule_lookup, target_data, processed_params):
+        """Process stream array elements with rules"""
+        # First, find all rules that might apply to stream elements
+        stream_rules = {}
+        for rule_path, rules in rule_lookup.items():
+            # Check if the rule path is a direct parameter name (not a path with dots)
+            if '.' not in rule_path:
+                stream_rules[rule_path] = rules
+        
+        self.logger.info(f"Found {len(stream_rules)} potential rules for stream elements")
+        
+        # Process each stream element
+        for i, stream in enumerate(streams):
+            stream_path = f"{path}[{i}]"
+            self.logger.info(f"Processing stream element {i+1}/{len(streams)}")
+            
+            # Process each parameter in the stream
+            for param_name, param_value in stream.items():
+                param_path = f"{stream_path}.{param_name}"
+                
+                # Skip already processed parameters
+                if param_path in processed_params:
+                    self.logger.info(f"Skipping already processed parameter: {param_path}={param_value}")
+                    continue
+                
+                # Check if we have rules for this parameter
+                if param_name in stream_rules:
+                    self.logger.info(f"Found {len(stream_rules[param_name])} rules for stream parameter: {param_name}={param_value}")
+                    
+                    # Process all rules for this parameter
+                    for rule in stream_rules[param_name]:
+                        # Create a temporary context with this stream as the source data
+                        temp_context = {param_name: param_value}
+                        
+                        # Process the rule
+                        self._process_rule(rule, param_name, param_value, temp_context, target_data, processed_params)
+                        
+                        # Mark the parameter as processed
+                        processed_params.add(param_path)
+                else:
+                    self.logger.info(f"No rules found for stream parameter: {param_name}={param_value}")
+                    
+                # If the parameter is a dictionary, process it recursively
+                if isinstance(param_value, dict):
+                    self._process_source_data(param_value, param_path, rule_lookup, target_data, processed_params)
+                # If the parameter is a list, process each item if they are dictionaries
+                elif isinstance(param_value, list):
+                    for j, item in enumerate(param_value):
+                        if isinstance(item, dict):
+                            item_path = f"{param_path}[{j}]"
+                            self._process_source_data(item, item_path, rule_lookup, target_data, processed_params)
     
     def _process_rule(self, rule, source_path, source_value, source_data, target_data, processed_params):
         """Process a single rule for a given source path and value"""
         source_regex = rule['source'].get('regex')
         
-        self.logger.debug(f"Processing rule for {source_path}, value: {source_value}")
+        self.logger.info(f"Processing rule for {source_path}, value: {source_value}")
         
         # Check if this parameter was already processed by rate control settings handler
         rate_control_params = ['cbr', 'cabr', 'bitrate', 'maxrate', 'minrate']
@@ -1247,17 +1451,19 @@ class ConfigConverter:
         
         # Check condition (if any)
         if 'condition' in rule['source'] and source_value is not None:
-            if not self.evaluate_condition(rule['source']['condition'], source_value, source_data):
-                self.logger.warning(f"Skipping rule for {source_path}={source_value} due to source condition not matching")
+            condition_result = self.evaluate_condition(rule['source']['condition'], source_value, source_data)
+            self.logger.info(f"Source condition evaluation for {source_path}: {condition_result}")
+            if not condition_result:
+                self.logger.info(f"Skipping rule for {source_path}={source_value} due to source condition not matching")
                 return
         
         # If source value doesn't exist, use default (if provided)
         if source_value is None:
             if 'default' in rule['source']:
                 source_value = rule['source']['default']
-                self.logger.debug(f"Using default value for {source_path}: {source_value}")
+                self.logger.info(f"Using default value for {source_path}: {source_value}")
             else:
-                self.logger.debug(f"Skipping rule for {source_path} (no value and no default)")
+                self.logger.info(f"Skipping rule for {source_path} (no value and no default)")
                 return
         
         # Process target mapping (can be single target or multiple targets)
@@ -1269,8 +1475,10 @@ class ConfigConverter:
             
             # Check target condition (if any)
             if 'condition' in target:
-                if not self.evaluate_condition(target['condition'], source_value, source_data):
-                    self.logger.warning(f"Skipping target {target_path} for source {source_path}={source_value} due to target condition not matching")
+                condition_result = self.evaluate_condition(target['condition'], source_value, source_data)
+                self.logger.info(f"Target condition evaluation for {target_path}: {condition_result}")
+                if not condition_result:
+                    self.logger.info(f"Skipping target {target_path} for source {source_path}={source_value} due to target condition not matching")
                     continue
             
             # Process value transformation
@@ -1292,13 +1500,13 @@ class ConfigConverter:
                         else:
                             target_value = value_template
                         
-                        self.logger.debug(f"Regex transformed {source_value} to {target_value}")
+                        self.logger.info(f"Regex transformed {source_value} to {target_value} using pattern {source_regex}")
                     else:
-                        self.logger.warning(f"Regex pattern {source_regex} did not match {source_value} for {source_path}")
+                        self.logger.info(f"Regex pattern {source_regex} did not match {source_value} for {source_path}")
                         continue
                 else:
                     target_value = target['value']
-                    self.logger.debug(f"Using static value: {target_value}")
+                    self.logger.info(f"Using static value: {target_value}")
             else:
                 target_value = source_value
                 
@@ -1306,18 +1514,19 @@ class ConfigConverter:
                 if transform:
                     context = {'source_data': source_data, 'target_data': target_data}
                     original_value = target_value
+                    self.logger.info(f"Applying transformation {transform} to {original_value}")
                     target_value = self.apply_transform(target_value, transform, context)
                     
                     # If transformation returns None, it means the value didn't match any mapping
                     if target_value is None:
-                        self.logger.warning(f"Skipping parameter mapping for {source_path}={source_value} → {target_path} (no matching transformation)")
+                        self.logger.info(f"Skipping parameter mapping for {source_path}={source_value} → {target_path} (no matching transformation)")
                         # Add to mapped parameters list (as mapped but skipped)
                         if not hasattr(self, 'mapped_parameters'):
                             self.mapped_parameters = []
                         self.mapped_parameters.append((source_path, source_value, target_path, "SKIPPED_NO_MATCHING_TRANSFORM"))
                         continue
                         
-                    self.logger.debug(f"Transformed {original_value} using {transform} to {type(target_value)}")
+                    self.logger.info(f"Transformed {original_value} using {transform} to {target_value}")
             
             # Set target value using the improved nested value setter
             self._set_nested_value(target_data, target_path, target_value)

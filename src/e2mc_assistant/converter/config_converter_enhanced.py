@@ -41,7 +41,7 @@ class ConfigConverter:
         This function combines _generate_outputs_from_streams with _process_rate_control_settings
         and _process_audio_settings to create outputs with proper settings, while respecting
         video-only and audio-only outputs. It also applies stream-specific rules from
-        mp4_rules_fixed.yaml.
+        the rules file provided during initialization.
         
         Args:
             streams: List of stream dictionaries from Encoding.com format
@@ -65,6 +65,8 @@ class ConfigConverter:
             
             # Track processed parameters
             processed_params = set()
+            # 创建一个专门的集合来跟踪通过dummy规则处理的参数
+            processed_dummy_params = set()
             
             # Process each output to apply rate control and audio settings
             for i, output in enumerate(outputs):
@@ -109,17 +111,13 @@ class ConfigConverter:
                 for key, value in processed_output.items():
                     output[key] = value
             
-            # Now load the rules from mp4_rules_fixed.yaml, but exclude stream rules
-            rules_file = os.path.join(os.path.dirname(__file__), 'rules/mp4_rules_fixed.yaml')
-            with open(rules_file, 'r') as f:
-                rules_data = yaml.safe_load(f)
-            
+            # Use the rules that were loaded during initialization
             # Create a rule lookup dictionary for faster access
             rule_lookup = {}
             dummy_rules = []
             
             # Organize rules by their source path for easier lookup, but skip stream rules
-            for rule in rules_data.get('rules', []):
+            for rule in self.rules:
                 # Skip rules that target stream path to avoid recursion
                 if rule['source'].get('path') == 'stream':
                     self.logger.info("Skipping stream rule to avoid recursion")
@@ -140,17 +138,17 @@ class ConfigConverter:
                 source_value = self.get_value_by_path(source_data, source_path)
                 self.logger.debug(f"Processing dummy rule for {source_path}")
                 processed_params.add(source_path)
+                processed_dummy_params.add(source_path)  # 添加到专门的dummy参数集合
                 # Log the dummy rule match
-                self.logger.debug(f"Mapped parameter: {source_path}={source_value} → [DUMMY RULE]")
+                self.logger.info(f"Mapped parameter: {source_path}={source_value} → [DUMMY RULE]")
             
             # Now process each stream individually with the rules
             for i, stream in enumerate(streams):
                 # Create a temporary target data structure for this stream's output
                 temp_target = {"Settings": {"OutputGroups": [{"Outputs": [outputs[i]]}]}}
                 
-                # Create a separate processed_params set for each stream to avoid skipping parameters
-                # that were processed in previous streams
-                stream_processed_params = set()
+                # 创建一个新的stream_processed_params，并复制processed_dummy_params
+                stream_processed_params = set(processed_dummy_params)  # 只复制dummy参数
                 
                 # Process each parameter in the stream using the rules
                 self.logger.info(f"Applying rules to stream {i+1}/{len(streams)}")
@@ -187,8 +185,6 @@ class ConfigConverter:
                         outputs[i].pop('VideoDescription', None)
             
             self.logger.info(f"Final outputs after cleanup: {len(outputs)} outputs")
-            return outputs
-                    
             return outputs
         finally:
             # 确保无论如何都清除处理标记

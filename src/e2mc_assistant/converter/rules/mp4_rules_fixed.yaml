@@ -349,7 +349,7 @@ rules:
         value: "advanced_dash"
     target:
       - path: "Settings.OutputGroups[0].OutputGroupSettings.Type"
-        value: "CMAF_GROUP_SETTINGS"
+        value: "DASH_ISO_GROUP_SETTINGS"
         
   - source:
       path: "output"
@@ -369,7 +369,7 @@ rules:
         value: "advanced_hls"
     target:
       - path: "Settings.OutputGroups[0].OutputGroupSettings.Type"
-        value: "CMAF_GROUP_SETTINGS"
+        value: "HLS_GROUP_SETTINGS"
         
   - source:
       path: "output"

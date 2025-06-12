@@ -1541,7 +1541,8 @@ class ConfigConverter:
                 for rule in rule_lookup[path]:
                     self._process_rule(rule, path, value, source_data, target_data, processed_params, context)
             else:
-                self.logger.info(f"No rules found for parameter: {path}={value}")
+                if not isinstance(value, dict):
+                    self.logger.info(f"No rules found for parameter: {path}={value}")
             
             # If this is a dictionary, process it recursively
             if isinstance(value, dict):

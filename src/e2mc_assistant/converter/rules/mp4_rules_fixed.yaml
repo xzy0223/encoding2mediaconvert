@@ -10,12 +10,19 @@ rules:
   #     transform: "generate_outputs_with_settings"
       
   # Alternate source handling with transform function
-  - source:
-      path: "alternate_source"
-      type: "string"
+  # - source:
+  #     path: "alternate_source"
+  #     type: "string"
+  #   target:
+  #     path: "Settings.Inputs[0].AudioSelectors"
+  #     transform: "process_alternate_sources"
+
+  - source: 
+      path: "use_alternate_id"
+      type: "number"
     target:
-      path: "Settings.Inputs[0].AudioSelectors"
-      transform: "process_alternate_sources"
+      path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0]"
+      transform: "process_use_alternate_id"
 
   # Parameters that don't need conversion but need to be recorded as processed
   - source:
@@ -165,6 +172,14 @@ rules:
       path: "playlist_version"
       type: "dummy" 
 
+  - source:
+      path: "video_only"
+      type: "dummy" 
+
+  - source:
+      path: "audio_only"
+      type: "dummy" 
+
   # 处理字幕CEA数据字段参数
   - source:
       path: "closed_captions.cea_data_field"
@@ -206,6 +221,14 @@ rules:
   # 不需要处理这个参数，有这个参数都会有alternate_source
   - source:
       path: "use_alternate_source"
+      type: "dummy" 
+
+  - source:
+      path: "AdditionalCfDestination"
+      type: "dummy" 
+
+  - source:
+      path: "framerate_upper_threshold"
       type: "dummy" 
 
   # 处理视频旋转参数

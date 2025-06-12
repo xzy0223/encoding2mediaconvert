@@ -73,6 +73,11 @@ class ConfigConverter:
                 # Create a temporary target data structure to use with processing methods
                 temp_target = {"Settings": {"OutputGroups": [{"Outputs": [output]}]}}
                 
+                # Add audio_selectors to temp_target if available in context
+                if 'audio_selectors' in context:
+                    temp_target["Settings"]["Inputs"] = [{"AudioSelectors": context['audio_selectors']}]
+                    self.logger.debug(f"Added AudioSelectors to temp_target for output {i}")
+                
                 # Check if this is a video-only output (no AudioDescriptions)
                 is_video_only = "AudioDescriptions" not in output
                 
@@ -155,7 +160,7 @@ class ConfigConverter:
                 
                 # Process the stream with rules, but avoid recursive processing
                 # by not processing 'stream' paths
-                self._process_source_data(stream, "", rule_lookup, temp_target, stream_processed_params)
+                self._process_source_data(stream, "", rule_lookup, temp_target, stream_processed_params, context)
                 
                 # Extract the processed output back
                 processed_output = temp_target["Settings"]["OutputGroups"][0]["Outputs"][0]
@@ -238,6 +243,25 @@ class ConfigConverter:
                 if elements:
                     self._process_element(elements[0], result)
         
+        # Special handling for stream elements with multiple use_alternate_id tags
+        if 'stream' in result and isinstance(result['stream'], list):
+            new_streams = []
+            for stream in result['stream']:
+                if isinstance(stream, dict) and 'use_alternate_id' in stream and isinstance(stream['use_alternate_id'], list):
+                    # This stream has multiple use_alternate_id values, split it
+                    for alt_id in stream['use_alternate_id']:
+                        # Create a copy of the stream with a single use_alternate_id
+                        new_stream = stream.copy()
+                        new_stream['use_alternate_id'] = alt_id
+                        new_streams.append(new_stream)
+                else:
+                    # No multiple use_alternate_id, keep as is
+                    new_streams.append(stream)
+            
+            # Replace the original streams with the expanded list
+            result['stream'] = new_streams
+            self.logger.info(f"Expanded streams with multiple use_alternate_id values. Total streams: {len(new_streams)}")
+        
         # Debug output
         self.logger.debug(f"Parsed XML structure: {result}")
                 
@@ -253,7 +277,18 @@ class ConfigConverter:
                     text = int(text)
                 elif self._is_float(text):
                     text = float(text)
-            current_dict[element.tag] = text
+                    
+            # Special handling for duplicate tags like use_alternate_id
+            if element.tag in current_dict:
+                # If this tag already exists, convert to a list or append to existing list
+                if isinstance(current_dict[element.tag], list):
+                    current_dict[element.tag].append(text)
+                else:
+                    # Convert existing value to a list with both values
+                    current_dict[element.tag] = [current_dict[element.tag], text]
+            else:
+                # First occurrence of this tag
+                current_dict[element.tag] = text
         else:
             # Non-leaf node
             new_dict = {}
@@ -298,6 +333,10 @@ class ConfigConverter:
                 self.logger.warning(f"Detected potential recursive call to {transform_name}, skipping transformation")
                 return value
             return self.custom_functions[transform_name](value, context)
+        
+        # Special case for process_use_alternate_id
+        if transform_name == "process_use_alternate_id":
+            return self._process_use_alternate_id(value, context)
             
         # Special case for audio_volume_format
         if transform_name == "audio_volume_format":
@@ -413,7 +452,7 @@ class ConfigConverter:
             context: Context dictionary with source_data and other information
             
         Returns:
-            Dictionary of audio selectors for MediaConvert
+            Dictionary of audio selectors for MediaConvert and a mapping of alternate source indices to selectors
         """
         audio_selectors = {}
         source_data = context.get('source_data', {})
@@ -434,10 +473,25 @@ class ConfigConverter:
         
         self.logger.debug(f"Processing {len(alternate_sources)} alternate audio sources")
         
-        # Process each alternate source
-        for i, source in enumerate(alternate_sources):
+        # Group alternate sources by language
+        language_groups = {}
+        for source in alternate_sources:
+            language = source.get('language', '').lower()
+            if language not in language_groups:
+                language_groups[language] = []
+            language_groups[language].append(source)
+        
+        self.logger.debug(f"Grouped alternate sources into {len(language_groups)} language groups")
+        
+        # Create a mapping between alternate source indices and audio selectors
+        alternate_source_mapping = {}
+        
+        # Process each language group (one selector per language)
+        selector_index = 1
+        for language, sources in language_groups.items():
             # Create a unique selector name
-            selector_name = f"Audio Selector {i+1}"
+            selector_name = f"Audio Selector {selector_index}"
+            selector_index += 1
             
             # Create base selector
             selector = {}
@@ -446,45 +500,72 @@ class ConfigConverter:
             selector['SelectorType'] = "LANGUAGE_CODE"
             
             # Set language code if available
-            if 'language' in source:
-                language = source['language'].lower()
+            mc_language_code = None
+            if language:
                 # Use the language code mapping
                 if language in language_code_format:
-                    selector['LanguageCode'] = language_code_format[language]
+                    mc_language_code = language_code_format[language]
+                    selector['LanguageCode'] = mc_language_code
                 # Fallback to previous mappings for compatibility
                 elif language in ['eng', 'english']:
-                    selector['LanguageCode'] = 'ENG'
+                    mc_language_code = 'ENG'
+                    selector['LanguageCode'] = mc_language_code
                 elif language in ['spa', 'spanish']:
-                    selector['LanguageCode'] = 'SPA'
+                    mc_language_code = 'SPA'
+                    selector['LanguageCode'] = mc_language_code
                 elif language in ['fre', 'fra', 'french']:
-                    selector['LanguageCode'] = 'FRA'
+                    mc_language_code = 'FRA'
+                    selector['LanguageCode'] = mc_language_code
                 elif language in ['ger', 'deu', 'german']:
-                    selector['LanguageCode'] = 'DEU'
+                    mc_language_code = 'DEU'
+                    selector['LanguageCode'] = mc_language_code
                 else:
                     # Use as is for other languages
-                    selector['LanguageCode'] = language.upper()
+                    mc_language_code = language.upper()
+                    selector['LanguageCode'] = mc_language_code
             
-            # Set custom language name if available
-            if 'audio_name' in source:
-                selector['CustomLanguageCode'] = source['audio_name']
+            # Set custom language name if available from any source in the group
+            audio_name = None
+            for source in sources:
+                if 'audio_name' in source:
+                    audio_name = source['audio_name']
+                    selector['CustomLanguageCode'] = audio_name
+                    break
             
-            # Set as default if specified
-            if source.get('alternate_default') == 'yes':
+            # Set as default if any source in the group is marked as default
+            is_default = any(source.get('alternate_default') == 'yes' for source in sources)
+            if is_default:
                 selector['DefaultSelection'] = 'DEFAULT'
             else:
                 selector['DefaultSelection'] = 'NOT_DEFAULT'
             
             # Add to audio selectors dictionary
             audio_selectors[selector_name] = selector
-            self.logger.debug(f"Created audio selector: {selector_name} with settings: {selector}")
+            self.logger.debug(f"Created audio selector: {selector_name} with settings: {selector} for {len(sources)} sources")
+            
+            # Add mapping for each source in this group
+            for i, source in enumerate(alternate_sources):
+                source_language = source.get('language', '').lower()
+                if source_language == language:
+                    source_audio_name = source.get('audio_name')
+                    if source_audio_name == audio_name or (audio_name is None and source_audio_name is None):
+                        alternate_source_mapping[i] = {
+                            'selector_name': selector_name,
+                            'language_code': mc_language_code,
+                            'audio_name': source_audio_name
+                        }
+                        self.logger.debug(f"Mapped alternate_source[{i}] to {selector_name}")
         
         # If no selectors were created, add a default one
         if not audio_selectors:
             audio_selectors["Audio Selector 1"] = {
-                "DefaultSelection": "DEFAULT",
-                "SelectorType": "LANGUAGE_CODE"
+                "DefaultSelection": "DEFAULT"
             }
             self.logger.debug("Added default audio selector")
+        
+        # Store the mapping in the context
+        context['alternate_source_mapping'] = alternate_source_mapping
+        self.logger.info(f"Created mapping for {len(alternate_source_mapping)} alternate sources")
         
         return audio_selectors
         
@@ -636,6 +717,34 @@ class ConfigConverter:
                     name_modifier += "_stereo"
                 elif channels == 1:
                     name_modifier += "_mono"
+                    
+            # Add language info from alternate_source_mapping if use_alternate_id is present
+            if 'use_alternate_id' in stream and 'alternate_source_mapping' in context:
+                alternate_id = stream['use_alternate_id']
+                mapping = context['alternate_source_mapping']
+                
+                # Convert to string key for dictionary lookup if needed
+                alternate_id_str = str(alternate_id)
+                if alternate_id_str in mapping:
+                    mapping_info = mapping[alternate_id_str]
+                elif alternate_id in mapping:
+                    mapping_info = mapping[alternate_id]
+                else:
+                    mapping_info = None
+                    
+                if mapping_info:
+                    language_code = mapping_info.get('language_code')
+                    audio_name = mapping_info.get('audio_name')
+                    
+                    # Add language info to name modifier to avoid duplicates
+                    if language_code:
+                        name_modifier += f"_{language_code.lower()}"
+                    elif audio_name:
+                        # Convert audio name to a safe format for filenames
+                        safe_audio_name = re.sub(r'[^a-zA-Z0-9]', '_', audio_name).lower()
+                        name_modifier += f"_{safe_audio_name}"
+                        
+                    self.logger.info(f"Added language info to name modifier for use_alternate_id={alternate_id}: {name_modifier}")
             
             output["NameModifier"] = name_modifier
             
@@ -1178,6 +1287,45 @@ class ConfigConverter:
         processed_params = set()
         self.mapped_parameters = []  # Track successfully mapped parameters
         self.unmapped_parameters = []  # Track unmapped parameters
+
+        # Process alternate_source directly if it exists
+        alternate_sources = self.get_value_by_path(source_data, 'alternate_source')
+        audio_selectors = None
+        alternate_source_mapping = {}
+        
+        if alternate_sources:
+            self.logger.info(f"Processing alternate_source directly in convert function")
+            # Create a context for processing alternate sources
+            alt_context = {'source_data': source_data}
+            audio_selectors = self._process_alternate_sources(alternate_sources, alt_context)
+            if audio_selectors:
+                # Ensure Inputs[0] exists
+                if 'Settings' not in target_data:
+                    target_data['Settings'] = {}
+                if 'Inputs' not in target_data['Settings']:
+                    target_data['Settings']['Inputs'] = [{}]
+                if not target_data['Settings']['Inputs']:
+                    target_data['Settings']['Inputs'] = [{}]
+                
+                # Set AudioSelectors
+                target_data['Settings']['Inputs'][0]['AudioSelectors'] = audio_selectors
+                processed_params.add('alternate_source')
+                self.logger.info(f"Added AudioSelectors to Inputs[0] from alternate_source")
+                
+                # Get the mapping created by _process_alternate_sources
+                if 'alternate_source_mapping' in alt_context:
+                    alternate_source_mapping = alt_context.get('alternate_source_mapping', {})
+                    self.logger.info(f"Retrieved alternate_source_mapping with {len(alternate_source_mapping)} entries")
+                    
+                    # # Store the mapping in target_data for later use
+                    # if 'alternate_source_mapping' not in target_data:
+                    #     target_data['alternate_source_mapping'] = alternate_source_mapping
+                    #     self.logger.info(f"Stored alternate_source_mapping in target_data for later use")
+                
+                # Get the mapping created by _process_alternate_sources
+                if 'alternate_source_mapping' in alt_context:
+                    alternate_source_mapping = alt_context.get('alternate_source_mapping', {})
+                    self.logger.info(f"Retrieved alternate_source_mapping with {len(alternate_source_mapping)} entries, {alternate_source_mapping}")
         
         # Check if this is a multi-stream configuration
         streams = self.get_value_by_path(source_data, 'stream')
@@ -1186,14 +1334,19 @@ class ConfigConverter:
         if is_multi_stream:
             self.logger.info(f"Detected multi-stream configuration with {len(streams)} streams")
             # Handle multi-stream scenario using specialized functions
-            context = {'source_data': source_data}
+            context = {'source_data': source_data, 'alternate_source_mapping': alternate_source_mapping}
             
-            # Process streams directly using the specialized functions
-            # This avoids the need for stream path rules that could cause recursion
-            # outputs = self._generate_outputs_from_streams(streams, context)
+            # Add audio_selectors to context for stream processing if available
+            if audio_selectors:
+                context['audio_selectors'] = audio_selectors
+                self.logger.info(f"Added audio_selectors to context for stream processing")
+                
+            # Add alternate_source_mapping to context if available
+            if alternate_source_mapping:
+                context['alternate_source_mapping'] = alternate_source_mapping
+                self.logger.info(f"Added alternate_source_mapping to context for stream processing")
             
             # Apply settings to the generated outputs
-            context = {'source_data': source_data}
             outputs_with_settings = self.generate_outputs_with_settings(streams, context)
             
             # Add the outputs to the target data
@@ -1362,7 +1515,7 @@ class ConfigConverter:
         
         return "_mc"  # Default if we can't extract resolution/bitrate
         
-    def _process_source_data(self, source_data, current_path, rule_lookup, target_data, processed_params):
+    def _process_source_data(self, source_data, current_path, rule_lookup, target_data, processed_params, context=None):
         """Process source data recursively and apply matching rules"""
         if not isinstance(source_data, dict):
             return
@@ -1379,28 +1532,28 @@ class ConfigConverter:
             # Special handling for stream array
             if key == 'stream' and isinstance(value, list):
                 self.logger.info(f"Processing stream array with {len(value)} elements")
-                self._process_stream_array(value, path, rule_lookup, target_data, processed_params)
+                self._process_stream_array(value, path, rule_lookup, target_data, processed_params, context)
             
             # Check if we have rules for this path
             if path in rule_lookup:
                 self.logger.info(f"Found {len(rule_lookup[path])} rules for parameter: {path}={value}")
                 # Process all rules for this path
                 for rule in rule_lookup[path]:
-                    self._process_rule(rule, path, value, source_data, target_data, processed_params)
+                    self._process_rule(rule, path, value, source_data, target_data, processed_params, context)
             else:
                 self.logger.info(f"No rules found for parameter: {path}={value}")
             
             # If this is a dictionary, process it recursively
             if isinstance(value, dict):
-                self._process_source_data(value, path, rule_lookup, target_data, processed_params)
+                self._process_source_data(value, path, rule_lookup, target_data, processed_params, context)
             # If this is a list, process each item if they are dictionaries
             elif isinstance(value, list) and key != 'stream':  # Skip stream array as it's handled specially
                 for i, item in enumerate(value):
                     if isinstance(item, dict):
                         list_path = f"{path}[{i}]"
-                        self._process_source_data(item, list_path, rule_lookup, target_data, processed_params)
+                        self._process_source_data(item, list_path, rule_lookup, target_data, processed_params, context)
                         
-    def _process_stream_array(self, streams, path, rule_lookup, target_data, processed_params):
+    def _process_stream_array(self, streams, path, rule_lookup, target_data, processed_params, context=None):
         """Process stream array elements with rules"""
         # First, find all rules that might apply to stream elements
         stream_rules = {}
@@ -1434,8 +1587,14 @@ class ConfigConverter:
                         # Create a temporary context with this stream as the source data
                         temp_context = {param_name: param_value}
                         
+                        # Add the global context to temp_context if available
+                        if context:
+                            for key, value in context.items():
+                                if key not in temp_context:
+                                    temp_context[key] = value
+                        
                         # Process the rule
-                        self._process_rule(rule, param_name, param_value, temp_context, target_data, processed_params)
+                        self._process_rule(rule, param_name, param_value, temp_context, target_data, processed_params, context)
                         
                         # Mark the parameter as processed
                         processed_params.add(param_path)
@@ -1444,15 +1603,15 @@ class ConfigConverter:
                     
                 # If the parameter is a dictionary, process it recursively
                 if isinstance(param_value, dict):
-                    self._process_source_data(param_value, param_path, rule_lookup, target_data, processed_params)
+                    self._process_source_data(param_value, param_path, rule_lookup, target_data, processed_params, context)
                 # If the parameter is a list, process each item if they are dictionaries
                 elif isinstance(param_value, list):
                     for j, item in enumerate(param_value):
                         if isinstance(item, dict):
                             item_path = f"{param_path}[{j}]"
-                            self._process_source_data(item, item_path, rule_lookup, target_data, processed_params)
+                            self._process_source_data(item, item_path, rule_lookup, target_data, processed_params, context)
     
-    def _process_rule(self, rule, source_path, source_value, source_data, target_data, processed_params):
+    def _process_rule(self, rule, source_path, source_value, source_data, target_data, processed_params, context=None):
         """Process a single rule for a given source path and value"""
         source_regex = rule['source'].get('regex')
         
@@ -1530,10 +1689,18 @@ class ConfigConverter:
                 
                 # Apply transformation function
                 if transform:
-                    context = {'source_data': source_data, 'target_data': target_data}
+                    # Create a combined context with both source_data and the passed context
+                    combined_context = {'source_data': source_data, 'target_data': target_data}
+                    
+                    # Add any additional context values if provided
+                    if context:
+                        for key, value in context.items():
+                            if key not in combined_context:
+                                combined_context[key] = value
+                    
                     original_value = target_value
                     self.logger.info(f"Applying transformation {transform} to {original_value}")
-                    target_value = self.apply_transform(target_value, transform, context)
+                    target_value = self.apply_transform(target_value, transform, combined_context)
                     
                     # If transformation returns None, it means the value didn't match any mapping
                     if target_value is None:
@@ -1556,6 +1723,72 @@ class ConfigConverter:
                 self.mapped_parameters = []
             self.mapped_parameters.append((source_path, source_value, target_path, target_value))
             
+        
+    def _process_use_alternate_id(self, alternate_id: Any, context: Dict = None) -> Dict:
+        """
+        Process use_alternate_id parameter in stream configuration
+        
+        This function handles the use_alternate_id parameter by using the mapping
+        created in _process_alternate_sources to find the corresponding audio selector
+        and language information.
+        
+        Args:
+            alternate_id: The alternate_id value (index of alternate_source)
+            context: Context dictionary with alternate_source_mapping and other information
+            
+        Returns:
+            Dictionary with settings to apply to AudioDescriptions
+        """
+        if context is None:
+            self.logger.warning("Cannot process use_alternate_id without context")
+            return {}
+            
+        # Convert alternate_id to integer if it's not already
+        try:
+            alternate_id = int(alternate_id)
+        except (ValueError, TypeError):
+            self.logger.warning(f"Invalid use_alternate_id value: {alternate_id}")
+            return {}
+            
+        self.logger.info(f"Processing use_alternate_id: {alternate_id}")
+        
+        # Get the mapping from context
+        alternate_source_mapping = context.get('alternate_source_mapping', {})
+        # if not alternate_source_mapping:
+        #     # Try to get it from target_data if available
+        #     target_data = context.get('target_data', {})
+        #     if 'alternate_source_mapping' in target_data:
+        #         alternate_source_mapping = target_data['alternate_source_mapping']
+                
+        # Convert to string key for dictionary lookup
+        alternate_id_str = str(alternate_id)
+        if alternate_id_str in alternate_source_mapping:
+            mapping = alternate_source_mapping[alternate_id_str]
+        elif alternate_id in alternate_source_mapping:
+            mapping = alternate_source_mapping[alternate_id]
+        else:
+            self.logger.warning(f"No mapping found for alternate_id: {alternate_id}, {context}")
+            return {}
+            
+        selector_name = mapping.get('selector_name')
+        language_code = mapping.get('language_code')
+        audio_name = mapping.get('audio_name')
+        
+        if not selector_name or not language_code:
+            self.logger.warning(f"Incomplete mapping for alternate_id: {alternate_id}")
+            return {}
+            
+        self.logger.info(f"Found mapping for alternate_id {alternate_id}: selector={selector_name}, language={language_code}, audio_name={audio_name}, selector_mapping={alternate_source_mapping}")
+        
+        # Create settings to apply to AudioDescriptions
+        audio_description_settings = {
+            "LanguageCode": language_code,
+            "StreamName": audio_name if audio_name else language_code,
+            "AudioSourceName": selector_name
+        }
+        
+        self.logger.info(f"Created AudioDescription settings: {audio_description_settings}")
+        return audio_description_settings
         
     def _log_unmapped_parameters(self, source_data: Dict, processed_params: set, parent_path: str = ""):
         """Log parameters that don't have mapping rules"""

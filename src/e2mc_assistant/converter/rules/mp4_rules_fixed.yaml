@@ -21,8 +21,10 @@ rules:
       path: "use_alternate_id"
       type: "number"
     target:
-      path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0]"
-      transform: "process_use_alternate_id"
+      - path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0]"
+        transform: "process_use_alternate_id"
+      - path: "Settings.OutputGroups[0].Outputs[0].ContainerSettings"
+        transform: "process_use_alternate_id_second"
 
   # Parameters that don't need conversion but need to be recorded as processed
   - source:
@@ -229,6 +231,34 @@ rules:
 
   - source:
       path: "framerate_upper_threshold"
+      type: "dummy" 
+
+  - source:
+      path: "segmenter"
+      type: "dummy" 
+
+  - source:
+      path: "copy_nielsen_metadata"
+      type: "dummy" 
+
+  - source:
+      path: "metadata.copy"
+      type: "dummy" 
+
+  - source:
+      path: "refs"
+      type: "dummy" 
+
+  - source:
+      path: "reduce_structural_overhead"
+      type: "dummy" 
+
+  - source:
+      path: "video_codec_parameters.nal-hrd"
+      type: "dummy" 
+
+  - source:
+      path: "timescale"
       type: "dummy" 
 
   # 处理视频旋转参数
@@ -485,7 +515,55 @@ rules:
       - path: "Settings.OutputGroups[0].Outputs[0].ContainerSettings.Container"
         value: "WEBM"
 
-  # Single output video settings (for MP4)
+
+  - source:
+      path: "bufsize"
+      type: "string"
+      regex: "(\\d+)k"
+      condition:
+        source_path: "video_codec"
+        operator: "in"
+        value: ["mpeg4", "libx264"]
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.HrdBufferSize"
+      value: "$1000"
+
+  - source:
+      path: "bufsize"
+      type: "string"
+      regex: "(\\d+)k"
+      condition:
+        source_path: "video_codec"
+        operator: "eq"
+        value: "hevc"
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.HrdBufferSize"
+      value: "$1000"  
+
+  - source:
+      path: "bufsize"
+      type: "string"
+      regex: "(\\d+)k"
+      condition:
+        source_path: "video_codec"
+        operator: "eq"
+        value: "libvpx"
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings.HrdBufferSize"
+      value: "$1000"  
+
+  - source:
+      path: "bufsize"
+      type: "string"
+      regex: "(\\d+)k"
+      condition:
+        source_path: "video_codec"
+        operator: "eq"
+        value: "mpeg2video"
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Mpeg2Settings.HrdBufferSize"
+      value: "$1000"     
+
   - source:
       path: "video_codec"
       type: "string"
@@ -1355,26 +1433,90 @@ rules:
   - source:
       path: "video_codec_parameters.g"
       type: "number"
+      condition:
+        source_path: "video_codec"
+        operator: "in"
+        value: ["mpeg4", "libx264"]
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.GopSize"
 
+  - source:
+      path: "video_codec_parameters.g"
+      type: "number"
+      condition:
+        source_path: "video_codec"
+        operator: "eq"
+        value: "hevc"
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.GopSize"
         
   # 处理视频编码器关键帧参数
   - source:
       path: "video_codec_parameters.keyframes"
       type: "number"
+      condition:
+        source_path: "video_codec"
+        operator: "in"
+        value: ["mpeg4", "libx264"]
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.GopClosedCadence"
 
+  - source:
+      path: "video_codec_parameters.keyframes"
+      type: "number"
+      condition:
+        source_path: "video_codec"
+        operator: "eq"
+        value: "hevc"
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.GopClosedCadence"
         
   # 处理视频编码器最大关键帧间隔参数
   - source:
       path: "video_codec_parameters.keyint_max"
       type: "number"
+      condition:
+        source_path: "video_codec"
+        operator: "in"
+        value: ["mpeg4", "libx264"]
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.GopSize"
 
-        
+  - source:
+      path: "video_codec_parameters.keyint_max"
+      type: "number"
+      condition:
+        source_path: "video_codec"
+        operator: "eq"
+        value: "hevc"
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.GopSize"
+
+  # 处理视频编码器最大关键帧间隔参数
+  - source:
+      path: "force_keyframes"
+      type: "number"
+      condition:
+        source_path: "video_codec"
+        operator: "in"
+        value: ["mpeg4", "libx264"]
+    target:
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.GopSize"
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.GopSizeUnits"
+        value: "FRAMES"
+
+  - source:
+      path: "force_keyframes"
+      type: "number"
+      condition:
+        source_path: "video_codec"
+        operator: "eq"
+        value: "hevc"
+    target:
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.GopSize"
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.GopSizeUnits"
+        value: "FRAMES"
+
   # 处理视频编码器配置文件参数
   - source:
       path: "video_codec_parameters.profile"
@@ -1588,6 +1730,13 @@ rules:
       path: "Settings.OutputGroups[0].Outputs[0].ContainerSettings.CmfcSettings.AudioTrackType"
       transform: "add_audio_only_format"
 
+  - source:
+      path: "group_id"
+      type: "string"
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].ContainerSettings"
+      transform: "process_group_id"
+
 # Transformation functions
   # 处理时间码复制参数
   - source:
@@ -1641,6 +1790,7 @@ transformers:
     "av1": "AV1"
     
   audio_codec_format:
+    "aac": "AAC"
     "libfaac": "AAC"
     "dolby_aac": "AAC"
     "dolby_heaac": "AAC"
@@ -1716,6 +1866,7 @@ transformers:
   audio_sync_format:
     "1": "AUTO"
     "": "AUTO"
+    "auto": "AUTO"
     
   cabr_format:
     "no": "QVBR"

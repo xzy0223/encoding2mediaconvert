@@ -337,6 +337,12 @@ class ConfigConverter:
         # Special case for process_use_alternate_id
         if transform_name == "process_use_alternate_id":
             return self._process_use_alternate_id(value, context)
+        
+        if transform_name == "process_use_alternate_id_second":
+            return self._process_use_alternate_id_second(value, context)
+            
+        if transform_name == "process_group_id":
+            return self._process_group_id(value, context)
             
         # Special case for audio_volume_format
         if transform_name == "audio_volume_format":
@@ -552,7 +558,8 @@ class ConfigConverter:
                         alternate_source_mapping[i] = {
                             'selector_name': selector_name,
                             'language_code': mc_language_code,
-                            'audio_name': source_audio_name
+                            'audio_name': source_audio_name,
+                            'alternate_default': source.get('alternate_default')
                         }
                         self.logger.debug(f"Mapped alternate_source[{i}] to {selector_name}")
         
@@ -1128,7 +1135,7 @@ class ConfigConverter:
             processed_params.add('audio_codec')
             
             # Case 1.a: audio_codec is one of the AAC variants
-            if audio_codec in ["dolby_aac", "dolby_heaac", "libfaac"]:
+            if audio_codec in ["dolby_aac", "dolby_heaac", "libfaac", "aac"]:
                 # i. Set codec to AAC
                 self._set_nested_value(target_data, f"{target_path}.CodecSettings.Codec", "AAC")
                 self.logger.info(f"Set AudioDescriptions[0].CodecSettings.Codec to AAC from <audio_codec>={audio_codec}")
@@ -1466,6 +1473,24 @@ class ConfigConverter:
                                 
                     self.logger.info(f"Cleaned up {len(outputs)} outputs based on video_only/audio_only flags")
         
+        # Add default Extension="m4s" for CMAF_GROUP_SETTINGS outputs without Extension
+        if 'Settings' in target_data and 'OutputGroups' in target_data['Settings']:
+            for output_group in target_data['Settings']['OutputGroups']:
+                # Check if this is a CMAF_GROUP_SETTINGS output group
+                if ('OutputGroupSettings' in output_group and 
+                    'Type' in output_group['OutputGroupSettings'] and 
+                    output_group['OutputGroupSettings']['Type'] == 'CMAF_GROUP_SETTINGS' and
+                    'Outputs' in output_group):
+                    
+                    outputs = output_group['Outputs']
+                    for output in outputs:
+                        # Check if Extension is missing
+                        if 'Extension' not in output:
+                            output['Extension'] = "m4s"
+                            self.logger.info(f"Added default Extension='m4s' to CMAF output")
+                    
+                    self.logger.info(f"Checked {len(outputs)} CMAF outputs for missing Extension parameter")
+        
         return target_data
         
     def _add_missing_name_modifiers(self, target_data: Dict) -> None:
@@ -1519,7 +1544,8 @@ class ConfigConverter:
         """Process source data recursively and apply matching rules"""
         if not isinstance(source_data, dict):
             return
-            
+        
+        # self.logger.debug(f"Processing source data at path: {current_path}, {context}")
         for key, value in source_data.items():
             # Build the current path
             path = f"{current_path}.{key}" if current_path else key
@@ -1539,6 +1565,7 @@ class ConfigConverter:
                 self.logger.info(f"Found {len(rule_lookup[path])} rules for parameter: {path}={value}")
                 # Process all rules for this path
                 for rule in rule_lookup[path]:
+                    # self.logger.debug(f"Processing rule with context:{context}")
                     self._process_rule(rule, path, value, source_data, target_data, processed_params, context)
             else:
                 if not isinstance(value, dict):
@@ -1690,14 +1717,16 @@ class ConfigConverter:
                 
                 # Apply transformation function
                 if transform:
+                    # original_source_data = context['source_data']
+                    self.logger.info(f"Applying transformation,now context is {context}")
                     # Create a combined context with both source_data and the passed context
-                    combined_context = {'source_data': source_data, 'target_data': target_data}
-                    
-                    # Add any additional context values if provided
-                    if context:
+                    if context is not None:
+                        combined_context = {'source_data': source_data, 'target_data': target_data, 'original_source_data': context['source_data']}
                         for key, value in context.items():
                             if key not in combined_context:
                                 combined_context[key] = value
+                    else:
+                        combined_context = {'source_data': source_data, 'target_data': target_data}    
                     
                     original_value = target_value
                     self.logger.info(f"Applying transformation {transform} to {original_value}")
@@ -1774,6 +1803,7 @@ class ConfigConverter:
         selector_name = mapping.get('selector_name')
         language_code = mapping.get('language_code')
         audio_name = mapping.get('audio_name')
+        alternate_default = mapping.get('alternate_default')
         
         if not selector_name or not language_code:
             self.logger.warning(f"Incomplete mapping for alternate_id: {alternate_id}")
@@ -1788,8 +1818,135 @@ class ConfigConverter:
             "AudioSourceName": selector_name
         }
         
-        self.logger.info(f"Created AudioDescription settings: {audio_description_settings}")
         return audio_description_settings
+        
+    def _process_use_alternate_id_second(self, alternate_id: Any, context: Dict = None) -> Dict:
+        """
+        Process use_alternate_id parameter for container settings
+        
+        This function handles the use_alternate_id parameter by determining the appropriate
+        container settings based on the output format and alternate_default value.
+        
+        Args:
+            alternate_id: The alternate_id value (index of alternate_source)
+            context: Context dictionary with alternate_source_mapping and other information
+            
+        Returns:
+            Dictionary with settings to apply to ContainerSettings
+        """
+        self.logger.info(f"entering second, {context}")
+        if context is None:
+            self.logger.warning("Cannot process use_alternate_id_second without context")
+            return {}
+        
+        # Convert alternate_id to integer if it's not already
+        try:
+            alternate_id = int(alternate_id)
+        except (ValueError, TypeError):
+            self.logger.warning(f"Invalid use_alternate_id value: {alternate_id}")
+            return {}
+            
+        self.logger.info(f"Processing use_alternate_id_second: {alternate_id}")
+        
+        # Get the output format from context
+        output_format = self.get_value_by_path(context.get('original_source_data', {}), 'output')
+        if not output_format:
+            self.logger.warning("No output format found in context")
+            return {}
+            
+        self.logger.info(f"Output format for use_alternate_id_second: {output_format}")
+        
+        # Get the mapping from context
+        alternate_source_mapping = context.get('alternate_source_mapping', {})
+        
+        # Convert to string key for dictionary lookup
+        alternate_id_str = str(alternate_id)
+        if alternate_id_str in alternate_source_mapping:
+            mapping = alternate_source_mapping[alternate_id_str]
+        elif alternate_id in alternate_source_mapping:
+            mapping = alternate_source_mapping[alternate_id]
+        else:
+            self.logger.warning(f"No mapping found for alternate_id: {alternate_id}")
+            return {}
+            
+        # Get alternate_default value
+        alternate_default = mapping.get('alternate_default')
+        
+        # Determine AudioTrackType based on alternate_default
+        audio_track_type = "ALTERNATE_AUDIO_AUTO_SELECT_DEFAULT" if alternate_default == 'yes' else "ALTERNATE_AUDIO_AUTO_SELECT"
+        
+        # Create container settings based on output format
+        container_settings = {}
+        if output_format in ["fmp4_hls", "advanced_fmp4"]:
+            container_settings = {
+                "CmfcSettings": {
+                    "AudioTrackType": audio_track_type
+                }
+            }
+            self.logger.info(f"Created CmfcSettings with AudioTrackType: {audio_track_type}")
+        elif output_format == "advanced_hls":
+            container_settings = {
+                "HlsSettings": {
+                    "AudioTrackType": audio_track_type
+                }
+            }
+            self.logger.info(f"Created HlsSettings with AudioTrackType: {audio_track_type}")
+        else:
+            self.logger.warning(f"Unsupported output format for use_alternate_id_second: {output_format}")
+            
+        return container_settings
+        
+    def _process_group_id(self, group_id: str, context: Dict = None) -> Dict:
+        """
+        Process group_id parameter for container settings
+        
+        This function handles the group_id parameter by determining the appropriate
+        container settings based on the output format and setting the AudioGroupId.
+        
+        Args:
+            group_id: The group_id value from the source data
+            context: Context dictionary with source_data and other information
+            
+        Returns:
+            Dictionary with settings to apply to ContainerSettings
+        """
+        if context is None:
+            self.logger.warning("Cannot process group_id without context")
+            return {}
+            
+        self.logger.info(f"Processing group_id: {group_id}")
+        
+        # Get the output format from context
+        output_format = self.get_value_by_path(context.get('source_data', {}), 'output')
+        if not output_format:
+            # Try to get from original_source_data if available
+            output_format = self.get_value_by_path(context.get('original_source_data', {}), 'output')
+            if not output_format:
+                self.logger.warning("No output format found in context")
+                return {}
+            
+        self.logger.info(f"Output format for group_id: {output_format}")
+        
+        # Create container settings based on output format
+        container_settings = {}
+        if output_format in ["fmp4_hls", "advanced_fmp4"]:
+            container_settings = {
+                "CmfcSettings": {
+                    "AudioGroupId": group_id
+                }
+            }
+            self.logger.info(f"Created CmfcSettings with AudioGroupId: {group_id}")
+        elif output_format == "advanced_hls":
+            container_settings = {
+                "HlsSettings": {
+                    "AudioGroupId": group_id
+                }
+            }
+            self.logger.info(f"Created HlsSettings with AudioGroupId: {group_id}")
+        else:
+            self.logger.warning(f"Unsupported output format for group_id: {output_format}")
+            
+        return container_settings
         
     def _log_unmapped_parameters(self, source_data: Dict, processed_params: set, parent_path: str = ""):
         """Log parameters that don't have mapping rules"""

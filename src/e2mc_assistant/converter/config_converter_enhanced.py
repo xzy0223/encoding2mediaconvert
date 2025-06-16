@@ -60,6 +60,7 @@ class ConfigConverter:
         
         try:
             # First, generate basic outputs from streams
+            self.logger.debug("Generating basic outputs from streams")
             outputs = self._generate_outputs_from_streams(streams, context)
             source_data = context.get('source_data', {})
             
@@ -595,25 +596,6 @@ class ConfigConverter:
         
         self.logger.debug(f"Generating outputs from {len(streams)} streams for format: {output_format}")
         
-        # Count video and audio streams
-        video_streams = []
-        audio_streams = []
-        
-        for stream in streams:
-            if stream.get('audio_only') == 'yes':
-                audio_streams.append(stream)
-            elif stream.get('video_only') == 'yes':
-                video_streams.append(stream)
-            else:
-                # If not explicitly marked, check for typical video parameters
-                if 'size' in stream or 'bitrate' in stream:
-                    video_streams.append(stream)
-                # If it has audio parameters, consider it an audio stream too
-                if 'audio_bitrate' in stream or 'audio_sample_rate' in stream:
-                    audio_streams.append(stream)
-        
-        self.logger.debug(f"Found {len(video_streams)} video streams and {len(audio_streams)} audio streams")
-        
         # Create template for output based on format
         if output_format == "advanced_hls":
             container = "M3U8"
@@ -621,7 +603,7 @@ class ConfigConverter:
         elif output_format in ["fmp4_hls", "advanced_fmp4"]:
             container = "CMFC"
             container_settings_key = "CmfcSettings"
-        elif output_format == "advanced_dash":
+        elif output_format in ["mpeg_dash", "advanced_dash"]:
             container = "MPD"
             container_settings_key = "MpdSettings"
         elif output_format == "mp4":
@@ -630,9 +612,29 @@ class ConfigConverter:
         else:
             container = "MP4"  # Default
             container_settings_key = "Mp4Settings"
+        
+        # Process each stream in the original order
+        for i, stream in enumerate(streams):
+            has_video = False
+            has_audio = False
             
-        # Generate outputs for video streams
-        for i, stream in enumerate(video_streams):
+            # Check for video parameters
+            if 'size' in stream or 'bitrate' in stream:
+                has_video = True
+            
+            # Check for audio parameters
+            if 'audio_bitrate' in stream or 'audio_sample_rate' in stream:
+                has_audio = True
+            
+            # Override detection with explicit flags
+            if stream.get('audio_only') == 'yes':
+                has_video = False
+                has_audio = True
+            elif stream.get('video_only') == 'yes':
+                has_video = True
+                has_audio = False
+            
+            # Create appropriate output structure based on stream type
             output = {
                 "ContainerSettings": {
                     "Container": container,
@@ -640,36 +642,16 @@ class ConfigConverter:
                 }
             }
             
-            # Only add VideoDescription if not audio_only
-            if stream.get('audio_only') != 'yes':
+            # Add VideoDescription for streams with video
+            if has_video:
                 output["VideoDescription"] = {
                     "CodecSettings": {
                         "Codec": "H_264"
                     }
                 }
-                
-                # Set basic video parameters based on stream data
-                if 'size' in stream:
-                    size_match = re.match(r'(\d+)x(\d+)', stream['size'])
-                    if size_match:
-                        width, height = size_match.groups()
-                        output['VideoDescription']['Width'] = int(width)
-                        output['VideoDescription']['Height'] = int(height)
             
-            # Add basic name modifier
-            name_modifier = f"_video_{i+1}"
-            if 'size' in stream:
-                name_modifier = f"_{stream['size']}"
-            if 'bitrate' in stream:
-                bitrate_match = re.match(r'(\d+)k', stream['bitrate'])
-                if bitrate_match:
-                    name_modifier += f"_{bitrate_match.group(1)}K"
-            
-            output["NameModifier"] = name_modifier
-            
-            # Only add AudioDescriptions if not video_only
-            # Explicitly check for 'yes' to ensure we don't add AudioDescriptions for video_only streams
-            if stream.get('video_only') != 'yes':
+            # Add AudioDescriptions for streams with audio
+            if has_audio:
                 output["AudioDescriptions"] = [
                     {
                         "CodecSettings": {
@@ -678,88 +660,161 @@ class ConfigConverter:
                     }
                 ]
             
-            outputs.append(output)
-            self.logger.debug(f"Generated basic video output structure with name modifier: {name_modifier}")
-        
-        # Generate outputs for audio-only streams
-        for i, stream in enumerate(audio_streams):
-            # Skip if this stream was already included with video
-            if stream in video_streams and stream.get('audio_only') != 'yes':
-                continue
+            # Generate appropriate name modifier based on stream type
+            if has_video and has_audio:
+                # Combined video+audio stream
+                name_modifier = f"_video_audio_{i+1}"
+                if 'size' in stream:
+                    name_modifier = f"_{stream['size']}"
+                if 'bitrate' in stream:
+                    bitrate_match = re.match(r'(\d+)k', stream['bitrate'])
+                    if bitrate_match:
+                        name_modifier += f"_{bitrate_match.group(1)}K"
+                if 'audio_bitrate' in stream:
+                    audio_bitrate_match = re.match(r'(\d+)k', stream['audio_bitrate'])
+                    if audio_bitrate_match:
+                        name_modifier += f"_audio_{audio_bitrate_match.group(1)}K"
+                if 'audio_codec' in stream:
+                    if stream['audio_codec'] == "eac3":
+                        name_modifier += "_eac3"
+                    elif stream['audio_codec'] in ["dolby_aac", "dolby_heaac", "libfaac"]:
+                        name_modifier += "_aac"
+                if 'audio_channels_number' in stream:
+                    channels = int(stream['audio_channels_number'])
+                    if channels == 6:
+                        name_modifier += "_surround"
+                    elif channels == 2:
+                        name_modifier += "_stereo"
+                    elif channels == 1:
+                        name_modifier += "_mono"
                 
-            output = {
-                "ContainerSettings": {
-                    "Container": container,
-                    container_settings_key: {}
-                },
-                "AudioDescriptions": [
-                    {
-                        "CodecSettings": {
-                            "Codec": "AAC"
-                        }
-                    }
-                ]
-            }
+                self.logger.debug(f"Generated combined video+audio output structure with name modifier: {name_modifier}")
             
-            # Add basic name modifier
-            name_modifier = f"_audio_{i+1}"
-            if 'audio_bitrate' in stream:
-                audio_bitrate_match = re.match(r'(\d+)k', stream['audio_bitrate'])
-                if audio_bitrate_match:
-                    name_modifier = f"_audio_{audio_bitrate_match.group(1)}K"
-            
-            # Add codec info to name modifier
-            if 'audio_codec' in stream:
-                if stream['audio_codec'] == "eac3":
-                    name_modifier += "_eac3"
-                elif stream['audio_codec'] in ["dolby_aac", "dolby_heaac", "libfaac"]:
-                    name_modifier += "_aac"
-            
-            # Add channels info to name modifier
-            if 'audio_channels_number' in stream:
-                channels = int(stream['audio_channels_number'])
-                if channels == 6:
-                    name_modifier += "_surround"
-                elif channels == 2:
-                    name_modifier += "_stereo"
-                elif channels == 1:
-                    name_modifier += "_mono"
-                    
-            # Add language info from alternate_source_mapping if use_alternate_id is present
-            if 'use_alternate_id' in stream and 'alternate_source_mapping' in context:
-                alternate_id = stream['use_alternate_id']
-                mapping = context['alternate_source_mapping']
+            elif has_video:
+                # Video-only stream
+                name_modifier = f"_video_{i+1}"
+                if 'size' in stream:
+                    name_modifier = f"_{stream['size']}"
+                if 'bitrate' in stream:
+                    bitrate_match = re.match(r'(\d+)k', stream['bitrate'])
+                    if bitrate_match:
+                        name_modifier += f"_{bitrate_match.group(1)}K"
                 
-                # Convert to string key for dictionary lookup if needed
-                alternate_id_str = str(alternate_id)
-                if alternate_id_str in mapping:
-                    mapping_info = mapping[alternate_id_str]
-                elif alternate_id in mapping:
-                    mapping_info = mapping[alternate_id]
-                else:
-                    mapping_info = None
+                self.logger.debug(f"Generated video-only output structure with name modifier: {name_modifier}")
+            
+            elif has_audio:
+                # Audio-only stream
+                name_modifier = f"_audio_{i+1}"
+                if 'audio_bitrate' in stream:
+                    audio_bitrate_match = re.match(r'(\d+)k', stream['audio_bitrate'])
+                    if audio_bitrate_match:
+                        name_modifier = f"_audio_{audio_bitrate_match.group(1)}K"
+                
+                # Add codec info to name modifier
+                if 'audio_codec' in stream:
+                    if stream['audio_codec'] == "eac3":
+                        name_modifier += "_eac3"
+                    elif stream['audio_codec'] in ["dolby_aac", "dolby_heaac", "libfaac"]:
+                        name_modifier += "_aac"
+                
+                # Add channels info to name modifier
+                if 'audio_channels_number' in stream:
+                    channels = int(stream['audio_channels_number'])
+                    if channels == 6:
+                        name_modifier += "_surround"
+                    elif channels == 2:
+                        name_modifier += "_stereo"
+                    elif channels == 1:
+                        name_modifier += "_mono"
+                
+                # Add language info from alternate_source_mapping if use_alternate_id is present
+                if 'use_alternate_id' in stream and 'alternate_source_mapping' in context:
+                    alternate_id = stream['use_alternate_id']
+                    mapping = context['alternate_source_mapping']
                     
-                if mapping_info:
-                    language_code = mapping_info.get('language_code')
-                    audio_name = mapping_info.get('audio_name')
-                    
-                    # Add language info to name modifier to avoid duplicates
-                    if language_code:
-                        name_modifier += f"_{language_code.lower()}"
-                    elif audio_name:
-                        # Convert audio name to a safe format for filenames
-                        safe_audio_name = re.sub(r'[^a-zA-Z0-9]', '_', audio_name).lower()
-                        name_modifier += f"_{safe_audio_name}"
+                    # Convert to string key for dictionary lookup if needed
+                    alternate_id_str = str(alternate_id)
+                    if alternate_id_str in mapping:
+                        mapping_info = mapping[alternate_id_str]
+                    elif alternate_id in mapping:
+                        mapping_info = mapping[alternate_id]
+                    else:
+                        mapping_info = None
                         
-                    self.logger.info(f"Added language info to name modifier for use_alternate_id={alternate_id}: {name_modifier}")
+                    if mapping_info:
+                        language_code = mapping_info.get('language_code')
+                        audio_name = mapping_info.get('audio_name')
+                        
+                        # Add language info to name modifier to avoid duplicates
+                        if language_code:
+                            name_modifier += f"_{language_code.lower()}"
+                        elif audio_name:
+                            # Convert audio name to a safe format for filenames
+                            safe_audio_name = re.sub(r'[^a-zA-Z0-9]', '_', audio_name).lower()
+                            name_modifier += f"_{safe_audio_name}"
+                            
+                        self.logger.info(f"Added language info to name modifier for use_alternate_id={alternate_id}: {name_modifier}")
+                
+                self.logger.debug(f"Generated audio-only output structure with name modifier: {name_modifier}")
             
             output["NameModifier"] = name_modifier
-            
             outputs.append(output)
-            self.logger.debug(f"Generated basic audio output structure with name modifier: {name_modifier}")
-        
+            
         self.logger.debug(f"Generated a total of {len(outputs)} basic output structures")
         return outputs
+            
+        #     # Add codec info to name modifier
+        #     if 'audio_codec' in stream:
+        #         if stream['audio_codec'] == "eac3":
+        #             name_modifier += "_eac3"
+        #         elif stream['audio_codec'] in ["dolby_aac", "dolby_heaac", "libfaac"]:
+        #             name_modifier += "_aac"
+            
+        #     # Add channels info to name modifier
+        #     if 'audio_channels_number' in stream:
+        #         channels = int(stream['audio_channels_number'])
+        #         if channels == 6:
+        #             name_modifier += "_surround"
+        #         elif channels == 2:
+        #             name_modifier += "_stereo"
+        #         elif channels == 1:
+        #             name_modifier += "_mono"
+                    
+        #     # Add language info from alternate_source_mapping if use_alternate_id is present
+        #     if 'use_alternate_id' in stream and 'alternate_source_mapping' in context:
+        #         alternate_id = stream['use_alternate_id']
+        #         mapping = context['alternate_source_mapping']
+                
+        #         # Convert to string key for dictionary lookup if needed
+        #         alternate_id_str = str(alternate_id)
+        #         if alternate_id_str in mapping:
+        #             mapping_info = mapping[alternate_id_str]
+        #         elif alternate_id in mapping:
+        #             mapping_info = mapping[alternate_id]
+        #         else:
+        #             mapping_info = None
+                    
+        #         if mapping_info:
+        #             language_code = mapping_info.get('language_code')
+        #             audio_name = mapping_info.get('audio_name')
+                    
+        #             # Add language info to name modifier to avoid duplicates
+        #             if language_code:
+        #                 name_modifier += f"_{language_code.lower()}"
+        #             elif audio_name:
+        #                 # Convert audio name to a safe format for filenames
+        #                 safe_audio_name = re.sub(r'[^a-zA-Z0-9]', '_', audio_name).lower()
+        #                 name_modifier += f"_{safe_audio_name}"
+                        
+        #             self.logger.info(f"Added language info to name modifier for use_alternate_id={alternate_id}: {name_modifier}")
+            
+        #     output["NameModifier"] = name_modifier
+            
+        #     outputs.append(output)
+        #     self.logger.debug(f"Generated basic audio output structure with name modifier: {name_modifier}")
+        
+        # self.logger.debug(f"Generated a total of {len(outputs)} basic output structures")
+        # return outputs
         
     def _merge_dicts(self, target: Dict, source: Dict) -> None:
         """Recursively merge source dict into target dict"""
@@ -1718,7 +1773,7 @@ class ConfigConverter:
                 # Apply transformation function
                 if transform:
                     # original_source_data = context['source_data']
-                    self.logger.info(f"Applying transformation,now context is {context}")
+                    # self.logger.info(f"Applying transformation,now context is {context}")
                     # Create a combined context with both source_data and the passed context
                     if context is not None:
                         combined_context = {'source_data': source_data, 'target_data': target_data, 'original_source_data': context['source_data']}

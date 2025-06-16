@@ -260,6 +260,11 @@ rules:
   - source:
       path: "timescale"
       type: "dummy" 
+       
+  # 处理视频传输特性参数(transfer_characteristics)
+  - source:
+      path: "video_codec_parameters.transfer_characteristics"
+      type: "dummy"  # dummy type to indicate no actual conversion needed
 
   # 处理视频旋转参数
   - source:
@@ -337,12 +342,6 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.VideoPreprocessors.ColorCorrector.ColorSpaceConversion"
       transform: "transfer_format"
-
-        
-  # 处理视频传输特性参数(transfer_characteristics)
-  - source:
-      path: "video_codec_parameters.transfer_characteristics"
-      type: "dummy"  # dummy type to indicate no actual conversion needed
       
   # 处理视频矩阵系数参数
   - source:
@@ -575,125 +574,134 @@ rules:
   - source:
       path: "split_segments"
       type: "number"
-    target:
-      path: "Settings.OutputGroups[0].OutputGroupSettings.CmafGroupSettings.SegmentControl"
-      transform: "split_segments_format"
       condition:
         source_path: "output"
         operator: "in"
         value: ["fmp4_hls", "advanced_fmp4"]
+    target:
+      path: "Settings.OutputGroups[0].OutputGroupSettings.CmafGroupSettings.SegmentControl"
+      transform: "split_segments_format"
         
   # Segment duration for streaming formats - HLS
   - source:
       path: "split_segments"
       type: "number"
-    target:
-      path: "Settings.OutputGroups[0].OutputGroupSettings.HlsGroupSettings.SegmentControl"
-      transform: "split_segments_format"
       condition:
         source_path: "output"
         operator: "eq"
         value: "advanced_hls"
+    target:
+      path: "Settings.OutputGroups[0].OutputGroupSettings.HlsGroupSettings.SegmentControl"
+      transform: "split_segments_format"
         
   # Segment duration for streaming formats - DASH
   - source:
       path: "split_segments"
       type: "number"
-    target:
-      path: "Settings.OutputGroups[0].OutputGroupSettings.DashIsoGroupSettings.SegmentControl"
-      transform: "split_segments_format"
       condition:
         source_path: "output"
         operator: "in"
         value: ["mpeg_dash", "advanced_dash"]
+    target:
+      path: "Settings.OutputGroups[0].OutputGroupSettings.DashIsoGroupSettings.SegmentControl"
+      transform: "split_segments_format"
 
   # Segment duration for streaming formats - CMAF
   - source:
       path: "segment_duration"
       type: "number"
-    target:
-      path: "Settings.OutputGroups[0].OutputGroupSettings.CmafGroupSettings.SegmentLength"
       condition:
         source_path: "output"
         operator: "in"
         value: ["fmp4_hls", "advanced_fmp4"]
+    target:
+      - path: "Settings.OutputGroups[0].OutputGroupSettings.CmafGroupSettings.SegmentLength"
+      - path: "Settings.OutputGroups[0].OutputGroupSettings.CmafGroupSettings.MinSegmentLength"
+        value: 0
+
         
   # Segment duration for streaming formats - HLS
   - source:
       path: "segment_duration"
       type: "number"
-    target:
-      path: "Settings.OutputGroups[0].OutputGroupSettings.HlsGroupSettings.SegmentLength"
       condition:
         source_path: "output"
         operator: "eq"
         value: "advanced_hls"
+    target:
+      - path: "Settings.OutputGroups[0].OutputGroupSettings.HlsGroupSettings.SegmentLength"
+      - path: "Settings.OutputGroups[0].OutputGroupSettings.HlsGroupSettings.MinSegmentLength"
+        value: 0
+
         
   # Segment duration for streaming formats - DASH
   - source:
       path: "segment_duration"
       type: "number"
-    target:
-      path: "Settings.OutputGroups[0].OutputGroupSettings.DashIsoGroupSettings.SegmentLength"
       condition:
         source_path: "output"
         operator: "in"
         value: ["mpeg_dash", "advanced_dash"]
+    target:
+      - path: "Settings.OutputGroups[0].OutputGroupSettings.DashIsoGroupSettings.SegmentLength"
+      - path: "Settings.OutputGroups[0].OutputGroupSettings.DashIsoGroupSettings.MinSegmentLength"
+        value: 0
+
 
   - source:
       path: "duration_precision"
       type: "number"
+      condition:
+        source_path: "output"
+        operator: "eq"
+        value: "advanced_hls"
     target:
       path: "Settings.OutputGroups[0].OutputGroupSettings.HlsGroupSettings.ManifestDurationFormat"
       transform: duration_precision_format
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "advanced_hls"
 
   - source:
       path: "duration_precision"
       type: "number"
-    target:
-      path: "Settings.OutputGroups[0].OutputGroupSettings.CmafGroupSettings.ManifestDurationFormat"
-      transform: duration_precision_format
       condition:
         source_path: "output"
         operator: "in"
         value: ["fmp4_hls", "advanced_fmp4"]
+    target:
+      path: "Settings.OutputGroups[0].OutputGroupSettings.CmafGroupSettings.ManifestDurationFormat"
+      transform: duration_precision_format
 
   - source:
       path: "merge_small_segments"
       type: "string"
-    target:
-      path: "Settings.OutputGroups[0].OutputGroupSettings.HlsGroupSettings.MinFinalSegmentLength"
-      transform: merge_small_segments_format
       condition:
         source_path: "output"
         operator: "eq"
         value: "advanced_hls"
+    target:
+      path: "Settings.OutputGroups[0].OutputGroupSettings.HlsGroupSettings.MinFinalSegmentLength"
+      transform: merge_small_segments_format
 
   - source:
       path: "merge_small_segments"
       type: "string"
-    target:
-      path: "Settings.OutputGroups[0].OutputGroupSettings.CmafGroupSettings.MinFinalSegmentLength"
-      transform: merge_small_segments_format
       condition:
         source_path: "output"
         operator: "in"
         value: ["fmp4_hls", "advanced_fmp4"]
+    target:
+      path: "Settings.OutputGroups[0].OutputGroupSettings.CmafGroupSettings.MinFinalSegmentLength"
+      transform: merge_small_segments_format
 
   - source:
       path: "merge_small_segments"
       type: "string"
-    target:
-      path: "Settings.OutputGroups[0].OutputGroupSettings.CmafGroupSettings.MinFinalSegmentLength"
-      transform: merge_small_segments_format
       condition:
         source_path: "output"
         operator: "in"
         value: ["mpeg_dash", "advanced_dash"]
+    target:
+      path: "Settings.OutputGroups[0].OutputGroupSettings.DashIsoGroupSettings.MinFinalSegmentLength"
+      transform: merge_small_segments_format
 
 
   # disable hls manifest in CmafGroupSettings
@@ -1249,11 +1257,47 @@ rules:
   - source:
       path: "destination"
       type: "string"
+      condition:
+        source_path: "output"
+        operator: "eq"
+        value: "mp4"
     target:
       path: "Settings.OutputGroups[0].OutputGroupSettings.FileGroupSettings.Destination"
       value: "S3_OUTPUT_URL"
-        
-      
+
+  - source:
+      path: "destination"
+      type: "string"
+      condition:
+        source_path: "output"
+        operator: "eq"
+        value: "advanced_hls"
+    target:
+      path: "Settings.OutputGroups[0].OutputGroupSettings.HlsGroupSettings.Destination"
+      value: "S3_OUTPUT_URL"
+
+  - source:
+      path: "destination"
+      type: "string"
+      condition:
+        source_path: "output"
+        operator: "in"
+        value: ["advanced_dash", "mpeg_dash"]
+    target:
+      path: "Settings.OutputGroups[0].OutputGroupSettings.DashIsoGroupSettings.Destination"
+      value: "S3_OUTPUT_URL"
+
+  - source:
+      path: "destination"
+      type: "string"
+      condition:
+        source_path: "output"
+        operator: "in"
+        value: ["fmp4_hls", "advanced_fmp4"]
+    target:
+      path: "Settings.OutputGroups[0].OutputGroupSettings.CmafGroupSettings.Destination"
+      value: "S3_OUTPUT_URL"
+            
   # 处理强制隔行参数
   - source:
       path: "force_interlaced"

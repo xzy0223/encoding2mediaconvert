@@ -26,6 +26,17 @@ rules:
       - path: "Settings.OutputGroups[0].Outputs[0].ContainerSettings"
         transform: "process_use_alternate_id_second"
 
+  - source:
+      path: "set_aspect_ratio"
+      type: "string"
+      condition:
+        source_path: "video_codec"
+        operator: "in"
+        value: ["mpeg4", "libx264"]
+    target:
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings"
+        transform: "process_set_aspect_ratio"
+
   # Parameters that don't need conversion but need to be recorded as processed
   - source:
       path: "VCodecParameters"
@@ -178,10 +189,6 @@ rules:
       path: "video_only"
       type: "dummy" 
 
-  - source:
-      path: "audio_only"
-      type: "dummy" 
-
   # 处理字幕CEA数据字段参数
   - source:
       path: "closed_captions.cea_data_field"
@@ -258,6 +265,10 @@ rules:
       type: "dummy" 
 
   - source:
+      path: "nal-hrd"
+      type: "dummy" 
+
+  - source:
       path: "timescale"
       type: "dummy" 
        
@@ -289,8 +300,23 @@ rules:
   - source:
       path: "two_pass"
       type: "string"
+      condition:
+        source_path: "video_codec"
+        operator: "in"
+        value: ["mpeg4", "libx264"]
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.QualityTuningLevel"
+      transform: "two_pass_format"
+
+  - source:
+      path: "two_pass"
+      type: "string"
+      condition:
+        source_path: "video_codec"
+        operator: "in"
+        value: ["libvpx"]
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings.QualityTuningLevel"
       transform: "two_pass_format"
 
         
@@ -374,8 +400,8 @@ rules:
       path: "output"
       type: "string"
       condition:
-        operator: "eq"
-        value: "advanced_dash"
+        operator: "in"
+        value: ["mpeg_dash", "advanced_dash"]
     target:
       - path: "Settings.OutputGroups[0].OutputGroupSettings.Type"
         value: "DASH_ISO_GROUP_SETTINGS"
@@ -384,8 +410,8 @@ rules:
       path: "output"
       type: "string"
       condition:
-        operator: "eq"
-        value: "advanced_fmp4"
+        operator: "in"
+        value: ["fmp4_hls", "advanced_fmp4"]
     target:
       - path: "Settings.OutputGroups[0].OutputGroupSettings.Type"
         value: "CMAF_GROUP_SETTINGS"
@@ -404,93 +430,11 @@ rules:
       path: "output"
       type: "string"
       condition:
-        operator: "eq"
-        value: "flv"
+        operator: "in"
+        value: ["mp4", "flv", "iphone", "ipad_stream", "mov", "mpegts", "webm"]
     target:
       - path: "Settings.OutputGroups[0].OutputGroupSettings.Type"
         value: "FILE_GROUP_SETTINGS"
-      - path: "Settings.OutputGroups[0].Outputs[0].ContainerSettings.Container"
-        value: "F4V"
-        
-  - source:
-      path: "output"
-      type: "string"
-      condition:
-        operator: "eq"
-        value: "fmp4_hls"
-    target:
-      - path: "Settings.OutputGroups[0].OutputGroupSettings.Type"
-        value: "CMAF_GROUP_SETTINGS"
-        
-  - source:
-      path: "output"
-      type: "string"
-      condition:
-        operator: "eq"
-        value: "ipad_stream"
-    target:
-      - path: "Settings.OutputGroups[0].OutputGroupSettings.Type"
-        value: "FILE_GROUP_SETTINGS"
-      - path: "Settings.OutputGroups[0].Outputs[0].ContainerSettings.Container"
-        value: "MOV"
-        
-  - source:
-      path: "output"
-      type: "string"
-      condition:
-        operator: "eq"
-        value: "iphone"
-    target:
-      - path: "Settings.OutputGroups[0].OutputGroupSettings.Type"
-        value: "FILE_GROUP_SETTINGS"
-      - path: "Settings.OutputGroups[0].Outputs[0].ContainerSettings.Container"
-        value: "MOV"
-        
-  - source:
-      path: "output"
-      type: "string"
-      condition:
-        operator: "eq"
-        value: "mov"
-    target:
-      - path: "Settings.OutputGroups[0].OutputGroupSettings.Type"
-        value: "FILE_GROUP_SETTINGS"
-      - path: "Settings.OutputGroups[0].Outputs[0].ContainerSettings.Container"
-        value: "MOV"
-        
-  - source:
-      path: "output"
-      type: "string"
-      condition:
-        operator: "eq"
-        value: "mp4"
-    target:
-      - path: "Settings.OutputGroups[0].OutputGroupSettings.Type"
-        value: "FILE_GROUP_SETTINGS"
-      - path: "Settings.OutputGroups[0].Outputs[0].ContainerSettings.Container"
-        value: "MP4"
-        
-  - source:
-      path: "output"
-      type: "string"
-      condition:
-        operator: "eq"
-        value: "mpeg_dash"
-    target:
-      - path: "Settings.OutputGroups[0].OutputGroupSettings.Type"
-        value: "DASH_ISO_GROUP_SETTINGS"
-        
-  - source:
-      path: "output"
-      type: "string"
-      condition:
-        operator: "eq"
-        value: "mpegts"
-    target:
-      - path: "Settings.OutputGroups[0].OutputGroupSettings.Type"
-        value: "FILE_GROUP_SETTINGS"
-      - path: "Settings.OutputGroups[0].Outputs[0].ContainerSettings.Container"
-        value: "M2TS"
         
   - source:
       path: "output"
@@ -500,19 +444,7 @@ rules:
         value: "smooth_streaming"
     target:
       - path: "Settings.OutputGroups[0].OutputGroupSettings.Type"
-        value: "MS_SMOOTH_GROUP_SETTINGS"
-        
-  - source:
-      path: "output"
-      type: "string"
-      condition:
-        operator: "eq"
-        value: "webm"
-    target:
-      - path: "Settings.OutputGroups[0].OutputGroupSettings.Type"
-        value: "FILE_GROUP_SETTINGS"
-      - path: "Settings.OutputGroups[0].Outputs[0].ContainerSettings.Container"
-        value: "WEBM"
+        value: "MS_SMOOTH_GROUP_SETTINGS"      
 
 
   - source:
@@ -1034,6 +966,16 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.Ac3Settings.CodingMode"
       transform: "audio_channels_ac3_format"
+
+  - source:
+      path: "audio_channels_number"
+      type: "number"
+      condition:
+        source_path: "audio_codec"
+        operator: "eq"
+        value: "libvpx"
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.VorbisSettings.Channels"
         
   # 处理音频最大码率参数
   - source:
@@ -1336,11 +1278,27 @@ rules:
   - source:
       path: "keyframe"
       type: "number"
+      condition:
+        source_path: "video_codec"
+        operator: "in"
+        value: ["mpeg4", "libx264"]
     target:
-      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.GopSize"
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.GopSize"
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.GopSizeUnits"
+        value: "FRAMES"
 
-        
-        
+  - source:
+      path: "keyframe"
+      type: "number"
+      condition:
+        source_path: "video_codec"
+        operator: "in"
+        value: ["hevc"]
+    target:
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.GopSize"
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.GopSizeUnits"
+        value: "FRAMES"
+
   # 处理音频响度模式参数
   - source:
       path: "loudness_mode"
@@ -1416,7 +1374,7 @@ rules:
         value: "yes"
     target:
       path: "AccelerationSettings.Mode"
-      value: "ENABLED"
+      value: "PREFERRED"
 
   # 处理twin_turbo参数
   - source:
@@ -1565,6 +1523,10 @@ rules:
   - source:
       path: "video_codec_parameters.profile"
       type: "string"
+      condition:
+        source_path: "video_codec"
+        operator: "in"
+        value: ["mpeg4", "libx264"]
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.CodecProfile"
       transform: "profile_format"
@@ -1573,6 +1535,10 @@ rules:
   - source:
       path: "video_codec_parameters.vprofile"
       type: "string"
+      condition:
+        source_path: "video_codec"
+        operator: "in"
+        value: ["mpeg4", "libx264"]
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.CodecProfile"
       transform: "profile_format"
@@ -1581,6 +1547,10 @@ rules:
   - source:
       path: "profile"
       type: "string"
+      condition:
+        source_path: "video_codec"
+        operator: "in"
+        value: ["mpeg4", "libx264"]
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.CodecProfile"
       transform: "profile_format"
@@ -1589,8 +1559,13 @@ rules:
       path: "profile"
       type: "string"
       condition:
-        operator: "eq"
-        value: "baseline"
+        operator: "AND"
+        conditions:
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["mpeg4", "libx264"]
+          - operator: "eq"
+            value: "baseline"
     target:
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.CodecProfile"
         value: "BASELINE"
@@ -1622,30 +1597,16 @@ rules:
 
         
   # 处理设置宽高比参数
-  - source:
-      path: "set_aspect_ratio"
-      type: "string"
-      condition:
-        operator: "eq"
-        value: "source"
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.ParControl"
-      value: "INITIALIZE_FROM_SOURCE"
-
-        
   # - source:
   #     path: "set_aspect_ratio"
   #     type: "string"
   #     condition:
   #       operator: "eq"
-  #       value: "16:9"
+  #       value: "source"
   #   target:
-  #     - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.ParControl"
-  #       value: "SPECIFIED"
-  #     - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.ParNumerator"
-  #       value: 16
-  #     - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.ParDenominator"
-  #       value: 9
+  #     path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.ParControl"
+  #     value: "INITIALIZE_FROM_SOURCE"
+
 
 # Additional rules
   # 处理视频编码器加权预测参数
@@ -1663,6 +1624,11 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.MinIInterval"
 
+  - source:
+      path: "keyint_min"
+      type: "number"
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.MinIInterval"
         
   # 处理视频编码器B帧策略参数
   - source:
@@ -1683,14 +1649,48 @@ rules:
   - source:
       path: "video_codec_parameters.level"
       type: "string"
+      condition:
+        operator: AND
+        conditions:
+          - source_path: "video_codec"
+            operator: exists
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["libx264", "mpeg4"] 
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.CodecLevel"
       transform: "h264_level_format"
+
+  - source:
+      path: "video_codec_parameters.level"
+      type: "string"
+      condition:
+        operator: AND
+        conditions:
+          - source_path: "video_codec"
+            operator: exists
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["hevc"]
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.CodecLevel"
+      transform: "h265_level_format"
+
+  # - source:
+  #     path: "video_codec_parameters.level"
+  #     type: "string"
+  #   target:
+  #     path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.CodecLevel"
+  #     transform: "h264_level_format"
 
   # 处理H.264编码级别参数
   - source:
       path: "level"
       type: "string"
+      condition:
+        source_path: "video_codec"
+        operator: "in"
+        value: ["libx264", "mpeg4"] 
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.CodecLevel"
       transform: "level_format"
@@ -1775,6 +1775,28 @@ rules:
       transform: "add_audio_only_format"
 
   - source:
+      path: "audio_only"
+      type: "string"
+      condition:
+        source_path: "output"
+        operator: "eq"
+        value: "advanced_hls"
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].OutputSettings.HlsSettings.AudioTrackType"
+      transform: "add_audio_only_format"
+
+  - source:
+      path: "audio_only"
+      type: "string"
+      condition:
+        source_path: "output"
+        operator: "in"
+        value: ["advanced_fmp4", "fmp4_hls"]
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].ContainerSettings.CmfcSettings.AudioTrackType"
+      transform: "add_audio_only_format"
+
+  - source:
       path: "group_id"
       type: "string"
     target:
@@ -1827,7 +1849,7 @@ transformers:
     "libx264": "H_264"
     "libx265": "H_265"
     "vp9": "VP9"
-    "hevc": "H_264"
+    "hevc": "H_265"
     "libvpx": "VP9"
     "mpeg2video": "MPEG2"
     "mpeg4": "H_264"
@@ -1857,13 +1879,16 @@ transformers:
     "baseline": "BASELINE"
     
   h264_level_format:
+    '1': "LEVEL_1"
     '10': "LEVEL_1"
     '11': "LEVEL_1_1"
     '12': "LEVEL_1_2"
     '13': "LEVEL_1_3"
+    '2': "LEVEL_2"
     '20': "LEVEL_2"
     '21': "LEVEL_2_1"
     '22': "LEVEL_2_2"
+    '3': "LEVEL_3"
     '30': "LEVEL_3"
     '31': "LEVEL_3_1"
     '32': "LEVEL_3_2"
@@ -1871,6 +1896,30 @@ transformers:
     '40': "LEVEL_4"
     '41': "LEVEL_4_1"
     '42': "LEVEL_4_2"
+    '5': "LEVEL_5"
+    '50': "LEVEL_5"
+    '51': "LEVEL_5_1"
+    '52': "LEVEL_5_2"
+  
+    h265_level_format:
+    '1': "LEVEL_1"
+    '10': "LEVEL_1"
+    '11': "LEVEL_1_1"
+    '12': "LEVEL_1_2"
+    '13': "LEVEL_1_3"
+    '2': "LEVEL_2"
+    '20': "LEVEL_2"
+    '21': "LEVEL_2_1"
+    '22': "LEVEL_2_2"
+    '3': "LEVEL_3"
+    '30': "LEVEL_3"
+    '31': "LEVEL_3_1"
+    '32': "LEVEL_3_2"
+    '4': "LEVEL_4"
+    '40': "LEVEL_4"
+    '41': "LEVEL_4_1"
+    '42': "LEVEL_4_2"
+    '5': "LEVEL_5"
     '50': "LEVEL_5"
     '51': "LEVEL_5_1"
     '52': "LEVEL_5_2"

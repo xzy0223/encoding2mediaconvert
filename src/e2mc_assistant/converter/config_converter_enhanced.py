@@ -2065,7 +2065,7 @@ class ConfigConverter:
         """Process a single rule for a given source path and value"""
         source_regex = rule['source'].get('regex')
         
-        self.logger.info(f"Processing rule for {source_path}, value: {source_value}, context: {context}")
+        self.logger.info(f"Processing rule for {source_path}, value: {source_value}")
         
         # Check if this parameter was already processed by rate control settings handler
         rate_control_params = ['cbr', 'cabr', 'bitrate', 'maxrate', 'minrate']

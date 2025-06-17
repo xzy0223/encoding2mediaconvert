@@ -2065,7 +2065,7 @@ class ConfigConverter:
         """Process a single rule for a given source path and value"""
         source_regex = rule['source'].get('regex')
         
-        self.logger.info(f"Processing rule for {source_path}, value: {source_value}")
+        self.logger.info(f"Processing rule for {source_path}, value: {source_value}, context: {context}")
         
         # Check if this parameter was already processed by rate control settings handler
         rate_control_params = ['cbr', 'cabr', 'bitrate', 'maxrate', 'minrate']
@@ -2078,7 +2078,17 @@ class ConfigConverter:
         
         # Check condition (if any)
         if 'condition' in rule['source'] and source_value is not None:
-            condition_result = self.evaluate_condition(rule['source']['condition'], source_value, source_data)
+            # Create a copy of source_data to avoid modifying the original
+            condition_source_data = source_data.copy() if source_data else {}
+            
+            # If context contains source_data with output, add it to condition_source_data
+            if context and 'source_data' in context and 'output' in context['source_data']:
+                condition_source_data['output'] = context['source_data']['output']
+                # Also add the current value being processed
+                condition_source_data['value'] = source_value
+                self.logger.info(f"Added output and value to condition_source_data: output={context['source_data']['output']}, value={source_value}")
+                
+            condition_result = self.evaluate_condition(rule['source']['condition'], source_value, condition_source_data)
             self.logger.info(f"Source condition evaluation for {source_path}: {condition_result}")
             if not condition_result:
                 self.logger.info(f"Skipping rule for {source_path}={source_value} due to source condition not matching")
@@ -2102,7 +2112,17 @@ class ConfigConverter:
             
             # Check target condition (if any)
             if 'condition' in target:
-                condition_result = self.evaluate_condition(target['condition'], source_value, source_data)
+                # Create a copy of source_data to avoid modifying the original
+                condition_source_data = source_data.copy() if source_data else {}
+                
+                # If context contains source_data with output, add it to condition_source_data
+                if context and 'source_data' in context and 'output' in context['source_data']:
+                    condition_source_data['output'] = context['source_data']['output']
+                    # Also add the current value being processed
+                    condition_source_data['value'] = source_value
+                    self.logger.info(f"Added output and value to target condition_source_data: output={context['source_data']['output']}, value={source_value}")
+                    
+                condition_result = self.evaluate_condition(target['condition'], source_value, condition_source_data)
                 self.logger.info(f"Target condition evaluation for {target_path}: {condition_result}")
                 if not condition_result:
                     self.logger.info(f"Skipping target {target_path} for source {source_path}={source_value} due to target condition not matching")

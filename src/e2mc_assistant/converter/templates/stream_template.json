@@ -14,7 +14,7 @@
     ],
     "OutputGroups": [
       {
-        "Name": "",
+        "Name": "e2mc test",
         "OutputGroupSettings": {},
         "Outputs": []
       }

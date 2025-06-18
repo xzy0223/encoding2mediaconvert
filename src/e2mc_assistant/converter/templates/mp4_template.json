@@ -24,8 +24,7 @@
         "Outputs": [
           {
             "ContainerSettings": {
-              "Container": "MP4",
-              "Mp4Settings": {}
+              "Container": ""
             }
           }
         ]

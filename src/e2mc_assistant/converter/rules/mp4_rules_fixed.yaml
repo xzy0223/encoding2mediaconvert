@@ -277,6 +277,14 @@ rules:
       path: "video_codec_parameters.transfer_characteristics"
       type: "dummy"  # dummy type to indicate no actual conversion needed
 
+  - source:
+      path: "audio_volume"
+      type: "dummy"
+
+  - source:
+      path: "video_codec_parameters.sc_threshold"
+      type: "dummy"
+
   # 处理视频旋转参数
   - source:
       path: "set_rotate"
@@ -284,7 +292,6 @@ rules:
     target:
       path: "Settings.Inputs[0].VideoSelector.Rotate"
       transform: "rotate_format"
-
       
   # 处理时间码轨道参数
   - source:
@@ -1084,17 +1091,17 @@ rules:
       transform: "audio_sync_format"
       
   # 处理音频音量参数
-  - source:
-      path: "audio_volume"
-      type: "number"
-      condition:
-        operator: NOT
-        condition:
-          source_path: "audio_normalization"
-          operator: "exists"
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].AudioNormalizationSettings.TargetLkfs"
-      transform: "audio_volume_format"
+  # - source:
+  #     path: "audio_volume"
+  #     type: "number"
+  #     condition:
+  #       operator: NOT
+  #       condition:
+  #         source_path: "audio_normalization"
+  #         operator: "exists"
+  #   target:
+  #     path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].AudioNormalizationSettings.TargetLkfs"
+  #     transform: "audio_volume_format"
 
         
   # 处理恒定平均码率参数
@@ -1697,12 +1704,12 @@ rules:
 
         
   # 处理视频编码器场景变化检测阈值参数
-  - source:
-      path: "video_codec_parameters.sc_threshold"
-      type: "string"
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.SceneChangeDetect"
-      transform: "sc_threshold_format"
+  # - source:
+  #     path: "video_codec_parameters.sc_threshold"
+  #     type: "string"
+  #   target:
+  #     path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.SceneChangeDetect"
+  #     transform: "sc_threshold_format"
 
   
   # 处理视频编码器最小关键帧间隔参数
@@ -1720,13 +1727,6 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.NumberReferenceFrames"
 
-  # 处理视频编码器场景变化检测阈值参数
-  - source:
-      path: "video_codec_parameters.sc_threshold"
-      type: "string"
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.SceneChangeDetect"
-      transform: "sc_threshold_format"
 
 
   # 处理视频同步参数

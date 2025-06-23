@@ -1510,8 +1510,8 @@ rules:
         operator: "in"
         value: ["mpeg4", "libx264"]
     target:
-      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.GopSize"
-      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.GopSizeUnits"
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.GopSize"
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.GopSizeUnits"
         value: "FRAMES"
 
   - source:

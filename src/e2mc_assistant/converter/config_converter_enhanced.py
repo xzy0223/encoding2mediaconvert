@@ -33,7 +33,7 @@ class ConfigConverter:
         """Register a custom transformation function"""
         self.custom_functions[name] = func
         
-    def process_set_aspect_ratio(self, aspect_ratio_str: str, context: Dict) -> Dict:
+    def _process_set_aspect_ratio(self, aspect_ratio_str: str, context: Dict) -> Dict:
         """
         Process set_aspect_ratio parameter to calculate ParNumerator and ParDenominator
         
@@ -454,10 +454,52 @@ class ConfigConverter:
             result['stream'] = new_streams
             self.logger.info(f"Expanded streams with multiple use_alternate_id values. Total streams: {len(new_streams)}")
         
+        # Special handling for multi-value elements like bitrates, size, keyframes, framerates
+        multi_value_fields = ['bitrates', 'size', 'keyframes', 'framerates']
+        has_multi_values = False
+        
+        for field in multi_value_fields:
+            if field in result and isinstance(result[field], str) and ',' in result[field]:
+                # This is a multi-value field, split it into a list
+                values = [v.strip() for v in result[field].split(',')]
+                result[f'_original_{field}'] = result[field]  # Store original value
+                result[field] = values
+                has_multi_values = True
+                self.logger.info(f"Split multi-value field {field} into list: {values}")
+        
+        # If we have multi-value fields, generate streams
+        if has_multi_values and all(field in result for field in multi_value_fields):
+            # Check if all multi-value fields have the same number of elements
+            lengths = [len(result[field]) for field in multi_value_fields]
+            if len(set(lengths)) == 1:  # All have the same length
+                # Generate streams from multi-value fields
+                streams = []
+                for i in range(lengths[0]):
+                    stream = {}
+                    # Map multi-value fields to singular fields in each stream
+                    stream['bitrate'] = result['bitrates'][i]
+                    stream['size'] = result['size'][i]
+                    stream['keyframe'] = result['keyframes'][i]
+                    stream['framerate'] = result['framerates'][i]
+                    
+                    # Copy other relevant fields from the source
+                    for key, value in result.items():
+                        if key not in multi_value_fields and not key.startswith('_original_'):
+                            stream[key] = value
+                    
+                    streams.append(stream)
+                
+                # Store the generated streams
+                result['_generated_streams'] = streams
+                self.logger.info(f"Generated {len(streams)} streams from multi-value fields")
+            else:
+                self.logger.warning(f"Multi-value fields have different lengths: {lengths}, cannot generate streams")
+        
         # Debug output
         self.logger.debug(f"Parsed XML structure: {result}")
                 
         return result
+    
         
     def _process_element(self, element, current_dict):
         """Process a single XML element into a dictionary"""
@@ -538,7 +580,7 @@ class ConfigConverter:
             
         # Special case for process_set_aspect_ratio
         if transform_name == "process_set_aspect_ratio":
-            return self.process_set_aspect_ratio(value, context)
+            return self._process_set_aspect_ratio(value, context)
             
         # Special case for audio_volume_format
         if transform_name == "audio_volume_format":
@@ -808,11 +850,11 @@ class ConfigConverter:
             container = "F4V"
             container_settings_key = "F4vSettings"
         elif output_format == "ipad_stream":
-            container = "MOV"
-            container_settings_key = "MovSettings"
+            container = "M3U8"
+            container_settings_key = "M3u8Settings"
         elif output_format == "iphone":
-            container = "MOV"
-            container_settings_key = "MovSettings"
+            container = "MP4"
+            container_settings_key = "Mp4Settings"
         elif output_format == "mov":
             container = "MOV"
             container_settings_key = "MovSettings"
@@ -985,59 +1027,7 @@ class ConfigConverter:
             
         self.logger.debug(f"Generated a total of {len(outputs)} basic output structures")
         return outputs
-            
-        #     # Add codec info to name modifier
-        #     if 'audio_codec' in stream:
-        #         if stream['audio_codec'] == "eac3":
-        #             name_modifier += "_eac3"
-        #         elif stream['audio_codec'] in ["dolby_aac", "dolby_heaac", "libfaac"]:
-        #             name_modifier += "_aac"
-            
-        #     # Add channels info to name modifier
-        #     if 'audio_channels_number' in stream:
-        #         channels = int(stream['audio_channels_number'])
-        #         if channels == 6:
-        #             name_modifier += "_surround"
-        #         elif channels == 2:
-        #             name_modifier += "_stereo"
-        #         elif channels == 1:
-        #             name_modifier += "_mono"
-                    
-        #     # Add language info from alternate_source_mapping if use_alternate_id is present
-        #     if 'use_alternate_id' in stream and 'alternate_source_mapping' in context:
-        #         alternate_id = stream['use_alternate_id']
-        #         mapping = context['alternate_source_mapping']
-                
-        #         # Convert to string key for dictionary lookup if needed
-        #         alternate_id_str = str(alternate_id)
-        #         if alternate_id_str in mapping:
-        #             mapping_info = mapping[alternate_id_str]
-        #         elif alternate_id in mapping:
-        #             mapping_info = mapping[alternate_id]
-        #         else:
-        #             mapping_info = None
-                    
-        #         if mapping_info:
-        #             language_code = mapping_info.get('language_code')
-        #             audio_name = mapping_info.get('audio_name')
-                    
-        #             # Add language info to name modifier to avoid duplicates
-        #             if language_code:
-        #                 name_modifier += f"_{language_code.lower()}"
-        #             elif audio_name:
-        #                 # Convert audio name to a safe format for filenames
-        #                 safe_audio_name = re.sub(r'[^a-zA-Z0-9]', '_', audio_name).lower()
-        #                 name_modifier += f"_{safe_audio_name}"
-                        
-        #             self.logger.info(f"Added language info to name modifier for use_alternate_id={alternate_id}: {name_modifier}")
-            
-        #     output["NameModifier"] = name_modifier
-            
-        #     outputs.append(output)
-        #     self.logger.debug(f"Generated basic audio output structure with name modifier: {name_modifier}")
-        
-        # self.logger.debug(f"Generated a total of {len(outputs)} basic output structures")
-        # return outputs
+    
         
     def _merge_dicts(self, target: Dict, source: Dict) -> None:
         """Recursively merge source dict into target dict"""
@@ -1690,27 +1680,48 @@ class ConfigConverter:
                     alternate_source_mapping = alt_context.get('alternate_source_mapping', {})
                     self.logger.info(f"Retrieved alternate_source_mapping with {len(alternate_source_mapping)} entries, {alternate_source_mapping}")
         
-        # Check if this is a multi-stream configuration
+        # Check if this is a multi-stream configuration from explicit streams
         streams = self.get_value_by_path(source_data, 'stream')
         is_multi_stream = streams is not None and isinstance(streams, list) and len(streams) > 0
         
-        if is_multi_stream:
-            self.logger.info(f"Detected multi-stream configuration with {len(streams)} streams")
+        # Check if this is a multi-stream configuration from multi-value fields
+        generated_streams = self.get_value_by_path(source_data, '_generated_streams')
+        is_generated_multi_stream = generated_streams is not None and isinstance(generated_streams, list) and len(generated_streams) > 0
+        
+        # Handle multi-stream scenarios
+        if is_multi_stream or is_generated_multi_stream:
+            # Determine which streams to use
+            if is_generated_multi_stream:
+                self.logger.info(f"Using generated streams from multi-value fields: {len(generated_streams)} streams")
+                streams_to_use = generated_streams
+                
+                # Mark multi-value fields as processed
+                for field in ['bitrates', 'size', 'keyframes', 'framerates']:
+                    if field in source_data:
+                        processed_params.add(field)
+                        self.logger.info(f"Marked {field} as processed (used in generated streams)")
+                
+                # Also mark the original fields as processed
+                for field in ['_original_bitrates', '_original_size', '_original_keyframes', '_original_framerates']:
+                    if field in source_data:
+                        processed_params.add(field)
+                        self.logger.info(f"Marked {field} as processed (original multi-value field)")
+                
+                # Mark _generated_streams as processed
+                processed_params.add('_generated_streams')
+                
+                # Mark all parameters in the source_data as processed to avoid duplicate processing
+                self._mark_all_params_processed(source_data, "", processed_params)
+                self.logger.info("Marked all original parameters as processed to avoid duplicate processing")
+            else:
+                self.logger.info(f"Using explicit stream definitions: {len(streams)} streams")
+                streams_to_use = streams
+            
             # Handle multi-stream scenario using specialized functions
             context = {'source_data': source_data, 'alternate_source_mapping': alternate_source_mapping}
             
-            # Add audio_selectors to context for stream processing if available
-            if audio_selectors:
-                context['audio_selectors'] = audio_selectors
-                self.logger.info(f"Added audio_selectors to context for stream processing")
-                
-            # Add alternate_source_mapping to context if available
-            if alternate_source_mapping:
-                context['alternate_source_mapping'] = alternate_source_mapping
-                self.logger.info(f"Added alternate_source_mapping to context for stream processing")
-            
             # Apply settings to the generated outputs
-            outputs_with_settings = self.generate_outputs_with_settings(streams, context)
+            outputs_with_settings = self.generate_outputs_with_settings(streams_to_use, context)
             
             # Add the outputs to the target data
             if outputs_with_settings:
@@ -1750,7 +1761,13 @@ class ConfigConverter:
                 elif output_format == "flv":
                     container = "F4V"
                     container_settings_key = "F4vSettings"
-                elif output_format == "ipad_stream" or output_format == "iphone" or output_format == "mov":
+                elif output_format == "ipad_stream":
+                    container = "M3U8"
+                    container_settings_key = "M3u8Settings"
+                elif output_format == "iphone":
+                    container = "MP4"
+                    container_settings_key = "Mp4Settings"
+                elif output_format == "mov":
                     container = "MOV"
                     container_settings_key = "MovSettings"
                 elif output_format == "mpegts":
@@ -1855,6 +1872,7 @@ class ConfigConverter:
         mapped_count = len(self.mapped_parameters)
         unmapped_count = len(self.unmapped_parameters)
         total_params = mapped_count + unmapped_count
+        # mapped_parameters = self.mapped_parameters
         
         # Log summary
         self.logger.info(f"Conversion summary for {source_file}:")
@@ -1862,6 +1880,7 @@ class ConfigConverter:
         if total_params > 0:
             self.logger.info(f"  - Mapped parameters: {mapped_count} ({mapped_count/total_params*100:.1f}%)")
             self.logger.info(f"  - Unmapped parameters: {unmapped_count} ({unmapped_count/total_params*100:.1f}%)")
+            # self.logger.info(f"  - Mapped parameters: {mapped_parameters}")
         else:
             self.logger.info("  - No parameters found to convert")
         
@@ -1874,14 +1893,15 @@ class ConfigConverter:
         self._add_missing_name_modifiers(target_data)
         
         # Check and clean up video_only and audio_only streams
-        if is_multi_stream and 'Settings' in target_data and 'OutputGroups' in target_data['Settings']:
+        streams_to_check = streams if is_multi_stream else (generated_streams if is_generated_multi_stream else None)
+        if streams_to_check and 'Settings' in target_data and 'OutputGroups' in target_data['Settings']:
             for output_group in target_data['Settings']['OutputGroups']:
                 if 'Outputs' in output_group:
                     outputs = output_group['Outputs']
                     for i, output in enumerate(outputs):
                         # Check if this output corresponds to a stream with video_only or audio_only flag
-                        if i < len(streams):
-                            stream = streams[i]
+                        if i < len(streams_to_check):
+                            stream = streams_to_check[i]
                             
                             # Handle video_only streams - they should not have AudioDescriptions
                             if stream.get('video_only') == 'yes' and 'AudioDescriptions' in output:
@@ -2003,63 +2023,6 @@ class ConfigConverter:
                         list_path = f"{path}[{i}]"
                         self._process_source_data(item, list_path, rule_lookup, target_data, processed_params, context)
                         
-    # def _process_stream_array(self, streams, path, rule_lookup, target_data, processed_params, context=None):
-    #     """Process stream array elements with rules"""
-    #     # First, find all rules that might apply to stream elements
-    #     stream_rules = {}
-    #     for rule_path, rules in rule_lookup.items():
-    #         # Check if the rule path is a direct parameter name (not a path with dots)
-    #         if '.' not in rule_path:
-    #             stream_rules[rule_path] = rules
-        
-    #     self.logger.info(f"Found {len(stream_rules)} potential rules for stream elements")
-        
-    #     # Process each stream element
-    #     for i, stream in enumerate(streams):
-    #         stream_path = f"{path}[{i}]"
-    #         self.logger.info(f"Processing stream element {i+1}/{len(streams)}")
-            
-    #         # Process each parameter in the stream
-    #         for param_name, param_value in stream.items():
-    #             param_path = f"{stream_path}.{param_name}"
-                
-    #             # Skip already processed parameters
-    #             if param_path in processed_params:
-    #                 self.logger.info(f"Skipping already processed parameter: {param_path}={param_value}")
-    #                 continue
-                
-    #             # Check if we have rules for this parameter
-    #             if param_name in stream_rules:
-    #                 self.logger.info(f"Found {len(stream_rules[param_name])} rules for stream parameter: {param_name}={param_value}")
-                    
-    #                 # Process all rules for this parameter
-    #                 for rule in stream_rules[param_name]:
-    #                     # Create a temporary context with this stream as the source data
-    #                     temp_context = {param_name: param_value}
-                        
-    #                     # Add the global context to temp_context if available
-    #                     if context:
-    #                         for key, value in context.items():
-    #                             if key not in temp_context:
-    #                                 temp_context[key] = value
-                        
-    #                     # Process the rule
-    #                     self._process_rule(rule, param_name, param_value, temp_context, target_data, processed_params, context)
-                        
-    #                     # Mark the parameter as processed
-    #                     processed_params.add(param_path)
-    #             else:
-    #                 self.logger.info(f"No rules found for stream parameter: {param_name}={param_value}")
-                    
-    #             # If the parameter is a dictionary, process it recursively
-    #             if isinstance(param_value, dict):
-    #                 self._process_source_data(param_value, param_path, rule_lookup, target_data, processed_params, context)
-    #             # If the parameter is a list, process each item if they are dictionaries
-    #             elif isinstance(param_value, list):
-    #                 for j, item in enumerate(param_value):
-    #                     if isinstance(item, dict):
-    #                         item_path = f"{param_path}[{j}]"
-    #                         self._process_source_data(item, item_path, rule_lookup, target_data, processed_params, context)
     
     def _process_rule(self, rule, source_path, source_value, source_data, target_data, processed_params, context=None):
         """Process a single rule for a given source path and value"""
@@ -2149,7 +2112,7 @@ class ConfigConverter:
                         
                         self.logger.info(f"Regex transformed {source_value} to {target_value} using pattern {source_regex}")
                     else:
-                        self.logger.info(f"Regex pattern {source_regex} did not match {source_value} for {source_path}")
+                        self.logger.warning(f"Regex pattern {source_regex} did not match {source_value} for {source_path}")
                         continue
                 else:
                     target_value = target['value']
@@ -2176,7 +2139,7 @@ class ConfigConverter:
                     
                     # If transformation returns None, it means the value didn't match any mapping
                     if target_value is None:
-                        self.logger.info(f"Skipping parameter mapping for {source_path}={source_value} → {target_path} (no matching transformation)")
+                        self.logger.warning(f"Skipping parameter mapping for {source_path}={source_value} → {target_path} (no matching transformation)")
                         # Add to mapped parameters list (as mapped but skipped)
                         if not hasattr(self, 'mapped_parameters'):
                             self.mapped_parameters = []
@@ -2418,6 +2381,31 @@ class ConfigConverter:
                 if not hasattr(self, 'unmapped_parameters'):
                     self.unmapped_parameters = []
                 self.unmapped_parameters.append((current_path, value))
+                
+    def _mark_all_params_processed(self, data: Dict, current_path: str, processed_params: set) -> None:
+        """Mark all parameters in the data structure as processed to avoid duplicate processing"""
+        if not isinstance(data, dict):
+            return
+            
+        for key, value in data.items():
+            # Build the current path
+            path = f"{current_path}.{key}" if current_path else key
+            
+            # Mark this parameter as processed
+            processed_params.add(path)
+            
+            # If this is a dictionary, process it recursively
+            if isinstance(value, dict):
+                self._mark_all_params_processed(value, path, processed_params)
+            # If this is a list, process each item if they are dictionaries
+            elif isinstance(value, list):
+                for i, item in enumerate(value):
+                    if isinstance(item, dict):
+                        list_path = f"{path}[{i}]"
+                        self._mark_all_params_processed(item, list_path, processed_params)
+                    else:
+                        # For non-dict items in a list, mark the list itself as processed
+                        processed_params.add(path)
 
 
 def batch_convert(converter: ConfigConverter, source_dir: str, output_dir: str, template_file: str = None, schema_file: str = None):

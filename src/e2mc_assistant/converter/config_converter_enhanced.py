@@ -2120,6 +2120,11 @@ class ConfigConverter:
             else:
                 target_value = source_value
                 
+                # Convert keyframe to integer for GopSize
+                if source_path == 'keyframe' and isinstance(source_value, str) and source_value.isdigit():
+                    target_value = int(source_value)
+                    self.logger.info(f"Converted keyframe value from string '{source_value}' to integer {target_value}")
+                
                 # Apply transformation function
                 if transform:
                     # original_source_data = context['source_data']

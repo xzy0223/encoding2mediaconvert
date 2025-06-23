@@ -13,7 +13,7 @@ def test_multi_value_conversion():
     test_file = "/home/ec2-user/e2mc_assistant/encoding_profiles/ipad_stream/54.xml"
     
     # Path to the rules file
-    rules_file = "/home/ec2-user/e2mc_assistant/src/e2mc_assistant/converter/rules/mp4_rules_fixed.yaml"
+    rules_file = "/home/ec2-user/e2mc_assistant/src/e2mc_assistant/converter/rules/e2mc_rules.yaml"
     
     # Output file path
     output_file = "/home/ec2-user/e2mc_assistant/test_output_54.json"

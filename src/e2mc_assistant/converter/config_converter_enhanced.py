@@ -225,7 +225,7 @@ class ConfigConverter:
             self.logger.error(f"Error calculating aspect ratio: {str(e)}. Using default 1:1")
             return default_return
             
-    def generate_outputs_with_settings(self, streams: List, context: Dict) -> List:
+    def generate_outputs_with_settings(self, streams: List, context: Dict) -> Dict:
         """
         Generate outputs from streams and apply both rate control and audio settings
         
@@ -239,12 +239,14 @@ class ConfigConverter:
             context: Context dictionary with source_data and other information
             
         Returns:
-            List of output structures for MediaConvert with proper settings
+            Dictionary containing:
+                - outputs: List of output structures for MediaConvert with proper settings
+                - group_settings: Dictionary with OutputGroupSettings to apply
         """
         # 添加防止递归调用的标记
         if context.get('processing_streams'):
-            self.logger.warning("Detected recursive call to generate_outputs_with_settings, returning empty list to prevent infinite loop")
-            return []
+            self.logger.warning("Detected recursive call to generate_outputs_with_settings, returning empty dict to prevent infinite loop")
+            return {'outputs': [], 'group_settings': {}}
         
         # 设置处理标记
         context['processing_streams'] = True
@@ -344,6 +346,10 @@ class ConfigConverter:
                 # Create a temporary target data structure for this stream's output
                 temp_target = {"Settings": {"OutputGroups": [{"Outputs": [outputs[i]]}]}}
                 
+                # Initialize OutputGroupSettings if needed
+                if 'OutputGroupSettings' not in temp_target["Settings"]["OutputGroups"][0]:
+                    temp_target["Settings"]["OutputGroups"][0]["OutputGroupSettings"] = {}
+                
                 # 创建一个新的stream_processed_params，并复制processed_dummy_params
                 stream_processed_params = set(processed_dummy_params)  # 只复制dummy参数
                 
@@ -367,6 +373,15 @@ class ConfigConverter:
                 
                 # Add the stream's processed parameters to the global set
                 processed_params.update(stream_processed_params)
+                
+                # Extract OutputGroupSettings from the temp_target if it exists
+                if i == 0:  # Only need to do this once
+                    if ('OutputGroupSettings' in temp_target["Settings"]["OutputGroups"][0] and 
+                        temp_target["Settings"]["OutputGroups"][0]["OutputGroupSettings"]):
+                        group_settings = temp_target["Settings"]["OutputGroups"][0]["OutputGroupSettings"]
+                        self.logger.info(f"Extracted OutputGroupSettings from temp_target: {group_settings}")
+                    else:
+                        group_settings = {}
             
             # Clean up outputs based on video_only and audio_only flags
             for i, stream in enumerate(streams):
@@ -381,8 +396,38 @@ class ConfigConverter:
                         self.logger.info(f"Removing VideoDescription from output {i} because audio_only=yes is set")
                         outputs[i].pop('VideoDescription', None)
             
+            # Get output format from source data to determine OutputGroupSettings.Type
+            output_format = self.get_value_by_path(source_data, 'output')
+            
+            # If group_settings wasn't set during stream processing, create it based on output format
+            if not group_settings and output_format:
+                # Set appropriate OutputGroupSettings.Type based on output format
+                group_type = self._get_output_group_type(output_format)
+                group_settings = {
+                    'Type': group_type
+                }
+                
+                # Add format-specific settings
+                if group_type == "HLS_GROUP_SETTINGS":
+                    group_settings['HlsGroupSettings'] = {}
+                elif group_type == "CMAF_GROUP_SETTINGS":
+                    group_settings['CmafGroupSettings'] = {}
+                elif group_type == "DASH_ISO_GROUP_SETTINGS":
+                    group_settings['DashIsoGroupSettings'] = {}
+                elif group_type == "FILE_GROUP_SETTINGS":
+                    group_settings['FileGroupSettings'] = {}
+                elif group_type == "MS_SMOOTH_GROUP_SETTINGS":
+                    group_settings['MsSmoothGroupSettings'] = {}
+                
+                self.logger.info(f"Created OutputGroupSettings with Type={group_type} for output_format={output_format}")
+            elif group_settings:
+                self.logger.info(f"Using OutputGroupSettings extracted from rule processing: {group_settings}")
+            
             self.logger.info(f"Final outputs after cleanup: {len(outputs)} outputs")
-            return outputs
+            return {
+                'outputs': outputs,
+                'group_settings': group_settings
+            }
         finally:
             # 确保无论如何都清除处理标记
             if 'processing_streams' in context:
@@ -479,8 +524,25 @@ class ConfigConverter:
                     # Map multi-value fields to singular fields in each stream
                     stream['bitrate'] = result['bitrates'][i]
                     stream['size'] = result['size'][i]
-                    stream['keyframe'] = result['keyframes'][i]
-                    stream['framerate'] = result['framerates'][i]
+                    
+                    # Convert keyframe to integer
+                    keyframe_value = result['keyframes'][i]
+                    if isinstance(keyframe_value, str) and keyframe_value.isdigit():
+                        stream['keyframe'] = int(keyframe_value)
+                    else:
+                        stream['keyframe'] = keyframe_value
+                    
+                    # Convert framerate to float or int as appropriate
+                    framerate_value = result['framerates'][i]
+                    if isinstance(framerate_value, str):
+                        if framerate_value.isdigit():
+                            stream['framerate'] = int(framerate_value)
+                        elif self._is_float(framerate_value):
+                            stream['framerate'] = float(framerate_value)
+                        else:
+                            stream['framerate'] = framerate_value
+                    else:
+                        stream['framerate'] = framerate_value
                     
                     # Copy other relevant fields from the source
                     for key, value in result.items():
@@ -1084,6 +1146,11 @@ class ConfigConverter:
                         # Check if we're overwriting an existing value and log it
                         if part in current and current[part] != value:
                             self.logger.debug(f"Overwriting existing value at {path}: {current[part]} -> {value}")
+                        
+                        # Add special logging for OutputGroupSettings
+                        if "OutputGroupSettings" in path:
+                            self.logger.info(f"Setting OutputGroupSettings value at {path}: {value}")
+                            
                         current[part] = value
                 else:
                     if part not in current:
@@ -1721,8 +1788,19 @@ class ConfigConverter:
             context = {'source_data': source_data, 'alternate_source_mapping': alternate_source_mapping}
             
             # Apply settings to the generated outputs
-            outputs_with_settings = self.generate_outputs_with_settings(streams_to_use, context)
+            result = self.generate_outputs_with_settings(streams_to_use, context)
             
+            # Handle the new return value structure
+            if isinstance(result, dict):
+                outputs_with_settings = result.get('outputs', [])
+                group_settings = result.get('group_settings', {})
+            else:
+                # For backward compatibility with older code that might still return a list
+                outputs_with_settings = result
+                group_settings = {}
+
+            self.logger.info(f"meddle result is {group_settings}")
+
             # Add the outputs to the target data
             if outputs_with_settings:
                 if 'Settings' not in target_data:
@@ -1737,6 +1815,23 @@ class ConfigConverter:
                     target_data['Settings']['OutputGroups'][0]['Outputs'] = []
                 
                 target_data['Settings']['OutputGroups'][0]['Outputs'].extend(outputs_with_settings)
+                
+                # Apply group settings if available
+                if group_settings:
+                    if 'OutputGroupSettings' not in target_data['Settings']['OutputGroups'][0]:
+                        target_data['Settings']['OutputGroups'][0]['OutputGroupSettings'] = {}
+                    
+                    # Merge group_settings into OutputGroupSettings
+                    for key, value in group_settings.items():
+                        target_data['Settings']['OutputGroups'][0]['OutputGroupSettings'][key] = value
+                    
+                    self.logger.info(f"Applied OutputGroupSettings: {group_settings}")
+                    
+                # Add debug log to see the final OutputGroupSettings
+                if 'OutputGroupSettings' in target_data['Settings']['OutputGroups'][0]:
+                    self.logger.info(f"Final OutputGroupSettings: {target_data['Settings']['OutputGroups'][0]['OutputGroupSettings']}")
+                else:
+                    self.logger.info("No OutputGroupSettings in final output")
             
             # Mark stream parameter as processed
             processed_params.add('stream')
@@ -1813,6 +1908,12 @@ class ConfigConverter:
                 
                 # Mark output parameter as processed
                 processed_params.add('output')
+                
+                # Add debug log to see if OutputGroupSettings are being set in non-multi-stream scenario
+                if 'OutputGroupSettings' in output_group:
+                    self.logger.info(f"Non-multi-stream OutputGroupSettings: {output_group['OutputGroupSettings']}")
+                else:
+                    self.logger.info("No OutputGroupSettings in non-multi-stream scenario")
             
             # Process rate control settings first (special handling for CBR/VBR/QVBR)
             if self._process_rate_control_settings(source_data, target_data):
@@ -2125,6 +2226,18 @@ class ConfigConverter:
                     target_value = int(source_value)
                     self.logger.info(f"Converted keyframe value from string '{source_value}' to integer {target_value}")
                 
+                # Convert framerate to number for FramerateNumerator/FramerateDenominator
+                elif source_path == 'framerate' and isinstance(source_value, str):
+                    self.logger.info(f"converting framerate value from string '{source_value}' to number")
+                    # Try to convert to integer first
+                    if source_value.isdigit():
+                        target_value = int(source_value)
+                        self.logger.info(f"Converted framerate value from string '{source_value}' to integer {target_value}")
+                    # Try to convert to float if it contains a decimal point
+                    elif self._is_float(source_value):
+                        target_value = float(source_value)
+                        self.logger.info(f"Converted framerate value from string '{source_value}' to float {target_value}")
+                
                 # Apply transformation function
                 if transform:
                     # original_source_data = context['source_data']
@@ -2387,6 +2500,34 @@ class ConfigConverter:
                     self.unmapped_parameters = []
                 self.unmapped_parameters.append((current_path, value))
                 
+    def _get_output_group_type(self, output_format: str) -> str:
+        """
+        Determine the appropriate OutputGroupSettings.Type based on output format
+        
+        Args:
+            output_format: The output format string from source data
+            
+        Returns:
+            The appropriate OutputGroupSettings.Type value
+        """
+        if output_format in ["advanced_hls", "ipad_stream"]:
+            return "HLS_GROUP_SETTINGS"
+        elif output_format in ["fmp4_hls", "advanced_fmp4"]:
+            return "CMAF_GROUP_SETTINGS"
+        elif output_format in ["mpeg_dash", "advanced_dash"]:
+            return "DASH_ISO_GROUP_SETTINGS"
+        elif output_format in ["mp4", "flv", "mov", "iphone"]:
+            return "FILE_GROUP_SETTINGS"
+        elif output_format == "mpegts":
+            return "FILE_GROUP_SETTINGS"
+        elif output_format == "smooth_streaming":
+            return "MS_SMOOTH_GROUP_SETTINGS"
+        elif output_format == "webm":
+            return "FILE_GROUP_SETTINGS"
+        
+        # Default to FILE_GROUP_SETTINGS for unknown formats
+        return "FILE_GROUP_SETTINGS"
+        
     def _mark_all_params_processed(self, data: Dict, current_path: str, processed_params: set) -> None:
         """Mark all parameters in the data structure as processed to avoid duplicate processing"""
         if not isinstance(data, dict):

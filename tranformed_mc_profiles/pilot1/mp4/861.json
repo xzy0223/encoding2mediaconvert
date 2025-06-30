@@ -32,10 +32,14 @@
                 "H264Settings": {
                   "RateControlMode": "CBR",
                   "Bitrate": 19000000,
+                  "ParControl": "SPECIFIED",
+                  "ParNumerator": 1,
+                  "ParDenominator": 1,
                   "FramerateControl": "SPECIFIED",
                   "FramerateNumerator": 30000,
                   "FramerateDenominator": 1001,
                   "CodecProfile": "MAIN",
+                  "CodecLevel": "LEVEL_3",
                   "NumberReferenceFrames": 4
                 },
                 "Codec": "H_264"

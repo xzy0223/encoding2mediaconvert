@@ -36,6 +36,7 @@
                   "FramerateNumerator": 60000,
                   "FramerateDenominator": 1001,
                   "CodecProfile": "HIGH",
+                  "CodecLevel": "LEVEL_4_1",
                   "NumberReferenceFrames": 3,
                   "GopClosedCadence": 90
                 },

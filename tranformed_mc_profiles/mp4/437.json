@@ -9,8 +9,7 @@
             "DefaultSelection": "DEFAULT"
           }
         },
-        "FileInput": "{SOURCE_S3_URL}",
-        "DeblockFilter": "ENABLED"
+        "FileInput": "{SOURCE_S3_URL}"
       }
     ],
     "OutputGroups": [
@@ -34,20 +33,19 @@
                   "RateControlMode": "VBR",
                   "Bitrate": 20000000,
                   "MaxBitrate": 50000000,
-                  "ParControl": "SPECIFIED",
-                  "ParNumerator": 16,
-                  "ParDenominator": 9,
                   "FramerateControl": "SPECIFIED",
                   "FramerateNumerator": 25,
                   "FramerateDenominator": 1,
                   "CodecProfile": "MAIN",
-                  "CodecLevel": "LEVEL_3_1",
                   "NumberReferenceFrames": 4
                 },
                 "Codec": "H_264"
               },
               "Width": 1920,
-              "Height": 1080
+              "Height": 1080,
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              }
             },
             "AudioDescriptions": [
               {

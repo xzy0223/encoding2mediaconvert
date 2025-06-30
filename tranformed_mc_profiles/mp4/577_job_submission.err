@@ -1,7 +1,7 @@
 Error submitting MediaConvert job for 577
-Timestamp: 2025-05-21T08:29:36.725236
+Timestamp: 2025-06-04T05:32:57.064905
 
-Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/codecProfile: Should match all dependencies: See other errors for more details | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings: Should match exactly one schema defined in "oneOf" | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings: entropyEncoding is a required property | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/codecProfile: Should be equal to one of the allowed values in ["HIGH","HIGH_10BIT","HIGH_422","HIGH_422_10BIT","MAIN"]
+Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings: maxBitrate is a required property
 
 Job settings:
 {
@@ -36,8 +36,10 @@ Job settings:
             "VideoDescription": {
               "CodecSettings": {
                 "H264Settings": {
-                  "RateControlMode": "CBR",
+                  "RateControlMode": "QVBR",
                   "CodecProfile": "BASELINE",
+                  "EntropyEncoding": "CAVLC",
+                  "NumberBFramesBetweenReferenceFrames": 0,
                   "CodecLevel": "LEVEL_3",
                   "ParControl": "SPECIFIED",
                   "ParNumerator": 1,
@@ -48,7 +50,6 @@ Job settings:
                   "MinIInterval": 29,
                   "GopSize": 50,
                   "NumberReferenceFrames": 2,
-                  "NumberBFramesBetweenReferenceFrames": 0,
                   "QualityTuningLevel": "SINGLE_PASS_HQ"
                 },
                 "Codec": "H_264"

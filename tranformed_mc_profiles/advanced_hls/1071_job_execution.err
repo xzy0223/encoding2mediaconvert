@@ -1,0 +1,203 @@
+MediaConvert job 1750386695939-n1tblm failed
+Timestamp: 2025-06-20T02:31:46.418585
+
+Job details:
+{
+  "AccelerationSettings": {
+    "Mode": "PREFERRED"
+  },
+  "AccelerationStatus": "NOT_ACCELERATED",
+  "Arn": "arn:aws:mediaconvert:us-east-1:935206693453:jobs/1750386695939-n1tblm",
+  "BillingTagsSource": "JOB",
+  "ClientRequestToken": "2ce8a748-06f6-4ad7-b04e-7cb453ca5b0e",
+  "CreatedAt": "2025-06-20 02:31:36+00:00",
+  "ErrorCode": 1076,
+  "ErrorMessage": "Demuxer: [ReadPacketData File read failed - end of file hit at length [3353600]. Is file truncated?]",
+  "Id": "1750386695939-n1tblm",
+  "Messages": {
+    "Info": [
+      "This job doesn't require enough processing power to benefit from accelerated transcoding."
+    ],
+    "Warning": []
+  },
+  "Priority": 0,
+  "Queue": "arn:aws:mediaconvert:us-east-1:935206693453:queues/Default",
+  "Role": "arn:aws:iam::935206693453:role/MediaConvertRole",
+  "Settings": {
+    "FollowSource": 1,
+    "Inputs": [
+      {
+        "AudioSelectors": {
+          "Audio Selector 1": {
+            "DefaultSelection": "DEFAULT"
+          }
+        },
+        "FileInput": "s3://fw-mc-test/advanced_hls/1071/1071_843489956_source.mp4",
+        "TimecodeSource": "ZEROBASED",
+        "VideoSelector": {}
+      }
+    ],
+    "OutputGroups": [
+      {
+        "Name": "e2mc test",
+        "OutputGroupSettings": {
+          "HlsGroupSettings": {
+            "Destination": "s3://fw-mc-test/advanced_hls/1071/",
+            "MinFinalSegmentLength": 1.0,
+            "MinSegmentLength": 0,
+            "SegmentLength": 10
+          },
+          "Type": "HLS_GROUP_SETTINGS"
+        },
+        "Outputs": [
+          {
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "AacSettings": {
+                    "Bitrate": 64000,
+                    "CodingMode": "CODING_MODE_2_0",
+                    "SampleRate": 48000
+                  },
+                  "Codec": "AAC"
+                }
+              }
+            ],
+            "ContainerSettings": {
+              "Container": "M3U8",
+              "M3u8Settings": {}
+            },
+            "NameModifier": "_854x480_800K_audio_64K_stereo",
+            "VideoDescription": {
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "Bitrate": 800000,
+                  "CodecProfile": "MAIN",
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateDenominator": 1,
+                  "FramerateNumerator": 30,
+                  "GopSize": 90.0,
+                  "GopSizeUnits": "FRAMES",
+                  "MaxBitrate": 2000000,
+                  "QualityTuningLevel": "SINGLE_PASS_HQ",
+                  "RateControlMode": "VBR"
+                }
+              },
+              "Height": 480,
+              "ScalingBehavior": "DEFAULT",
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "Width": 854
+            }
+          },
+          {
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "AacSettings": {
+                    "Bitrate": 64000,
+                    "CodingMode": "CODING_MODE_2_0",
+                    "SampleRate": 48000
+                  },
+                  "Codec": "AAC"
+                }
+              }
+            ],
+            "ContainerSettings": {
+              "Container": "M3U8",
+              "M3u8Settings": {}
+            },
+            "NameModifier": "_1280x720_1800K_audio_64K_stereo",
+            "VideoDescription": {
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "Bitrate": 1800000,
+                  "CodecProfile": "MAIN",
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateDenominator": 1,
+                  "FramerateNumerator": 30,
+                  "GopSize": 90.0,
+                  "GopSizeUnits": "FRAMES",
+                  "MaxBitrate": 4500000,
+                  "QualityTuningLevel": "SINGLE_PASS_HQ",
+                  "RateControlMode": "VBR"
+                }
+              },
+              "Height": 720,
+              "ScalingBehavior": "DEFAULT",
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "Width": 1280
+            }
+          },
+          {
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "AacSettings": {
+                    "Bitrate": 64000,
+                    "CodingMode": "CODING_MODE_2_0",
+                    "SampleRate": 48000
+                  },
+                  "Codec": "AAC"
+                }
+              }
+            ],
+            "ContainerSettings": {
+              "Container": "M3U8",
+              "M3u8Settings": {}
+            },
+            "NameModifier": "_1920x1080_2800K_audio_64K_stereo",
+            "VideoDescription": {
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "Bitrate": 2800000,
+                  "CodecProfile": "HIGH",
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateDenominator": 1,
+                  "FramerateNumerator": 30,
+                  "GopSize": 90.0,
+                  "GopSizeUnits": "FRAMES",
+                  "MaxBitrate": 7000000,
+                  "QualityTuningLevel": "SINGLE_PASS_HQ",
+                  "RateControlMode": "VBR"
+                }
+              },
+              "Height": 1080,
+              "ScalingBehavior": "DEFAULT",
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "Width": 1920
+            }
+          }
+        ]
+      }
+    ],
+    "TimecodeConfig": {
+      "Source": "ZEROBASED"
+    }
+  },
+  "Status": "ERROR",
+  "StatusUpdateInterval": "SECONDS_60",
+  "Timing": {
+    "FinishTime": "2025-06-20 02:31:39+00:00",
+    "StartTime": "2025-06-20 02:31:37+00:00",
+    "SubmitTime": "2025-06-20 02:31:36+00:00"
+  },
+  "UserMetadata": {},
+  "Warnings": [
+    {
+      "Code": 220000,
+      "Count": 16
+    }
+  ]
+}
+
+Error message:
+Demuxer: [ReadPacketData File read failed - end of file hit at length [3353600]. Is file truncated?]

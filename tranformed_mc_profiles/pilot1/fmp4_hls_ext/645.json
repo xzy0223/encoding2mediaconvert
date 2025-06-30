@@ -338,12 +338,12 @@
           "Type": "CMAF_GROUP_SETTINGS",
           "CmafGroupSettings": {
             "WriteDashManifest": "DISABLED",
-            "SegmentLength": 6,
+            "SegmentLength": 2,
             "Destination": "S3_OUTPUT_URL",
             "FragmentLength": 2,
             "SegmentControl": "SEGMENTED_FILES",
             "ManifestDurationFormat": "FLOATING_POINT",
-			"MinFinalSegmentLength": 1,
+			      "MinFinalSegmentLength": 1,
             "ManifestCompression": "NONE"
           }
         }

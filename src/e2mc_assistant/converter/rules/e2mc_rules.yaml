@@ -583,9 +583,6 @@ rules:
         value: ["mpeg_dash", "advanced_dash"]
     target:
       - path: "Settings.OutputGroups[0].OutputGroupSettings.DashIsoGroupSettings.SegmentLength"
-      - path: "Settings.OutputGroups[0].OutputGroupSettings.DashIsoGroupSettings.MinSegmentLength"
-        value: 0
-
 
   - source:
       path: "duration_precision"

@@ -37,6 +37,8 @@
                   "FramerateNumerator": 25,
                   "FramerateDenominator": 1,
                   "CodecProfile": "BASELINE",
+                  "EntropyEncoding": "CAVLC",
+                  "NumberBFramesBetweenReferenceFrames": 0,
                   "CodecLevel": "LEVEL_4_1"
                 },
                 "Codec": "H_264"

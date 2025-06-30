@@ -1,0 +1,211 @@
+{
+  "Settings": {
+    "Inputs": [
+      {
+        "TimecodeSource": "ZEROBASED",
+        "VideoSelector": {},
+        "AudioSelectors": {
+          "Audio Selector 1": {
+            "DefaultSelection": "DEFAULT"
+          }
+        },
+        "FileInput": "{SOURCE_S3_URL}"
+      }
+    ],
+    "OutputGroups": [
+      {
+        "Name": "e2mc test",
+        "OutputGroupSettings": {
+          "Type": "HLS_GROUP_SETTINGS",
+          "HlsGroupSettings": {
+            "SegmentLength": 6,
+            "MinSegmentLength": 0,
+            "MinFinalSegmentLength": 1,
+            "Destination": "S3_OUTPUT_URL"
+          }
+        },
+        "Outputs": [
+          {
+            "ContainerSettings": {
+              "Container": "M3U8",
+              "M3u8Settings": {}
+            },
+            "VideoDescription": {
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "RateControlMode": "VBR",
+                  "Bitrate": 500000,
+                  "MaxBitrate": 1250000,
+                  "QualityTuningLevel": "SINGLE_PASS_HQ",
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateNumerator": 30,
+                  "FramerateDenominator": 1,
+                  "GopSize": 90,
+                  "GopSizeUnits": "FRAMES",
+                  "CodecProfile": "HIGH",
+                  "SceneChangeDetect": "DISABLED"
+                }
+              },
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "ScalingBehavior": "DEFAULT",
+              "Width": 480,
+              "Height": 270
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 64000,
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
+                }
+              }
+            ],
+            "NameModifier": "_480x270_500K_audio_64K_stereo"
+          },
+          {
+            "ContainerSettings": {
+              "Container": "M3U8",
+              "M3u8Settings": {}
+            },
+            "VideoDescription": {
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "RateControlMode": "VBR",
+                  "Bitrate": 700000,
+                  "MaxBitrate": 1750000,
+                  "QualityTuningLevel": "SINGLE_PASS_HQ",
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateNumerator": 30,
+                  "FramerateDenominator": 1,
+                  "GopSize": 90,
+                  "GopSizeUnits": "FRAMES",
+                  "CodecProfile": "MAIN",
+                  "SceneChangeDetect": "DISABLED"
+                }
+              },
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "ScalingBehavior": "DEFAULT",
+              "Width": 640,
+              "Height": 360
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 64000,
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
+                }
+              }
+            ],
+            "NameModifier": "_640x360_700K_audio_64K_stereo"
+          },
+          {
+            "ContainerSettings": {
+              "Container": "M3U8",
+              "M3u8Settings": {}
+            },
+            "VideoDescription": {
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "RateControlMode": "VBR",
+                  "Bitrate": 2800000,
+                  "MaxBitrate": 7000000,
+                  "QualityTuningLevel": "SINGLE_PASS_HQ",
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateNumerator": 30,
+                  "FramerateDenominator": 1,
+                  "GopSize": 90,
+                  "GopSizeUnits": "FRAMES",
+                  "CodecProfile": "MAIN",
+                  "SceneChangeDetect": "DISABLED"
+                }
+              },
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "ScalingBehavior": "DEFAULT",
+              "Width": 960,
+              "Height": 540
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 64000,
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
+                }
+              }
+            ],
+            "NameModifier": "_960x540_2800K_audio_64K_stereo"
+          },
+          {
+            "ContainerSettings": {
+              "Container": "M3U8",
+              "M3u8Settings": {}
+            },
+            "VideoDescription": {
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "RateControlMode": "VBR",
+                  "Bitrate": 3100000,
+                  "MaxBitrate": 7750000,
+                  "QualityTuningLevel": "SINGLE_PASS_HQ",
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateNumerator": 30,
+                  "FramerateDenominator": 1,
+                  "GopSize": 90,
+                  "GopSizeUnits": "FRAMES",
+                  "CodecProfile": "MAIN",
+                  "SceneChangeDetect": "DISABLED"
+                }
+              },
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "ScalingBehavior": "DEFAULT",
+              "Width": 1280,
+              "Height": 720
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 64000,
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
+                }
+              }
+            ],
+            "NameModifier": "_1280x720_3100K_audio_64K_stereo"
+          }
+        ]
+      }
+    ],
+    "TimecodeConfig": {
+      "Source": "ZEROBASED"
+    },
+    "FollowSource": 1
+  },
+  "AccelerationSettings": {
+    "Mode": "PREFERRED"
+  }
+}

@@ -1,5 +1,5 @@
 Error submitting MediaConvert job for 1014
-Timestamp: 2025-05-21T08:13:50.329981
+Timestamp: 2025-06-03T03:33:34.255987
 
 Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/audioDescriptions/0/codecSettings/aacSettings/bitrate: You specified a value for Bitrate that is not valid with the combination of Profile LC, Coding mode CODING_MODE_2_0, and Sample rate 48000 you selected. Specify a bitrate in the range of 64000-576000, and resubmit your job For a list of supported bitrates, see: https://docs.aws.amazon.com/mediaconvert/latest/ug/aac-support.html
 
@@ -15,7 +15,7 @@ Job settings:
             "DefaultSelection": "DEFAULT"
           }
         },
-        "FileInput": "s3://fw-mc-test/mp4/1014/1014_619053743_source.jpeg"
+        "FileInput": "s3://fw-mc-test/mp4/1014/1014_619053743_target.mp4"
       }
     ],
     "OutputGroups": [

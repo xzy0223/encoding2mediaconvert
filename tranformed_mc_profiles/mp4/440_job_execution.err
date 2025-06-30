@@ -1,5 +1,5 @@
-MediaConvert job 1747815835906-4117rq failed
-Timestamp: 2025-05-21T08:24:06.422677
+MediaConvert job 1748922249105-ij78p5 failed
+Timestamp: 2025-06-03T03:44:19.607425
 
 Job details:
 {
@@ -7,13 +7,13 @@ Job details:
     "Mode": "DISABLED"
   },
   "AccelerationStatus": "NOT_APPLICABLE",
-  "Arn": "arn:aws:mediaconvert:us-east-1:935206693453:jobs/1747815835906-4117rq",
+  "Arn": "arn:aws:mediaconvert:us-east-1:935206693453:jobs/1748922249105-ij78p5",
   "BillingTagsSource": "JOB",
-  "ClientRequestToken": "a92cef7a-df66-432c-990b-7c9f9eb7e88c",
-  "CreatedAt": "2025-05-21 08:23:56+00:00",
+  "ClientRequestToken": "6d6c32c0-f462-4cfb-8578-65568f255774",
+  "CreatedAt": "2025-06-03 03:44:09+00:00",
   "ErrorCode": 1040,
   "ErrorMessage": "Error initializing encoder for video target [1] [initialization failed: Invalid level specified for the selected buffer size.]",
-  "Id": "1747815835906-4117rq",
+  "Id": "1748922249105-ij78p5",
   "Messages": {
     "Info": [],
     "Warning": []
@@ -30,7 +30,6 @@ Job details:
             "DefaultSelection": "DEFAULT"
           }
         },
-        "DeblockFilter": "ENABLED",
         "FileInput": "s3://fw-mc-test/mp4/440/440_880644324_source.mp4",
         "TimecodeSource": "ZEROBASED",
         "VideoSelector": {}
@@ -79,13 +78,13 @@ Job details:
                   "FramerateDenominator": 1001,
                   "FramerateNumerator": 30000,
                   "NumberReferenceFrames": 4,
-                  "ParControl": "SPECIFIED",
-                  "ParDenominator": 9,
-                  "ParNumerator": 16,
                   "RateControlMode": "CBR"
                 }
               },
               "Height": 1080,
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
               "Width": 1920
             }
           }
@@ -99,9 +98,9 @@ Job details:
   "Status": "ERROR",
   "StatusUpdateInterval": "SECONDS_60",
   "Timing": {
-    "FinishTime": "2025-05-21 08:24:00+00:00",
-    "StartTime": "2025-05-21 08:23:56+00:00",
-    "SubmitTime": "2025-05-21 08:23:56+00:00"
+    "FinishTime": "2025-06-03 03:44:13+00:00",
+    "StartTime": "2025-06-03 03:44:10+00:00",
+    "SubmitTime": "2025-06-03 03:44:09+00:00"
   },
   "UserMetadata": {}
 }

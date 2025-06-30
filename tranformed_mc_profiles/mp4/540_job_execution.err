@@ -1,5 +1,5 @@
-MediaConvert job 1747816091561-q2oc0h failed
-Timestamp: 2025-05-21T08:28:22.060102
+MediaConvert job 1748922584613-j0lm2t failed
+Timestamp: 2025-06-03T03:49:55.222633
 
 Job details:
 {
@@ -7,13 +7,13 @@ Job details:
     "Mode": "DISABLED"
   },
   "AccelerationStatus": "NOT_APPLICABLE",
-  "Arn": "arn:aws:mediaconvert:us-east-1:935206693453:jobs/1747816091561-q2oc0h",
+  "Arn": "arn:aws:mediaconvert:us-east-1:935206693453:jobs/1748922584613-j0lm2t",
   "BillingTagsSource": "JOB",
-  "ClientRequestToken": "4e87d3ee-660a-4bf7-ae1f-d970691bd5e6",
-  "CreatedAt": "2025-05-21 08:28:11+00:00",
+  "ClientRequestToken": "3afb0a74-e18d-42ce-b47c-bdabc63855e8",
+  "CreatedAt": "2025-06-03 03:49:44+00:00",
   "ErrorCode": 1075,
   "ErrorMessage": "Unable to open input file [s3://fw-mc-test/mp4/540/540_882779581_source.mp4]: [Failed probe/open: [no moov box found in file]]",
-  "Id": "1747816091561-q2oc0h",
+  "Id": "1748922584613-j0lm2t",
   "Messages": {
     "Info": [],
     "Warning": []
@@ -30,7 +30,6 @@ Job details:
             "DefaultSelection": "DEFAULT"
           }
         },
-        "DeblockFilter": "ENABLED",
         "FileInput": "s3://fw-mc-test/mp4/540/540_882779581_source.mp4",
         "TimecodeSource": "ZEROBASED",
         "VideoSelector": {}
@@ -80,13 +79,13 @@ Job details:
                   "FramerateNumerator": 30,
                   "MaxBitrate": 510000,
                   "NumberReferenceFrames": 4,
-                  "ParControl": "SPECIFIED",
-                  "ParDenominator": 9,
-                  "ParNumerator": 16,
                   "RateControlMode": "VBR"
                 }
               },
               "Height": 360,
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
               "Width": 640
             }
           }
@@ -100,9 +99,9 @@ Job details:
   "Status": "ERROR",
   "StatusUpdateInterval": "SECONDS_60",
   "Timing": {
-    "FinishTime": "2025-05-21 08:28:13+00:00",
-    "StartTime": "2025-05-21 08:28:12+00:00",
-    "SubmitTime": "2025-05-21 08:28:11+00:00"
+    "FinishTime": "2025-06-03 03:49:46+00:00",
+    "StartTime": "2025-06-03 03:49:45+00:00",
+    "SubmitTime": "2025-06-03 03:49:44+00:00"
   },
   "UserMetadata": {}
 }

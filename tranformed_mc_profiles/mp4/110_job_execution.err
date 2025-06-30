@@ -1,5 +1,5 @@
-MediaConvert job 1747815526293-k4ip7e failed
-Timestamp: 2025-05-21T08:18:56.734735
+MediaConvert job 1748921908202-rgoid0 failed
+Timestamp: 2025-06-03T03:38:38.602356
 
 Job details:
 {
@@ -7,19 +7,20 @@ Job details:
     "Mode": "DISABLED"
   },
   "AccelerationStatus": "NOT_APPLICABLE",
-  "Arn": "arn:aws:mediaconvert:us-east-1:935206693453:jobs/1747815526293-k4ip7e",
+  "Arn": "arn:aws:mediaconvert:us-east-1:935206693453:jobs/1748921908202-rgoid0",
   "BillingTagsSource": "JOB",
-  "ClientRequestToken": "c39d6f0f-c55f-420a-86a9-9d74de875e1f",
-  "CreatedAt": "2025-05-21 08:18:46+00:00",
+  "ClientRequestToken": "47c704b0-823f-4438-853c-534a46c03258",
+  "CreatedAt": "2025-06-03 03:38:28+00:00",
   "ErrorCode": 1021,
   "ErrorMessage": "No audio frames decoded on [selector-(Audio Selector 1)-track-1-drc]",
-  "Id": "1747815526293-k4ip7e",
+  "Id": "1748921908202-rgoid0",
   "Messages": {
     "Info": [],
     "Warning": []
   },
   "Priority": 0,
   "Queue": "arn:aws:mediaconvert:us-east-1:935206693453:queues/Default",
+  "RetryCount": 1,
   "Role": "arn:aws:iam::935206693453:role/MediaConvertRole",
   "Settings": {
     "FollowSource": 1,
@@ -30,7 +31,6 @@ Job details:
             "DefaultSelection": "DEFAULT"
           }
         },
-        "DeblockFilter": "ENABLED",
         "FileInput": "s3://fw-mc-test/mp4/110/110_881432621_source.mpg",
         "TimecodeSource": "ZEROBASED",
         "VideoSelector": {}
@@ -76,13 +76,13 @@ Job details:
                   "FramerateNumerator": 30,
                   "MaxBitrate": 2400000,
                   "NumberReferenceFrames": 3,
-                  "ParControl": "SPECIFIED",
-                  "ParDenominator": 9,
-                  "ParNumerator": 16,
                   "RateControlMode": "VBR"
                 }
               },
               "Height": 540,
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
               "Width": 960
             }
           }
@@ -96,9 +96,9 @@ Job details:
   "Status": "ERROR",
   "StatusUpdateInterval": "SECONDS_60",
   "Timing": {
-    "FinishTime": "2025-05-21 08:18:49+00:00",
-    "StartTime": "2025-05-21 08:18:48+00:00",
-    "SubmitTime": "2025-05-21 08:18:46+00:00"
+    "FinishTime": "2025-06-03 03:38:37+00:00",
+    "StartTime": "2025-06-03 03:38:30+00:00",
+    "SubmitTime": "2025-06-03 03:38:28+00:00"
   },
   "UserMetadata": {},
   "Warnings": [

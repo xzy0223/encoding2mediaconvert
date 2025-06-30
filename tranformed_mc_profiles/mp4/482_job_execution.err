@@ -1,5 +1,5 @@
-MediaConvert job 1747815943079-at0tyl failed
-Timestamp: 2025-05-21T08:25:53.602282
+MediaConvert job 1748928921312-9ihk7o failed
+Timestamp: 2025-06-03T05:35:31.763966
 
 Job details:
 {
@@ -7,13 +7,13 @@ Job details:
     "Mode": "DISABLED"
   },
   "AccelerationStatus": "NOT_APPLICABLE",
-  "Arn": "arn:aws:mediaconvert:us-east-1:935206693453:jobs/1747815943079-at0tyl",
+  "Arn": "arn:aws:mediaconvert:us-east-1:935206693453:jobs/1748928921312-9ihk7o",
   "BillingTagsSource": "JOB",
-  "ClientRequestToken": "d2e89516-ded7-4356-9e7e-835a406c9fba",
-  "CreatedAt": "2025-05-21 08:25:43+00:00",
+  "ClientRequestToken": "c6cc7ab2-f223-4d11-9862-acecf1d97973",
+  "CreatedAt": "2025-06-03 05:35:21+00:00",
   "ErrorCode": 1076,
   "ErrorMessage": "Demuxer: [ReadPacketData File read failed - end of file hit at length [1257472]. Is file truncated?]",
-  "Id": "1747815943079-at0tyl",
+  "Id": "1748928921312-9ihk7o",
   "Messages": {
     "Info": [],
     "Warning": []
@@ -87,15 +87,15 @@ Job details:
   "Status": "ERROR",
   "StatusUpdateInterval": "SECONDS_60",
   "Timing": {
-    "FinishTime": "2025-05-21 08:25:46+00:00",
-    "StartTime": "2025-05-21 08:25:43+00:00",
-    "SubmitTime": "2025-05-21 08:25:43+00:00"
+    "FinishTime": "2025-06-03 05:35:25+00:00",
+    "StartTime": "2025-06-03 05:35:22+00:00",
+    "SubmitTime": "2025-06-03 05:35:21+00:00"
   },
   "UserMetadata": {},
   "Warnings": [
     {
       "Code": 220000,
-      "Count": 789
+      "Count": 800
     }
   ]
 }

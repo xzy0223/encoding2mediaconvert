@@ -37,14 +37,17 @@
                   "RateControlMode": "VBR",
                   "Bitrate": 5000000,
                   "MaxBitrate": 12500000,
-                  "CodecProfile": "MAIN",
+                  "CodecProfile": "HIGH",
                   "FramerateControl": "INITIALIZE_FROM_SOURCE",
                   "FramerateNumerator": 30000,
                   "FramerateDenominator": 1001,
-                  "GopSize": 60,
+                  "GopSize": [
+                    60,
+                    250
+                  ],
+                  "GopSizeUnits": "FRAMES",
                   "EntropyEncoding": "CAVLC",
                   "MinIInterval": 25,
-                  "SceneChangeDetect": "ENABLED",
                   "NumberBFramesBetweenReferenceFrames": 1,
                   "Slices": 1,
                   "InterlaceMode": "PROGRESSIVE"

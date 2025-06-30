@@ -1,0 +1,118 @@
+MediaConvert job 1748921875848-2drkqa failed
+Timestamp: 2025-06-03T03:38:06.357906
+
+Job details:
+{
+  "AccelerationSettings": {
+    "Mode": "DISABLED"
+  },
+  "AccelerationStatus": "NOT_APPLICABLE",
+  "Arn": "arn:aws:mediaconvert:us-east-1:935206693453:jobs/1748921875848-2drkqa",
+  "BillingTagsSource": "JOB",
+  "ClientRequestToken": "1d819621-b813-43e3-8514-c847e34408ce",
+  "CreatedAt": "2025-06-03 03:37:56+00:00",
+  "ErrorCode": 1021,
+  "ErrorMessage": "No audio frames decoded on [selector-(Audio Selector 1)-track-1-drc]",
+  "Id": "1748921875848-2drkqa",
+  "Messages": {
+    "Info": [],
+    "Warning": []
+  },
+  "Priority": 0,
+  "Queue": "arn:aws:mediaconvert:us-east-1:935206693453:queues/Default",
+  "Role": "arn:aws:iam::935206693453:role/MediaConvertRole",
+  "Settings": {
+    "FollowSource": 1,
+    "Inputs": [
+      {
+        "AudioSelectors": {
+          "Audio Selector 1": {
+            "DefaultSelection": "DEFAULT"
+          }
+        },
+        "FileInput": "s3://fw-mc-test/mp4/108/108_881442884_source.mpg",
+        "TimecodeSource": "ZEROBASED",
+        "VideoSelector": {}
+      }
+    ],
+    "OutputGroups": [
+      {
+        "Name": "File Group",
+        "OutputGroupSettings": {
+          "FileGroupSettings": {
+            "Destination": "s3://fw-mc-test/mp4/108/"
+          },
+          "Type": "FILE_GROUP_SETTINGS"
+        },
+        "Outputs": [
+          {
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "AacSettings": {
+                    "Bitrate": 128000,
+                    "CodingMode": "CODING_MODE_2_0",
+                    "SampleRate": 48000
+                  },
+                  "Codec": "AAC"
+                }
+              }
+            ],
+            "ContainerSettings": {
+              "Container": "MP4",
+              "Mp4Settings": {}
+            },
+            "NameModifier": "_768x432_1300000_mc",
+            "VideoDescription": {
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "Bitrate": 1300000,
+                  "CodecLevel": "LEVEL_3",
+                  "CodecProfile": "BASELINE",
+                  "EntropyEncoding": "CAVLC",
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateDenominator": 1,
+                  "FramerateNumerator": 30,
+                  "MaxBitrate": 1500000,
+                  "NumberBFramesBetweenReferenceFrames": 0,
+                  "NumberReferenceFrames": 3,
+                  "RateControlMode": "VBR"
+                }
+              },
+              "Height": 432,
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "Width": 768
+            }
+          }
+        ]
+      }
+    ],
+    "TimecodeConfig": {
+      "Source": "ZEROBASED"
+    }
+  },
+  "Status": "ERROR",
+  "StatusUpdateInterval": "SECONDS_60",
+  "Timing": {
+    "FinishTime": "2025-06-03 03:37:58+00:00",
+    "StartTime": "2025-06-03 03:37:57+00:00",
+    "SubmitTime": "2025-06-03 03:37:56+00:00"
+  },
+  "UserMetadata": {},
+  "Warnings": [
+    {
+      "Code": 230001,
+      "Count": 1
+    },
+    {
+      "Code": 230005,
+      "Count": 1
+    }
+  ]
+}
+
+Error message:
+No audio frames decoded on [selector-(Audio Selector 1)-track-1-drc]

@@ -219,7 +219,8 @@
             "MinFinalSegmentLength": 1,
             "FragmentLength": 30000,
             "SegmentControl": "SEGMENTED_FILES",
-            "ManifestDurationFormat": "FLOATING_POINT"
+            "ManifestDurationFormat": "FLOATING_POINT",
+            "WriteHlsManifest": "DISABLED"
           }
         }
       }

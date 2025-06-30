@@ -1,0 +1,63 @@
+{
+  "Settings": {
+    "Inputs": [
+      {
+        "TimecodeSource": "ZEROBASED",
+        "VideoSelector": {},
+        "AudioSelectors": {
+          "Audio Selector 1": {
+            "DefaultSelection": "DEFAULT"
+          }
+        },
+        "FileInput": "{SOURCE_S3_URL}"
+      }
+    ],
+    "OutputGroups": [
+      {
+        "Name": "File Group",
+        "OutputGroupSettings": {
+          "Type": "FILE_GROUP_SETTINGS",
+          "FileGroupSettings": {
+            "Destination": "{DEST_S3_URL}"
+          }
+        },
+        "Outputs": [
+          {
+            "ContainerSettings": {
+              "Container": "WEBM"
+            },
+            "VideoDescription": {
+              "CodecSettings": {
+                "Vp9Settings": {
+                  "RateControlMode": "VBR",
+                  "Bitrate": 210000,
+                  "MaxBitrate": 525000,
+                  "QualityTuningLevel": "MULTI_PASS_HQ"
+                },
+                "Codec": "VP9"
+              },
+              "Width": 288,
+              "Height": 162
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "VORBIS",
+                  "VorbisSettings": {
+                    "SampleRate": 48000,
+                    "Channels": 2
+                  }
+                }
+              }
+            ],
+            "NameModifier": "_mc"
+          }
+        ]
+      }
+    ],
+    "TimecodeConfig": {
+      "Source": "ZEROBASED"
+    },
+    "FollowSource": 1
+  }
+}

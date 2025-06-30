@@ -1,5 +1,5 @@
 Error submitting MediaConvert job for 816
-Timestamp: 2025-05-21T08:33:25.301658
+Timestamp: 2025-06-03T03:56:03.855270
 
 Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 1808
 
@@ -15,8 +15,7 @@ Job settings:
             "DefaultSelection": "DEFAULT"
           }
         },
-        "FileInput": "s3://fw-mc-test/mp4/816/816_881463062_source.mpg",
-        "DeblockFilter": "ENABLED"
+        "FileInput": "s3://fw-mc-test/mp4/816/816_881463062_source.mpg"
       }
     ],
     "OutputGroups": [
@@ -40,9 +39,6 @@ Job settings:
                   "RateControlMode": "VBR",
                   "Bitrate": 30000000,
                   "MaxBitrate": 75000000,
-                  "ParControl": "SPECIFIED",
-                  "ParNumerator": 16,
-                  "ParDenominator": 9,
                   "FramerateControl": "SPECIFIED",
                   "FramerateNumerator": 30000,
                   "FramerateDenominator": 1001,
@@ -53,7 +49,10 @@ Job settings:
                 "Codec": "H_264"
               },
               "Width": 1920,
-              "Height": 1080
+              "Height": 1080,
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              }
             },
             "AudioDescriptions": [
               {

@@ -1,7 +1,7 @@
 Error submitting MediaConvert job for 837
-Timestamp: 2025-05-21T08:33:27.437289
+Timestamp: 2025-06-03T03:56:05.927230
 
-Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/codecProfile: Should match all dependencies: See other errors for more details | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings: Should match exactly one schema defined in "oneOf" | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/entropyEncoding: Must be CAVLC | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/codecProfile: Should be equal to one of the allowed values in ["HIGH","HIGH_10BIT","HIGH_422","HIGH_422_10BIT","MAIN"]
+Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 720
 
 Job settings:
 {
@@ -39,16 +39,14 @@ Job settings:
                   "RateControlMode": "CBR",
                   "Bitrate": 1400000,
                   "QualityTuningLevel": "MULTI_PASS_HQ",
-                  "ParControl": "SPECIFIED",
-                  "ParNumerator": 16,
-                  "ParDenominator": 9,
                   "FramerateControl": "SPECIFIED",
                   "FramerateNumerator": 25,
                   "FramerateDenominator": 1,
                   "CodecProfile": "BASELINE",
+                  "EntropyEncoding": "CAVLC",
+                  "NumberBFramesBetweenReferenceFrames": 0,
                   "NumberReferenceFrames": 4,
                   "GopSize": 50,
-                  "EntropyEncoding": "CABAC",
                   "CodecLevel": "LEVEL_3"
                 },
                 "Codec": "H_264"

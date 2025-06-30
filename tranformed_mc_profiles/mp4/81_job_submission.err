@@ -1,5 +1,5 @@
 Error submitting MediaConvert job for 81
-Timestamp: 2025-05-21T08:33:25.064184
+Timestamp: 2025-06-03T03:56:03.636933
 
 Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 576
 
@@ -15,8 +15,7 @@ Job settings:
             "DefaultSelection": "DEFAULT"
           }
         },
-        "FileInput": "s3://fw-mc-test/mp4/81/81_879479135_source.mp4",
-        "DeblockFilter": "ENABLED"
+        "FileInput": "s3://fw-mc-test/mp4/81/81_879479135_source.mp4"
       }
     ],
     "OutputGroups": [
@@ -40,9 +39,6 @@ Job settings:
                   "RateControlMode": "VBR",
                   "Bitrate": 2500000,
                   "MaxBitrate": 2700000,
-                  "ParControl": "SPECIFIED",
-                  "ParNumerator": 16,
-                  "ParDenominator": 9,
                   "FramerateControl": "SPECIFIED",
                   "FramerateNumerator": 30,
                   "FramerateDenominator": 1,
@@ -53,7 +49,10 @@ Job settings:
                 "Codec": "H_264"
               },
               "Width": 1280,
-              "Height": 720
+              "Height": 720,
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              }
             },
             "AudioDescriptions": [
               {

@@ -1,0 +1,76 @@
+Error submitting MediaConvert job for 491
+Timestamp: 2025-06-17T11:19:19.117113
+
+Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings: You set Rate control mode to CBR but the settings values for Bitrate and Max bitrate aren't compatible with CBR. When you use CBR, you must specify a value for Bitrate and you must not specify a value for Max bitrate. Adjust your job settings and then resubmit your job.
+
+Job settings:
+{
+  "Settings": {
+    "Inputs": [
+      {
+        "TimecodeSource": "ZEROBASED",
+        "VideoSelector": {},
+        "AudioSelectors": {
+          "Audio Selector 1": {
+            "DefaultSelection": "DEFAULT"
+          }
+        },
+        "FileInput": "s3://fw-mc-test/mpegts/491/491_633618890_source.mp4"
+      }
+    ],
+    "OutputGroups": [
+      {
+        "Name": "File Group",
+        "OutputGroupSettings": {
+          "Type": "FILE_GROUP_SETTINGS",
+          "FileGroupSettings": {
+            "Destination": "s3://fw-mc-test/mpegts/491/"
+          }
+        },
+        "Outputs": [
+          {
+            "ContainerSettings": {
+              "Container": "M2TS",
+              "M2tsSettings": {}
+            },
+            "VideoDescription": {
+              "CodecSettings": {
+                "Mpeg2Settings": {
+                  "RateControlMode": "CBR",
+                  "Bitrate": 50000000
+                },
+                "Codec": "MPEG2",
+                "H264Settings": {
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateNumerator": 30,
+                  "FramerateDenominator": 1,
+                  "InterlaceMode": "TOP_FIELD",
+                  "RateControlMode": "CBR"
+                }
+              },
+              "Width": 1920,
+              "Height": 1080
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "MP2",
+                  "Mp2Settings": {
+                    "Bitrate": 384000,
+                    "SampleRate": 48000
+                  }
+                }
+              }
+            ],
+            "NameModifier": "_1920x1080_mc"
+          }
+        ]
+      }
+    ],
+    "TimecodeConfig": {
+      "Source": "ZEROBASED"
+    },
+    "FollowSource": 1
+  },
+  "Role": "arn:aws:iam::935206693453:role/MediaConvertRole"
+}

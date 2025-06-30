@@ -30,8 +30,11 @@
             "VideoDescription": {
               "CodecSettings": {
                 "H264Settings": {
-                  "RateControlMode": "CBR",
+                  "RateControlMode": "QVBR",
+                  "MaxBitrate": 1000000,
                   "CodecProfile": "BASELINE",
+                  "EntropyEncoding": "CAVLC",
+                  "NumberBFramesBetweenReferenceFrames": 0,
                   "CodecLevel": "LEVEL_3",
                   "ParControl": "SPECIFIED",
                   "ParNumerator": 1,
@@ -42,7 +45,6 @@
                   "MinIInterval": 29,
                   "GopSize": 50,
                   "NumberReferenceFrames": 2,
-                  "NumberBFramesBetweenReferenceFrames": 0,
                   "QualityTuningLevel": "SINGLE_PASS_HQ"
                 },
                 "Codec": "H_264"

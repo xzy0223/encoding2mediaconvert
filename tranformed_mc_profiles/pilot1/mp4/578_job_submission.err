@@ -1,5 +1,5 @@
 Error submitting MediaConvert job for 578
-Timestamp: 2025-05-26T02:47:21.609184
+Timestamp: 2025-05-29T08:56:00.514951
 
 Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/audioDescriptions/0/codecSettings/aacSettings/bitrate: You specified a value for Bitrate that is not valid with the combination of Profile LC, Coding mode CODING_MODE_2_0, and Sample rate 44100 you selected. Specify a bitrate in the range of 64000-512000, and resubmit your job For a list of supported bitrates, see: https://docs.aws.amazon.com/mediaconvert/latest/ug/aac-support.html
 
@@ -47,6 +47,7 @@ Job settings:
                   "FramerateDenominator": 1001,
                   "CodecProfile": "MAIN",
                   "SceneChangeDetect": "ENABLED",
+                  "CodecLevel": "LEVEL_3",
                   "NumberReferenceFrames": 3,
                   "MinIInterval": 25,
                   "NumberBFramesBetweenReferenceFrames": 1,

@@ -342,7 +342,8 @@
             "SegmentLength": 6,
             "MinFinalSegmentLength": 1,
             "FragmentLength": 2,
-            "SegmentControl": "SEGMENTED_FILES"
+            "SegmentControl": "SEGMENTED_FILES",
+            "WriteHlsManifest": "DISABLED"
           }
         }
       }

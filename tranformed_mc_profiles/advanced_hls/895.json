@@ -1,0 +1,527 @@
+{
+  "Settings": {
+    "Inputs": [
+      {
+        "TimecodeSource": "ZEROBASED",
+        "VideoSelector": {},
+        "AudioSelectors": {
+          "Audio Selector 1": {
+            "DefaultSelection": "DEFAULT"
+          }
+        },
+        "FileInput": "{SOURCE_S3_URL}"
+      }
+    ],
+    "OutputGroups": [
+      {
+        "Name": "e2mc test",
+        "OutputGroupSettings": {
+          "Type": "HLS_GROUP_SETTINGS",
+          "HlsGroupSettings": {
+            "SegmentLength": 2,
+            "MinSegmentLength": 0,
+            "Destination": "S3_OUTPUT_URL"
+          }
+        },
+        "Outputs": [
+          {
+            "ContainerSettings": {
+              "Container": "M3U8",
+              "M3u8Settings": {}
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 64000,
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
+                },
+                "AudioNormalizationSettings": {
+                  "Algorithm": "ITU_BS_1770_2",
+                  "TargetLkfs": -24.0,
+                  "TruePeakLimiterThreshold": -1.0
+                }
+              }
+            ],
+            "NameModifier": "_audio_64K_aac_stereo",
+            "OutputSettings": {
+              "HlsSettings": {
+                "AudioTrackType": "AUDIO_ONLY_VARIANT_STREAM"
+              }
+            }
+          },
+          {
+            "ContainerSettings": {
+              "Container": "M3U8",
+              "M3u8Settings": {}
+            },
+            "VideoDescription": {
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "RateControlMode": "VBR",
+                  "Bitrate": 210000,
+                  "MaxBitrate": 525000,
+                  "QualityTuningLevel": "MULTI_PASS_HQ",
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateNumerator": 30000,
+                  "FramerateDenominator": 1001,
+                  "GopSize": 30,
+                  "GopSizeUnits": "FRAMES",
+                  "CodecProfile": "MAIN"
+                }
+              },
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "ScalingBehavior": "DEFAULT",
+              "Width": 288
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 96000,
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
+                },
+                "AudioNormalizationSettings": {
+                  "Algorithm": "ITU_BS_1770_2",
+                  "TargetLkfs": -24.0,
+                  "TruePeakLimiterThreshold": -1.0
+                }
+              }
+            ],
+            "NameModifier": "_288x0_210K_audio_96K_aac_stereo"
+          },
+          {
+            "ContainerSettings": {
+              "Container": "M3U8",
+              "M3u8Settings": {}
+            },
+            "VideoDescription": {
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "RateControlMode": "VBR",
+                  "Bitrate": 284000,
+                  "MaxBitrate": 710000,
+                  "QualityTuningLevel": "MULTI_PASS_HQ",
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateNumerator": 30000,
+                  "FramerateDenominator": 1001,
+                  "GopSize": 30,
+                  "GopSizeUnits": "FRAMES",
+                  "CodecProfile": "MAIN"
+                }
+              },
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "ScalingBehavior": "DEFAULT",
+              "Width": 320
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 128000,
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
+                },
+                "AudioNormalizationSettings": {
+                  "Algorithm": "ITU_BS_1770_2",
+                  "TargetLkfs": -24.0,
+                  "TruePeakLimiterThreshold": -1.0
+                }
+              }
+            ],
+            "NameModifier": "_320x0_284K_audio_128K_aac_stereo"
+          },
+          {
+            "ContainerSettings": {
+              "Container": "M3U8",
+              "M3u8Settings": {}
+            },
+            "VideoDescription": {
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "RateControlMode": "VBR",
+                  "Bitrate": 354000,
+                  "MaxBitrate": 885000,
+                  "QualityTuningLevel": "MULTI_PASS_HQ",
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateNumerator": 30000,
+                  "FramerateDenominator": 1001,
+                  "GopSize": 30,
+                  "GopSizeUnits": "FRAMES",
+                  "CodecProfile": "MAIN"
+                }
+              },
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "ScalingBehavior": "DEFAULT",
+              "Width": 384
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 128000,
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
+                },
+                "AudioNormalizationSettings": {
+                  "Algorithm": "ITU_BS_1770_2",
+                  "TargetLkfs": -24.0,
+                  "TruePeakLimiterThreshold": -1.0
+                }
+              }
+            ],
+            "NameModifier": "_384x0_354K_audio_128K_aac_stereo"
+          },
+          {
+            "ContainerSettings": {
+              "Container": "M3U8",
+              "M3u8Settings": {}
+            },
+            "VideoDescription": {
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "RateControlMode": "VBR",
+                  "Bitrate": 554000,
+                  "MaxBitrate": 1385000,
+                  "QualityTuningLevel": "MULTI_PASS_HQ",
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateNumerator": 30000,
+                  "FramerateDenominator": 1001,
+                  "GopSize": 30,
+                  "GopSizeUnits": "FRAMES",
+                  "CodecProfile": "MAIN"
+                }
+              },
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "ScalingBehavior": "DEFAULT",
+              "Width": 480
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 128000,
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
+                },
+                "AudioNormalizationSettings": {
+                  "Algorithm": "ITU_BS_1770_2",
+                  "TargetLkfs": -24.0,
+                  "TruePeakLimiterThreshold": -1.0
+                }
+              }
+            ],
+            "NameModifier": "_480x0_554K_audio_128K_aac_stereo"
+          },
+          {
+            "ContainerSettings": {
+              "Container": "M3U8",
+              "M3u8Settings": {}
+            },
+            "VideoDescription": {
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "RateControlMode": "VBR",
+                  "Bitrate": 674000,
+                  "MaxBitrate": 1685000,
+                  "QualityTuningLevel": "MULTI_PASS_HQ",
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateNumerator": 30000,
+                  "FramerateDenominator": 1001,
+                  "GopSize": 30,
+                  "GopSizeUnits": "FRAMES",
+                  "CodecProfile": "MAIN"
+                }
+              },
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "ScalingBehavior": "DEFAULT",
+              "Width": 512
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 128000,
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
+                },
+                "AudioNormalizationSettings": {
+                  "Algorithm": "ITU_BS_1770_2",
+                  "TargetLkfs": -24.0,
+                  "TruePeakLimiterThreshold": -1.0
+                }
+              }
+            ],
+            "NameModifier": "_512x0_674K_audio_128K_aac_stereo"
+          },
+          {
+            "ContainerSettings": {
+              "Container": "M3U8",
+              "M3u8Settings": {}
+            },
+            "VideoDescription": {
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "RateControlMode": "VBR",
+                  "Bitrate": 862000,
+                  "MaxBitrate": 2155000,
+                  "QualityTuningLevel": "MULTI_PASS_HQ",
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateNumerator": 30000,
+                  "FramerateDenominator": 1001,
+                  "GopSize": 30,
+                  "GopSizeUnits": "FRAMES",
+                  "CodecProfile": "MAIN"
+                }
+              },
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "ScalingBehavior": "DEFAULT",
+              "Width": 576
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 128000,
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
+                },
+                "AudioNormalizationSettings": {
+                  "Algorithm": "ITU_BS_1770_2",
+                  "TargetLkfs": -24.0,
+                  "TruePeakLimiterThreshold": -1.0
+                }
+              }
+            ],
+            "NameModifier": "_576x0_862K_audio_128K_aac_stereo"
+          },
+          {
+            "ContainerSettings": {
+              "Container": "M3U8",
+              "M3u8Settings": {}
+            },
+            "VideoDescription": {
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "RateControlMode": "VBR",
+                  "Bitrate": 1100000,
+                  "MaxBitrate": 2750000,
+                  "QualityTuningLevel": "MULTI_PASS_HQ",
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateNumerator": 30000,
+                  "FramerateDenominator": 1001,
+                  "GopSize": 30,
+                  "GopSizeUnits": "FRAMES",
+                  "CodecProfile": "MAIN"
+                }
+              },
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "ScalingBehavior": "DEFAULT",
+              "Width": 640
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 160000,
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
+                },
+                "AudioNormalizationSettings": {
+                  "Algorithm": "ITU_BS_1770_2",
+                  "TargetLkfs": -24.0,
+                  "TruePeakLimiterThreshold": -1.0
+                }
+              }
+            ],
+            "NameModifier": "_640x0_1100K_audio_160K_aac_stereo"
+          },
+          {
+            "ContainerSettings": {
+              "Container": "M3U8",
+              "M3u8Settings": {}
+            },
+            "VideoDescription": {
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "RateControlMode": "VBR",
+                  "Bitrate": 1372000,
+                  "MaxBitrate": 3430000,
+                  "QualityTuningLevel": "MULTI_PASS_HQ",
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateNumerator": 30000,
+                  "FramerateDenominator": 1001,
+                  "GopSize": 30,
+                  "GopSizeUnits": "FRAMES",
+                  "CodecProfile": "MAIN"
+                }
+              },
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "ScalingBehavior": "DEFAULT",
+              "Width": 768
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 160000,
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
+                },
+                "AudioNormalizationSettings": {
+                  "Algorithm": "ITU_BS_1770_2",
+                  "TargetLkfs": -24.0,
+                  "TruePeakLimiterThreshold": -1.0
+                }
+              }
+            ],
+            "NameModifier": "_768x0_1372K_audio_160K_aac_stereo"
+          },
+          {
+            "ContainerSettings": {
+              "Container": "M3U8",
+              "M3u8Settings": {}
+            },
+            "VideoDescription": {
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "RateControlMode": "VBR",
+                  "Bitrate": 2378000,
+                  "MaxBitrate": 5945000,
+                  "QualityTuningLevel": "MULTI_PASS_HQ",
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateNumerator": 30000,
+                  "FramerateDenominator": 1001,
+                  "GopSize": 30,
+                  "GopSizeUnits": "FRAMES",
+                  "CodecProfile": "MAIN"
+                }
+              },
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "ScalingBehavior": "DEFAULT",
+              "Width": 1024
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 192000,
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
+                },
+                "AudioNormalizationSettings": {
+                  "Algorithm": "ITU_BS_1770_2",
+                  "TargetLkfs": -24.0,
+                  "TruePeakLimiterThreshold": -1.0
+                }
+              }
+            ],
+            "NameModifier": "_1024x0_2378K_audio_192K_aac_stereo"
+          },
+          {
+            "ContainerSettings": {
+              "Container": "M3U8",
+              "M3u8Settings": {}
+            },
+            "VideoDescription": {
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "RateControlMode": "VBR",
+                  "Bitrate": 3508000,
+                  "MaxBitrate": 8770000,
+                  "QualityTuningLevel": "MULTI_PASS_HQ",
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateNumerator": 30000,
+                  "FramerateDenominator": 1001,
+                  "GopSize": 30,
+                  "GopSizeUnits": "FRAMES",
+                  "CodecProfile": "MAIN"
+                }
+              },
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "ScalingBehavior": "DEFAULT",
+              "Width": 1280
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 192000,
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
+                },
+                "AudioNormalizationSettings": {
+                  "Algorithm": "ITU_BS_1770_2",
+                  "TargetLkfs": -24.0,
+                  "TruePeakLimiterThreshold": -1.0
+                }
+              }
+            ],
+            "NameModifier": "_1280x0_3508K_audio_192K_aac_stereo"
+          }
+        ]
+      }
+    ],
+    "TimecodeConfig": {
+      "Source": "ZEROBASED"
+    },
+    "FollowSource": 1
+  },
+  "AccelerationSettings": {
+    "Mode": "PREFERRED"
+  }
+}

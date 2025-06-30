@@ -34,8 +34,8 @@
                   "Bitrate": 3072000,
                   "MaxBitrate": 5120000,
                   "GopSize": 300,
+                  "GopSizeUnits": "FRAMES",
                   "QualityTuningLevel": "SINGLE_PASS_HQ",
-                  "CodecProfile": "MAIN",
                   "NumberReferenceFrames": 4
                 },
                 "Codec": "H_264"

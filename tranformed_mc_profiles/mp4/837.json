@@ -33,17 +33,14 @@
                   "RateControlMode": "CBR",
                   "Bitrate": 1400000,
                   "QualityTuningLevel": "MULTI_PASS_HQ",
-                  "ParControl": "SPECIFIED",
-                  "ParNumerator": 16,
-                  "ParDenominator": 9,
                   "FramerateControl": "SPECIFIED",
                   "FramerateNumerator": 25,
                   "FramerateDenominator": 1,
                   "CodecProfile": "BASELINE",
+                  "EntropyEncoding": "CAVLC",
+                  "NumberBFramesBetweenReferenceFrames": 0,
                   "NumberReferenceFrames": 4,
-                  "GopSize": 50,
-                  "EntropyEncoding": "CABAC",
-                  "CodecLevel": "LEVEL_3"
+                  "GopSize": 50
                 },
                 "Codec": "H_264"
               },

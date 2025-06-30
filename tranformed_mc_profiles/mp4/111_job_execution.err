@@ -1,5 +1,5 @@
-MediaConvert job 1747815537047-ue6azi failed
-Timestamp: 2025-05-21T08:19:07.529098
+MediaConvert job 1748921918902-nelou7 failed
+Timestamp: 2025-06-03T03:38:49.376282
 
 Job details:
 {
@@ -7,20 +7,19 @@ Job details:
     "Mode": "DISABLED"
   },
   "AccelerationStatus": "NOT_APPLICABLE",
-  "Arn": "arn:aws:mediaconvert:us-east-1:935206693453:jobs/1747815537047-ue6azi",
+  "Arn": "arn:aws:mediaconvert:us-east-1:935206693453:jobs/1748921918902-nelou7",
   "BillingTagsSource": "JOB",
-  "ClientRequestToken": "5c2280e0-755d-48fc-8874-26e8e141915e",
-  "CreatedAt": "2025-05-21 08:18:57+00:00",
+  "ClientRequestToken": "3e224739-3952-4c53-9433-7d14160f446b",
+  "CreatedAt": "2025-06-03 03:38:39+00:00",
   "ErrorCode": 1040,
   "ErrorMessage": "Invalid resolution [912 x 513], only even values are supported. video_description [1]. For 111_881430577_source.mpg",
-  "Id": "1747815537047-ue6azi",
+  "Id": "1748921918902-nelou7",
   "Messages": {
     "Info": [],
     "Warning": []
   },
   "Priority": 0,
   "Queue": "arn:aws:mediaconvert:us-east-1:935206693453:queues/Default",
-  "RetryCount": 1,
   "Role": "arn:aws:iam::935206693453:role/MediaConvertRole",
   "Settings": {
     "FollowSource": 1,
@@ -31,7 +30,6 @@ Job details:
             "DefaultSelection": "DEFAULT"
           }
         },
-        "DeblockFilter": "ENABLED",
         "FileInput": "s3://fw-mc-test/mp4/111/111_881430577_source.mpg",
         "TimecodeSource": "ZEROBASED",
         "VideoSelector": {}
@@ -77,13 +75,13 @@ Job details:
                   "FramerateNumerator": 30,
                   "MaxBitrate": 2000000,
                   "NumberReferenceFrames": 3,
-                  "ParControl": "SPECIFIED",
-                  "ParDenominator": 9,
-                  "ParNumerator": 16,
                   "RateControlMode": "VBR"
                 }
               },
               "Height": 513,
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
               "Width": 912
             }
           }
@@ -97,9 +95,9 @@ Job details:
   "Status": "ERROR",
   "StatusUpdateInterval": "SECONDS_60",
   "Timing": {
-    "FinishTime": "2025-05-21 08:19:04+00:00",
-    "StartTime": "2025-05-21 08:18:58+00:00",
-    "SubmitTime": "2025-05-21 08:18:57+00:00"
+    "FinishTime": "2025-06-03 03:38:41+00:00",
+    "StartTime": "2025-06-03 03:38:40+00:00",
+    "SubmitTime": "2025-06-03 03:38:39+00:00"
   },
   "UserMetadata": {},
   "Warnings": [

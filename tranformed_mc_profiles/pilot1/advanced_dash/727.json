@@ -300,7 +300,8 @@
           "DashIsoGroupSettings": {
             "SegmentLength": 2,
             "FragmentLength": 2,
-            "MpdProfile": "MAIN_PROFILE"
+            "MpdProfile": "MAIN_PROFILE",
+            "SegmentControl": "SEGMENTED_FILES"
           }
         }
       }

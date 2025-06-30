@@ -36,7 +36,7 @@
                   "QualityTuningLevel": "MULTI_PASS_HQ",
                   "NumberReferenceFrames": 5,
                   "NumberBFramesBetweenReferenceFrames": 0,
-                  "EntropyEncoding": "CABAC",
+                  "EntropyEncoding": "CAVLC",
                   "CodecProfile": "BASELINE",
                   "CodecLevel": "LEVEL_3"
                 },

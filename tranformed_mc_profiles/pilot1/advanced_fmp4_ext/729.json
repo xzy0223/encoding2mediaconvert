@@ -225,9 +225,10 @@
             "WriteDashManifest": "ENABLED",
             "SegmentLength": 3,
             "MinFinalSegmentLength": 1,
-            "FragmentLength": 30000,
+            "FragmentLength": 2,
             "SegmentControl": "SEGMENTED_FILES",
-            "ManifestDurationFormat": "FLOATING_POINT"
+            "ManifestDurationFormat": "FLOATING_POINT",
+            "WriteHlsManifest": "DISABLED"
           }
         }
       }

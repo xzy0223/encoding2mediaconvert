@@ -1,5 +1,5 @@
-MediaConvert job 1747816144928-ovxu5h failed
-Timestamp: 2025-05-21T08:29:15.447000
+MediaConvert job 1748922639051-4nycfp failed
+Timestamp: 2025-06-03T03:50:49.613107
 
 Job details:
 {
@@ -7,13 +7,13 @@ Job details:
     "Mode": "DISABLED"
   },
   "AccelerationStatus": "NOT_APPLICABLE",
-  "Arn": "arn:aws:mediaconvert:us-east-1:935206693453:jobs/1747816144928-ovxu5h",
+  "Arn": "arn:aws:mediaconvert:us-east-1:935206693453:jobs/1748922639051-4nycfp",
   "BillingTagsSource": "JOB",
-  "ClientRequestToken": "0a8ccf6c-9590-45ba-bd98-e58e00871986",
-  "CreatedAt": "2025-05-21 08:29:05+00:00",
+  "ClientRequestToken": "22d91014-d2b4-4870-903f-54a6b7db55d7",
+  "CreatedAt": "2025-06-03 03:50:39+00:00",
   "ErrorCode": 1076,
   "ErrorMessage": "Demuxer: [ReadPacketData File read failed - end of file hit at length [1212416]. Is file truncated?]",
-  "Id": "1747816144928-ovxu5h",
+  "Id": "1748922639051-4nycfp",
   "Messages": {
     "Info": [],
     "Warning": []
@@ -30,7 +30,6 @@ Job details:
             "DefaultSelection": "DEFAULT"
           }
         },
-        "DeblockFilter": "ENABLED",
         "FileInput": "s3://fw-mc-test/mp4/559/559_880607761_source.mp4",
         "TimecodeSource": "ZEROBASED",
         "VideoSelector": {}
@@ -79,13 +78,13 @@ Job details:
                   "FramerateDenominator": 1,
                   "FramerateNumerator": 25,
                   "NumberReferenceFrames": 4,
-                  "ParControl": "SPECIFIED",
-                  "ParDenominator": 9,
-                  "ParNumerator": 16,
                   "RateControlMode": "CBR"
                 }
               },
               "Height": 360,
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
               "Width": 640
             }
           }
@@ -99,15 +98,15 @@ Job details:
   "Status": "ERROR",
   "StatusUpdateInterval": "SECONDS_60",
   "Timing": {
-    "FinishTime": "2025-05-21 08:29:08+00:00",
-    "StartTime": "2025-05-21 08:29:05+00:00",
-    "SubmitTime": "2025-05-21 08:29:05+00:00"
+    "FinishTime": "2025-06-03 03:50:41+00:00",
+    "StartTime": "2025-06-03 03:50:40+00:00",
+    "SubmitTime": "2025-06-03 03:50:39+00:00"
   },
   "UserMetadata": {},
   "Warnings": [
     {
       "Code": 220000,
-      "Count": 41
+      "Count": 42
     },
     {
       "Code": 230001,

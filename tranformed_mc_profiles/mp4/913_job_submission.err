@@ -1,5 +1,5 @@
 Error submitting MediaConvert job for 913
-Timestamp: 2025-05-21T08:36:08.711575
+Timestamp: 2025-06-03T11:55:15.192872
 
 Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/captionDescriptions/0/destinationSettings/burninDestinationSettings: Should match all dependencies: See other errors for more details | /outputGroups/0/outputs/0/captionDescriptions/0/destinationSettings/destinationType: Must be BURN_IN
 
@@ -15,8 +15,15 @@ Job settings:
             "DefaultSelection": "DEFAULT"
           }
         },
-        "FileInput": "s3://fw-mc-test/mp4/913/913_591427604_source.mp4",
-        "DeblockFilter": "ENABLED"
+        "CaptionSelectors": {
+          "Captions Selector 1": {
+            "SourceSettings": {
+              "SourceType": "EMBEDDED",
+              "EmbeddedSourceSettings": {}
+            }
+          }
+        },
+        "FileInput": "s3://fw-mc-test/mp4/913/913_591427604_source.mp4"
       }
     ],
     "OutputGroups": [
@@ -47,14 +54,16 @@ Job settings:
                   "QualityTuningLevel": "MULTI_PASS_HQ",
                   "MinIInterval": 1,
                   "NumberReferenceFrames": 4,
-                  "CodecProfile": "MAIN",
-                  "CodecLevel": "LEVEL_3"
+                  "CodecProfile": "MAIN"
                 },
                 "Codec": "H_264"
               },
               "Width": 1024,
               "Height": 576,
-              "ScalingBehavior": "DEFAULT"
+              "ScalingBehavior": "DEFAULT",
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              }
             },
             "AudioDescriptions": [
               {
@@ -79,7 +88,8 @@ Job settings:
                     "FontSize": 16,
                     "BackgroundOpacity": 255
                   }
-                }
+                },
+                "CaptionSelectorName": "Captions Selector 1"
               }
             ],
             "NameModifier": "_1024x576_1100000_mc"

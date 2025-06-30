@@ -35,9 +35,6 @@
                   "MaxBitrate": 700000,
                   "CodecProfile": "MAIN",
                   "CodecLevel": "LEVEL_3_1",
-                  "ParControl": "SPECIFIED",
-                  "ParNumerator": 16,
-                  "ParDenominator": 9,
                   "FramerateControl": "SPECIFIED",
                   "FramerateNumerator": 25,
                   "FramerateDenominator": 1

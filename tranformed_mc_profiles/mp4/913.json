@@ -9,8 +9,15 @@
             "DefaultSelection": "DEFAULT"
           }
         },
-        "FileInput": "{SOURCE_S3_URL}",
-        "DeblockFilter": "ENABLED"
+        "CaptionSelectors": {
+          "Captions Selector 1": {
+            "SourceSettings": {
+              "SourceType": "EMBEDDED",
+              "EmbeddedSourceSettings": {}
+            }
+          }
+        },
+        "FileInput": "{SOURCE_S3_URL}"
       }
     ],
     "OutputGroups": [
@@ -41,14 +48,16 @@
                   "QualityTuningLevel": "MULTI_PASS_HQ",
                   "MinIInterval": 1,
                   "NumberReferenceFrames": 4,
-                  "CodecProfile": "MAIN",
-                  "CodecLevel": "LEVEL_3"
+                  "CodecProfile": "MAIN"
                 },
                 "Codec": "H_264"
               },
               "Width": 1024,
               "Height": 576,
-              "ScalingBehavior": "DEFAULT"
+              "ScalingBehavior": "DEFAULT",
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              }
             },
             "AudioDescriptions": [
               {
@@ -68,12 +77,13 @@
             "CaptionDescriptions": [
               {
                 "DestinationSettings": {
-                  "DestinationType": "EMBEDDED",
+                  "DestinationType": "BURN_IN",
                   "BurninDestinationSettings": {
                     "FontSize": 16,
                     "BackgroundOpacity": 255
                   }
-                }
+                },
+                "CaptionSelectorName": "Captions Selector 1"
               }
             ],
             "NameModifier": "_1024x576_1100000_mc"

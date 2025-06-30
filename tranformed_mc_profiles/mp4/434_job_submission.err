@@ -1,5 +1,5 @@
 Error submitting MediaConvert job for 434
-Timestamp: 2025-05-21T08:23:55.312832
+Timestamp: 2025-06-03T03:44:08.511986
 
 Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 1200
 
@@ -15,8 +15,7 @@ Job settings:
             "DefaultSelection": "DEFAULT"
           }
         },
-        "FileInput": "s3://fw-mc-test/mp4/434/434_700610270_source.mov",
-        "DeblockFilter": "ENABLED"
+        "FileInput": "s3://fw-mc-test/mp4/434/434_700610270_source.mov"
       }
     ],
     "OutputGroups": [
@@ -40,9 +39,6 @@ Job settings:
                   "RateControlMode": "VBR",
                   "Bitrate": 4500000,
                   "MaxBitrate": 4510000,
-                  "ParControl": "SPECIFIED",
-                  "ParNumerator": 16,
-                  "ParDenominator": 9,
                   "FramerateControl": "SPECIFIED",
                   "FramerateNumerator": 30,
                   "FramerateDenominator": 1,
@@ -53,7 +49,10 @@ Job settings:
                 "Codec": "H_264"
               },
               "Width": 1920,
-              "Height": 1080
+              "Height": 1080,
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              }
             },
             "AudioDescriptions": [
               {

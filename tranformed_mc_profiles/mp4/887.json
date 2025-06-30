@@ -38,8 +38,7 @@
                   "FramerateNumerator": 25,
                   "FramerateDenominator": 1,
                   "QualityTuningLevel": "MULTI_PASS_HQ",
-                  "CodecProfile": "HIGH",
-                  "CodecLevel": "LEVEL_3"
+                  "CodecProfile": "HIGH"
                 },
                 "Codec": "H_264"
               },

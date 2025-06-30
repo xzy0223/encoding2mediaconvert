@@ -1,7 +1,7 @@
 Error submitting MediaConvert job for 1058
-Timestamp: 2025-05-21T08:16:50.503915
+Timestamp: 2025-06-03T05:31:49.583111
 
-Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/codecProfile: Should match all dependencies: See other errors for more details | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings: Should match exactly one schema defined in "oneOf" | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/entropyEncoding: Must be CAVLC | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/codecProfile: Should be equal to one of the allowed values in ["HIGH","HIGH_10BIT","HIGH_422","HIGH_422_10BIT","MAIN"]
+Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/codecProfile: Should match all dependencies: See other errors for more details | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings: Should match exactly one schema defined in "oneOf" | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/numberBFramesBetweenReferenceFrames: Should be less than or equal to 0 | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/codecProfile: Should be equal to one of the allowed values in ["HIGH","HIGH_10BIT","HIGH_422","HIGH_422_10BIT","MAIN"]
 
 Job settings:
 {
@@ -17,8 +17,7 @@ Job settings:
             "DefaultSelection": "DEFAULT"
           }
         },
-        "FileInput": "s3://fw-mc-test/mp4/1058/1058_840781384_source.mov",
-        "DeblockFilter": "ENABLED"
+        "FileInput": "s3://fw-mc-test/mp4/1058/1058_840781384_source.mov"
       }
     ],
     "OutputGroups": [
@@ -45,8 +44,7 @@ Job settings:
                   "Bitrate": 500000,
                   "MaxBitrate": 1250000,
                   "CodecProfile": "BASELINE",
-                  "CodecLevel": "LEVEL_3",
-                  "EntropyEncoding": "CABAC",
+                  "EntropyEncoding": "CAVLC",
                   "NumberBFramesBetweenReferenceFrames": 1,
                   "MinIInterval": 25,
                   "SceneChangeDetect": "ENABLED",
@@ -61,7 +59,10 @@ Job settings:
               },
               "Width": 640,
               "Height": 360,
-              "ScalingBehavior": "DEFAULT"
+              "ScalingBehavior": "DEFAULT",
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              }
             },
             "AudioDescriptions": [
               {

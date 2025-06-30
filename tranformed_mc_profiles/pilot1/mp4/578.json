@@ -40,13 +40,13 @@
                   "FramerateNumerator": 30000,
                   "FramerateDenominator": 1001,
                   "CodecProfile": "MAIN",
-                  "SceneChangeDetect": "ENABLED",
                   "NumberReferenceFrames": 3,
                   "MinIInterval": 25,
                   "NumberBFramesBetweenReferenceFrames": 1,
                   "Slices": 1,
                   "QualityTuningLevel": "SINGLE_PASS_HQ",
                   "GopSize": 60,
+                  "GopSizeUnits": "FRAMES",
                   "InterlaceMode": "PROGRESSIVE"
                 },
                 "Codec": "H_264"
@@ -63,13 +63,10 @@
                 "CodecSettings": {
                   "Codec": "AAC",
                   "AacSettings": {
-                    "Bitrate": 64000,
+                    "Bitrate": 56000,
                     "SampleRate": 44100,
                     "CodingMode": "CODING_MODE_2_0"
                   }
-                },
-                "AudioNormalizationSettings": {
-                  "TargetLkfs": -2.0
                 }
               }
             ],

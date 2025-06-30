@@ -1,5 +1,5 @@
 Error submitting MediaConvert job for 465
-Timestamp: 2025-05-21T08:25:42.913146
+Timestamp: 2025-06-03T03:47:01.158272
 
 Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 752
 
@@ -15,8 +15,7 @@ Job settings:
             "DefaultSelection": "DEFAULT"
           }
         },
-        "FileInput": "s3://fw-mc-test/mp4/465/465_787623176_source.mp4",
-        "DeblockFilter": "ENABLED"
+        "FileInput": "s3://fw-mc-test/mp4/465/465_787623176_source.mp4"
       }
     ],
     "OutputGroups": [
@@ -40,9 +39,6 @@ Job settings:
                   "RateControlMode": "VBR",
                   "Bitrate": 1800000,
                   "MaxBitrate": 2000000,
-                  "ParControl": "SPECIFIED",
-                  "ParNumerator": 16,
-                  "ParDenominator": 9,
                   "FramerateControl": "SPECIFIED",
                   "FramerateNumerator": 30,
                   "FramerateDenominator": 1,
@@ -53,7 +49,10 @@ Job settings:
                 "Codec": "H_264"
               },
               "Width": 960,
-              "Height": 540
+              "Height": 540,
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              }
             },
             "AudioDescriptions": [
               {

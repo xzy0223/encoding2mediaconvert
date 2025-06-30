@@ -9,8 +9,7 @@
             "DefaultSelection": "DEFAULT"
           }
         },
-        "FileInput": "{SOURCE_S3_URL}",
-        "DeblockFilter": "DISABLED"
+        "FileInput": "{SOURCE_S3_URL}"
       }
     ],
     "OutputGroups": [

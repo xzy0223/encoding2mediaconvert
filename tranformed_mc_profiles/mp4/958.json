@@ -36,7 +36,9 @@
                   "FramerateControl": "SPECIFIED",
                   "FramerateNumerator": 25,
                   "FramerateDenominator": 1,
-                  "CodecProfile": "BASELINE"
+                  "CodecProfile": "BASELINE",
+                  "EntropyEncoding": "CAVLC",
+                  "NumberBFramesBetweenReferenceFrames": 0
                 },
                 "Codec": "H_264"
               },
@@ -48,7 +50,7 @@
                 "CodecSettings": {
                   "Codec": "AAC",
                   "AacSettings": {
-                    "Bitrate": 32000,
+                    "Bitrate": 64000,
                     "SampleRate": 48000,
                     "CodingMode": "CODING_MODE_2_0"
                   }

@@ -1,0 +1,4 @@
+Validation failed for /home/ec2-user/e2mc_assistant/tranformed_mc_profiles/mov/560.json
+Validation errors:
+Found 1 schema validation errors:
+1. Schema error at OutputGroups -> 0 -> Outputs -> 0 -> ContainerSettings -> Container: '' is not one of ['F4V', 'GIF', 'ISMV', 'M2TS', 'M3U8', 'CMFC', 'MOV', 'MP4', 'MPD', 'MXF', 'OGG', 'WEBM', 'RAW', 'Y4M']

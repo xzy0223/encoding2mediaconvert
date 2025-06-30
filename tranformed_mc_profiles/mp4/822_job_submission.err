@@ -1,5 +1,5 @@
 Error submitting MediaConvert job for 822
-Timestamp: 2025-05-21T08:33:25.908652
+Timestamp: 2025-06-03T03:56:04.486869
 
 Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 720
 
@@ -15,8 +15,7 @@ Job settings:
             "DefaultSelection": "DEFAULT"
           }
         },
-        "FileInput": "s3://fw-mc-test/mp4/822/822_644721991_source.mp4",
-        "DeblockFilter": "ENABLED"
+        "FileInput": "s3://fw-mc-test/mp4/822/822_644721991_source.mp4"
       }
     ],
     "OutputGroups": [
@@ -54,7 +53,10 @@ Job settings:
               },
               "Width": 1024,
               "Height": 576,
-              "ScalingBehavior": "DEFAULT"
+              "ScalingBehavior": "DEFAULT",
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              }
             },
             "AudioDescriptions": [
               {

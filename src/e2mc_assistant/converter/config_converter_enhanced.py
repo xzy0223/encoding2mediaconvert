@@ -128,102 +128,6 @@ class ConfigConverter:
         except Exception as e:
             self.logger.error(f"Error calculating aspect ratio: {str(e)}. Using default 1:1")
             return default_return
-        
-    def process_set_aspect_ratio(self, aspect_ratio_str: str, context: Dict) -> Dict:
-        """
-        Process set_aspect_ratio parameter to calculate ParNumerator and ParDenominator
-        
-        This function calculates the Pixel Aspect Ratio (PAR) based on:
-        - Display Aspect Ratio (DAR) from set_aspect_ratio (e.g., "16:9")
-        - Storage Aspect Ratio (SAR) from output width and height
-        
-        Formula: PAR = DAR / SAR
-        
-        Args:
-            aspect_ratio_str: String containing aspect ratio in format "width:height" (e.g., "16:9")
-            context: Context dictionary with source_data and target_data
-            
-        Returns:
-            Dictionary with ParControl, ParNumerator, and ParDenominator values
-        """
-        # Default return if we can't calculate
-        default_return = {
-            "ParControl": "SPECIFIED",
-            "ParNumerator": 1,
-            "ParDenominator": 1
-        }
-        
-        try:
-            # Parse the aspect ratio string (e.g., "16:9")
-            if not aspect_ratio_str or ':' not in aspect_ratio_str:
-                self.logger.warning(f"Invalid aspect ratio format: {aspect_ratio_str}. Using default 1:1")
-                return default_return
-                
-            dar_width, dar_height = map(int, aspect_ratio_str.split(':'))
-            if dar_width <= 0 or dar_height <= 0:
-                self.logger.warning(f"Invalid aspect ratio values: {aspect_ratio_str}. Using default 1:1")
-                return default_return
-                
-            # Get output width and height from the source data
-            source_data = context.get('source_data', {})
-            width = None
-            height = None
-            
-            # Try to find width and height in the source data
-            if 'size' in source_data:
-                size_parts = source_data['size'].split('x')
-                if len(size_parts) == 2:
-                    width = int(size_parts[0])
-                    height = int(size_parts[1])
-            
-            # If size not found, try width and height separately
-            if width is None and 'width' in source_data:
-                width = int(source_data['width'])
-            if height is None and 'height' in source_data:
-                height = int(source_data['height'])
-                
-            # If we couldn't find dimensions, use default
-            if width is None or height is None or width <= 0 or height <= 0:
-                self.logger.warning(f"Could not determine output dimensions. Using default PAR 1:1")
-                return default_return
-                
-            # Calculate Storage Aspect Ratio (SAR)
-            sar = width / height
-            
-            # Calculate Display Aspect Ratio (DAR)
-            dar = dar_width / dar_height
-            
-            # Calculate Pixel Aspect Ratio (PAR)
-            par = dar / sar
-            
-            # Convert PAR to a simplified fraction
-            def gcd(a, b):
-                """Calculate greatest common divisor"""
-                while b:
-                    a, b = b, a % b
-                return a
-            
-            # Convert to a fraction with reasonable precision
-            precision = 1000
-            par_num = int(par * precision)
-            par_den = precision
-            
-            # Simplify the fraction
-            common_divisor = gcd(par_num, par_den)
-            par_num = par_num // common_divisor
-            par_den = par_den // common_divisor
-            
-            self.logger.info(f"Calculated PAR {par_num}:{par_den} from DAR {dar_width}:{dar_height} and dimensions {width}x{height}")
-            
-            return {
-                "ParControl": "SPECIFIED",
-                "ParNumerator": par_num,
-                "ParDenominator": par_den
-            }
-            
-        except Exception as e:
-            self.logger.error(f"Error calculating aspect ratio: {str(e)}. Using default 1:1")
-            return default_return
             
     def generate_outputs_with_settings(self, streams: List, context: Dict) -> Dict:
         """
@@ -1910,6 +1814,7 @@ class ConfigConverter:
                 processed_params.add('output')
                 
                 # Add debug log to see if OutputGroupSettings are being set in non-multi-stream scenario
+                output_group = target_data['Settings']['OutputGroups'][0]
                 if 'OutputGroupSettings' in output_group:
                     self.logger.info(f"Non-multi-stream OutputGroupSettings: {output_group['OutputGroupSettings']}")
                 else:

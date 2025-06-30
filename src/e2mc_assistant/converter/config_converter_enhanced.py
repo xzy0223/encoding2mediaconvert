@@ -1886,7 +1886,12 @@ class ConfigConverter:
         if total_params > 0:
             self.logger.info(f"  - Mapped parameters: {mapped_count} ({mapped_count/total_params*100:.1f}%)")
             self.logger.info(f"  - Unmapped parameters: {unmapped_count} ({unmapped_count/total_params*100:.1f}%)")
-            # self.logger.info(f"  - Mapped parameters: {mapped_parameters}")
+            
+            # Log unmapped parameters if there are any
+            if unmapped_count > 0 and hasattr(self, 'unmapped_parameters'):
+                self.logger.info("  - Unmapped parameter details:")
+                for path, value in self.unmapped_parameters:
+                    self.logger.info(f"    * {path} = {value}")
         else:
             self.logger.info("  - No parameters found to convert")
         
@@ -1993,6 +1998,10 @@ class ConfigConverter:
         if not isinstance(source_data, dict):
             return
         
+        # Initialize mapped_parameters if it doesn't exist
+        if not hasattr(self, 'mapped_parameters'):
+            self.mapped_parameters = []
+            
         # self.logger.debug(f"Processing source data at path: {current_path}, {context}")
         for key, value in source_data.items():
             # Build the current path
@@ -2003,21 +2012,44 @@ class ConfigConverter:
                 self.logger.info(f"Skipping already processed parameter: {path}={value}")
                 continue
                 
-            # Special handling for stream array
-            # if key == 'stream' and isinstance(value, list):
-            #     self.logger.info(f"Processing stream array with {len(value)} elements")
-            #     self._process_stream_array(value, path, rule_lookup, target_data, processed_params, context)
+            # Track if this path was processed by any rule
+            path_was_processed = False
+            path_has_rules = path in rule_lookup
             
             # Check if we have rules for this path
-            if path in rule_lookup:
+            if path_has_rules:
                 self.logger.info(f"Found {len(rule_lookup[path])} rules for parameter: {path}={value}")
+                
+                # Store the current length of mapped_parameters to check if it changes
+                mapped_params_count_before = len(self.mapped_parameters)
+                
                 # Process all rules for this path
                 for rule in rule_lookup[path]:
                     # self.logger.debug(f"Processing rule with context:{context}")
                     self._process_rule(rule, path, value, source_data, target_data, processed_params, context)
+                
+                # Check if mapped_parameters grew, indicating a rule was successfully applied
+                path_was_processed = len(self.mapped_parameters) > mapped_params_count_before
+                
+                if path_was_processed:
+                    self.logger.info(f"Successfully applied rules for parameter: {path}={value}")
+                else:
+                    self.logger.info(f"No rules were successfully applied for parameter: {path}={value}")
+                    # Add to unmapped_parameters list since no rules were successfully applied
+                    if not hasattr(self, 'unmapped_parameters'):
+                        self.unmapped_parameters = []
+                    self.unmapped_parameters.append((path, value))
             else:
                 if not isinstance(value, dict):
                     self.logger.info(f"No rules found for parameter: {path}={value}")
+            
+            # Generate warning if path wasn't processed and it's a leaf node
+            if not path_was_processed and not isinstance(value, (dict, list)) and path not in processed_params:
+                self.logger.warning(f"No matching rules applied for parameter: {path}={value}")
+                # Add to unmapped_parameters list
+                if not hasattr(self, 'unmapped_parameters'):
+                    self.unmapped_parameters = []
+                self.unmapped_parameters.append((path, value))
             
             # If this is a dictionary, process it recursively
             if isinstance(value, dict):
@@ -2381,11 +2413,22 @@ class ConfigConverter:
         if not isinstance(source_data, dict):
             return
             
+        # Initialize unmapped_parameters if it doesn't exist
+        if not hasattr(self, 'unmapped_parameters'):
+            self.unmapped_parameters = []
+            
+        # Create a set of already unmapped paths for faster lookup
+        unmapped_paths = set(path for path, _ in self.unmapped_parameters)
+            
         for key, value in source_data.items():
             current_path = f"{parent_path}.{key}" if parent_path else key
             
             # Skip already processed parameters
             if current_path in processed_params:
+                continue
+                
+            # Skip parameters already in unmapped_parameters
+            if current_path in unmapped_paths:
                 continue
                 
             # Handle nested dictionaries
@@ -2400,9 +2443,7 @@ class ConfigConverter:
             # Log unmapped leaf parameters
             else:
                 self.logger.warning(f"Unmapped parameter: {current_path} = {value}")
-                # Add to a list of unmapped parameters for summary
-                if not hasattr(self, 'unmapped_parameters'):
-                    self.unmapped_parameters = []
+                # Add to unmapped_parameters list
                 self.unmapped_parameters.append((current_path, value))
                 
     def _get_output_group_type(self, output_format: str) -> str:

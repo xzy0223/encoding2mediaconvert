@@ -260,6 +260,17 @@ class ConfigConverter:
                 # 创建一个新的stream_processed_params，并复制processed_dummy_params
                 stream_processed_params = set(processed_dummy_params)  # 只复制dummy参数
                 
+                # 添加已经通过_process_rate_control_settings和_process_audio_settings处理过的参数
+                # 这些参数在前面的代码中已经被处理，但没有添加到stream_processed_params中
+                rate_control_params = ['cbr', 'hard_cbr', 'cabr', 'bitrate', 'maxrate', 'minrate']
+                audio_params = ['audio_codec', 'audio_bitrate', 'audio_sample_rate', 'audio_maxrate', 'audio_minrate']
+                
+                # 检查stream中的每个参数，如果是rate_control_params或audio_params中的参数，则添加到stream_processed_params中
+                for param in rate_control_params + audio_params:
+                    if param in stream:
+                        stream_processed_params.add(param)
+                        self.logger.debug(f"Added pre-processed parameter {param} to stream_processed_params for stream {i}")
+                
                 # Process each parameter in the stream using the rules
                 self.logger.info(f"Applying rules to stream {i+1}/{len(streams)}")
                 self.logger.info(f"The structure of stream is {stream}")
@@ -2543,11 +2554,11 @@ class ConfigConverter:
         # Check if we're processing a stream
         is_stream = parent_path.startswith('stream') or parent_path == 'stream'
         self.logger.debug(f"processed_ params are: {processed_params}")
-        self.logger.debug(f"unmapped_ params are: {self.unmapped_parameters}")
+        # self.logger.debug(f"unmapped_ params are: {self.unmapped_parameters}")
             
         for key, value in source_data.items():
             current_path = f"{parent_path}.{key}" if parent_path else key
-            self.logger.debug(f"current_path is: {current_path}")
+            # self.logger.debug(f"current_path is: {current_path}")
             
             # Skip already processed parameters
             if current_path in processed_params:

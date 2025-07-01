@@ -769,184 +769,184 @@ rules:
         value: "DEFAULT"
         
       
-  # CBR/VBR mode
-  - source:
-      path: cbr
-      condition:
-        operator: AND
-        conditions:
-          - operator: eq
-            value: "no"  # 检查 cbr=no
-          - operator: AND
-            conditions:
-              - operator: exists
-                source_path: cabr  # 检查 cabr 参数存在
-              - operator: eq
-                source_path: cabr
-                value: "no"  # 检查 cabr=no
-    target:
-      path: Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode
-      value: VBR
+  # # CBR/VBR mode
+  # - source:
+  #     path: cbr
+  #     condition:
+  #       operator: AND
+  #       conditions:
+  #         - operator: eq
+  #           value: "no"  # 检查 cbr=no
+  #         - operator: AND
+  #           conditions:
+  #             - operator: exists
+  #               source_path: cabr  # 检查 cabr 参数存在
+  #             - operator: eq
+  #               source_path: cabr
+  #               value: "no"  # 检查 cabr=no
+  #   target:
+  #     path: Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode
+  #     value: VBR
 
-  - source:
-      path: cbr
-      condition:
-        operator: AND
-        conditions:
-          - operator: eq
-            value: "no"  # 检查 cbr=no
-          - operator: AND
-            conditions:
-              - operator: exists
-                source_path: cabr  # 检查 cabr 参数存在
-              - operator: eq
-                source_path: cabr
-                value: "yes"  # 检查 cabr=no
-    target:
-      path: Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode
-      value: QVBR
+  # - source:
+  #     path: cbr
+  #     condition:
+  #       operator: AND
+  #       conditions:
+  #         - operator: eq
+  #           value: "no"  # 检查 cbr=no
+  #         - operator: AND
+  #           conditions:
+  #             - operator: exists
+  #               source_path: cabr  # 检查 cabr 参数存在
+  #             - operator: eq
+  #               source_path: cabr
+  #               value: "yes"  # 检查 cabr=no
+  #   target:
+  #     path: Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode
+  #     value: QVBR
 
-  - source:
-      path: cbr
-      condition:
-        operator: AND
-        conditions:
-          - operator: eq
-            value: "no"  # 检查 cbr=no
-          - operator: NOT
-            condition:
-              operator: exists
-              source_path: cabr  # 检查 cabr 参数存在
-    target:
-      path: Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode
-      value: VBR
+  # - source:
+  #     path: cbr
+  #     condition:
+  #       operator: AND
+  #       conditions:
+  #         - operator: eq
+  #           value: "no"  # 检查 cbr=no
+  #         - operator: NOT
+  #           condition:
+  #             operator: exists
+  #             source_path: cabr  # 检查 cabr 参数存在
+  #   target:
+  #     path: Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode
+  #     value: VBR
 
-  - source:
-      path: cbr
-      condition:
-        operator: eq
-        value: "yes"
-    target:
-      path: Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode
-      value: CBR
+  # - source:
+  #     path: cbr
+  #     condition:
+  #       operator: eq
+  #       value: "yes"
+  #   target:
+  #     path: Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode
+  #     value: CBR
 
-  # Video bitrate
-  - source:
-      path: "bitrate"
-      type: "string"
-      regex: "(\\d+)k"
-      condition:
-        operator: AND
-        conditions:
-          - operator: eq
-            source_path: cbr
-            value: "no"  # 检查 cbr=no
-          - operator: AND
-            conditions:
-              - operator: exists
-                source_path: cabr  # 检查 cabr 参数存在
-              - operator: eq
-                source_path: cabr
-                value: "no"  # 检查 cabr=no
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.Bitrate"
-      value: "$1000"
+  # # Video bitrate
+  # - source:
+  #     path: "bitrate"
+  #     type: "string"
+  #     regex: "(\\d+)k"
+  #     condition:
+  #       operator: AND
+  #       conditions:
+  #         - operator: eq
+  #           source_path: cbr
+  #           value: "no"  # 检查 cbr=no
+  #         - operator: AND
+  #           conditions:
+  #             - operator: exists
+  #               source_path: cabr  # 检查 cabr 参数存在
+  #             - operator: eq
+  #               source_path: cabr
+  #               value: "no"  # 检查 cabr=no
+  #   target:
+  #     path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.Bitrate"
+  #     value: "$1000"
 
-  - source:
-      path: "bitrate"
-      type: "string"
-      regex: "(\\d+)k"
-      condition:
-        operator: AND
-        conditions:
-          - operator: eq
-            source_path: cbr
-            value: "no"  # 检查 cbr=no
-          - operator: AND
-            conditions:
-              - operator: exists
-                source_path: cabr  # 检查 cabr 参数存在
-              - operator: eq
-                source_path: cabr
-                value: "yes"  # 检查 cabr=no
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.MaxBitrate"
-      value: "$1000"
+  # - source:
+  #     path: "bitrate"
+  #     type: "string"
+  #     regex: "(\\d+)k"
+  #     condition:
+  #       operator: AND
+  #       conditions:
+  #         - operator: eq
+  #           source_path: cbr
+  #           value: "no"  # 检查 cbr=no
+  #         - operator: AND
+  #           conditions:
+  #             - operator: exists
+  #               source_path: cabr  # 检查 cabr 参数存在
+  #             - operator: eq
+  #               source_path: cabr
+  #               value: "yes"  # 检查 cabr=no
+  #   target:
+  #     path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.MaxBitrate"
+  #     value: "$1000"
 
-  - source:
-      path: "bitrate"
-      type: "string"
-      regex: "(\\d+)k"
-      condition:
-        operator: AND
-        conditions:
-          - operator: eq
-            source_path: cbr
-            value: "no"  # 检查 cbr=no
-          - operator: NOT
-            condition:
-              operator: exists
-              source_path: cabr  # 检查 cabr 参数存在
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.Bitrate"
-      value: "$1000"
+  # - source:
+  #     path: "bitrate"
+  #     type: "string"
+  #     regex: "(\\d+)k"
+  #     condition:
+  #       operator: AND
+  #       conditions:
+  #         - operator: eq
+  #           source_path: cbr
+  #           value: "no"  # 检查 cbr=no
+  #         - operator: NOT
+  #           condition:
+  #             operator: exists
+  #             source_path: cabr  # 检查 cabr 参数存在
+  #   target:
+  #     path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.Bitrate"
+  #     value: "$1000"
 
-  - source:
-      path: "bitrate"
-      type: "string"
-      regex: "(\\d+)k"
-      condition:
-        operator: eq
-        source_path: hard_cbr
-        value: "yes"
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.Bitrate"
-      value: "$1000"
+  # - source:
+  #     path: "bitrate"
+  #     type: "string"
+  #     regex: "(\\d+)k"
+  #     condition:
+  #       operator: eq
+  #       source_path: hard_cbr
+  #       value: "yes"
+  #   target:
+  #     path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.Bitrate"
+  #     value: "$1000"
 
-  - source:
-      path: "bitrate"
-      type: "string"
-      regex: "(\\d+)k"
-      condition:
-        operator: eq
-        source_path: cbr
-        value: "yes"
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.Bitrate"
-      value: "$1000"
+  # - source:
+  #     path: "bitrate"
+  #     type: "string"
+  #     regex: "(\\d+)k"
+  #     condition:
+  #       operator: eq
+  #       source_path: cbr
+  #       value: "yes"
+  #   target:
+  #     path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.Bitrate"
+  #     value: "$1000"
 
   # Audio codec
-  - source:
-      path: "audio_codec"
-      type: "string"
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.Codec"
-      transform: "audio_codec_format"
+  # - source:
+  #     path: "audio_codec"
+  #     type: "string"
+  #   target:
+  #     path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.Codec"
+  #     transform: "audio_codec_format"
       
-  # Audio bitrate
-  - source:
-      path: "audio_bitrate"
-      type: "string"
-      regex: "(\\d+)k"
-      default: "128k"
-      condition:
-        operator: in
-        source_path: audio_codec
-        value: ["dolby_aac", "dolby_heaac", "libfaac"]
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.AacSettings.Bitrate"
-      value: "$1000"
+  # # Audio bitrate
+  # - source:
+  #     path: "audio_bitrate"
+  #     type: "string"
+  #     regex: "(\\d+)k"
+  #     default: "128k"
+  #     condition:
+  #       operator: in
+  #       source_path: audio_codec
+  #       value: ["dolby_aac", "dolby_heaac", "libfaac"]
+  #   target:
+  #     path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.AacSettings.Bitrate"
+  #     value: "$1000"
       
-  # Audio sample rate
-  - source:
-      path: "audio_sample_rate"
-      type: "number"
-      condition:
-        operator: in
-        source_path: audio_codec
-        value: ["dolby_aac", "dolby_heaac", "libfaac"]
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.AacSettings.SampleRate"
+  # # Audio sample rate
+  # - source:
+  #     path: "audio_sample_rate"
+  #     type: "number"
+  #     condition:
+  #       operator: in
+  #       source_path: audio_codec
+  #       value: ["dolby_aac", "dolby_heaac", "libfaac"]
+  #   target:
+  #     path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.AacSettings.SampleRate"
 
   # 处理音频通道数参数
   - source:
@@ -1216,8 +1216,8 @@ rules:
       type: "string"
       condition:
         source_path: "output"
-        operator: "eq"
-        value: "advanced_hls"
+        operator: "in"
+        value: ["advanced_hls", "ipad_stream"]
     target:
       path: "Settings.OutputGroups[0].OutputGroupSettings.HlsGroupSettings.Destination"
       value: "S3_OUTPUT_URL"
@@ -1373,23 +1373,17 @@ rules:
   - source:
       path: "turbo"
       type: "string"
-      condition:
-        operator: "eq"
-        value: "yes"
     target:
       path: "AccelerationSettings.Mode"
-      value: "PREFERRED"
+      transform: "turbo_format"
 
   # 处理twin_turbo参数
   - source:
       path: "twin_turbo"
       type: "string"
-      condition:
-        operator: "eq"
-        value: "yes"
     target:
       path: "AccelerationSettings.Mode"
-      value: "ENABLED"
+      transform: "twin_turbo_format"
         
   # 处理视频编码器熵编码参数
 
@@ -2069,3 +2063,11 @@ transformers:
 
   add_audio_only_format:
     "yes": "AUDIO_ONLY_VARIANT_STREAM"
+
+  turbo_format:
+    "yes": "PREFERRED"
+    "no": "DISABLED"
+
+  twin_turbo_format:
+    "yes": "PREFERRED"
+    "no": "DISABLED"

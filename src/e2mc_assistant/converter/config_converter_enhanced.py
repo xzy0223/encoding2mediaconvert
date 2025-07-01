@@ -194,6 +194,7 @@ class ConfigConverter:
                     if rate_control_processed:
                         processed_params.update(rate_control_processed)
                     self.logger.debug(f"Applied rate control settings for output {i} using stream-specific data")
+                    self.logger.debug(f"Processed parameters for output{i} are: {processed_params}")
                 elif is_audio_only:
                     self.logger.debug(f"Skipping rate control settings for audio-only output {i}")
                 
@@ -219,6 +220,8 @@ class ConfigConverter:
             rule_lookup = {}
             dummy_rules = []
             
+            self.logger.debug(f"Processed parameters before rule matching are: {processed_params}")
+
             # Organize rules by their source path for easier lookup, but skip stream rules
             for rule in self.rules:
                 # Skip rules that target stream path to avoid recursion
@@ -1189,6 +1192,7 @@ class ConfigConverter:
         
         # Get relevant source parameters
         cbr = self.get_value_by_path(source_data, 'cbr')
+        hard_cbr = self.get_value_by_path(source_data, 'hard_cbr')
         cabr = self.get_value_by_path(source_data, 'cabr')
         bitrate_str = self.get_value_by_path(source_data, 'bitrate')
         maxrate_str = self.get_value_by_path(source_data, 'maxrate')
@@ -1202,95 +1206,172 @@ class ConfigConverter:
         # Track if we've processed these parameters
         processed_params = set()
         
-        # Case 1: If <cbr> exists and is not empty
-        if cbr is not None:
-            processed_params.add('cbr')
+        # Determine if we should use CBR mode based on cbr and hard_cbr parameters
+        use_cbr = False
+        
+        # Case 1: If either <cbr> or <hard_cbr> exists and is set to "yes"
+        if (cbr is not None and cbr == 'yes') or (hard_cbr is not None and hard_cbr == 'yes'):
+            use_cbr = True
             
-            if cbr == 'yes':
-                # Case 1.a: cbr=yes
-                self._set_nested_value(target_data, f"{target_path}.RateControlMode", "CBR")
-                self.logger.info(f"Set RateControlMode to CBR because <cbr>=yes")
+            # Mark both parameters as processed if they exist
+            if cbr is not None:
+                processed_params.add('cbr')
+            if hard_cbr is not None:
+                processed_params.add('hard_cbr')
                 
-                if bitrate_str:
-                    self._set_nested_value(target_data, f"{target_path}.Bitrate", bitrate)
-                    processed_params.add('bitrate')
-                    self.logger.info(f"Set Bitrate to {bitrate} from <bitrate>={bitrate_str}")
+            # Set CBR mode
+            self._set_nested_value(target_data, f"{target_path}.RateControlMode", "CBR")
+            self.logger.info(f"Set RateControlMode to CBR because {'<cbr>=yes' if cbr == 'yes' else ''} {'<hard_cbr>=yes' if hard_cbr == 'yes' else ''}")
+            
+            # Set bitrate if available
+            if bitrate_str:
+                self._set_nested_value(target_data, f"{target_path}.Bitrate", bitrate)
+                processed_params.add('bitrate')
+                self.logger.info(f"Set Bitrate to {bitrate} from <bitrate>={bitrate_str}")
+            
+            # Log if maxrate or minrate are ignored
+            if maxrate_str:
+                self.logger.info(f"Ignoring <maxrate>={maxrate_str} because CBR mode is used (CBR mode doesn't use MaxBitrate)")
+                processed_params.add('maxrate')
+            if minrate_str:
+                self.logger.info(f"Ignoring <minrate>={minrate_str} because CBR mode is used (CBR mode doesn't use MinBitrate)")
+                processed_params.add('minrate')
+        
+        # Case 2: If both <cbr> and <hard_cbr> are explicitly set to "no"
+        elif (cbr is not None and cbr == 'no') and (hard_cbr is not None and hard_cbr == 'no'):
+            processed_params.add('cbr')
+            processed_params.add('hard_cbr')
+            
+            # Check for cabr parameter
+            if cabr is not None:
+                processed_params.add('cabr')
                 
-                # Log if maxrate or minrate are ignored
-                if maxrate_str:
-                    self.logger.info(f"Ignoring <maxrate>={maxrate_str} because <cbr>=yes (CBR mode doesn't use MaxBitrate)")
-                    processed_params.add('maxrate')
-                if minrate_str:
-                    self.logger.info(f"Ignoring <minrate>={minrate_str} because <cbr>=yes (CBR mode doesn't use MinBitrate)")
-                    processed_params.add('minrate')
+                if cabr == 'yes':
+                    # Case 2.a: cbr=no, hard_cbr=no, cabr=yes
+                    self._set_nested_value(target_data, f"{target_path}.RateControlMode", "QVBR")
+                    self.logger.info(f"Set RateControlMode to QVBR because <cbr>=no, <hard_cbr>=no, and <cabr>=yes")
                     
-            elif cbr == 'no':
-                # Case 1.b: cbr=no
-                if cabr is not None:
-                    processed_params.add('cabr')
-                    
-                    if cabr == 'yes':
-                        # Case 1.b.i: cbr=no, cabr=yes
-                        self._set_nested_value(target_data, f"{target_path}.RateControlMode", "QVBR")
-                        self.logger.info(f"Set RateControlMode to QVBR because <cbr>=no and <cabr>=yes")
+                    if maxrate_str:
+                        self._set_nested_value(target_data, f"{target_path}.MaxBitrate", maxrate)
+                        processed_params.add('maxrate')
+                        self.logger.info(f"Set MaxBitrate to {maxrate} from <maxrate>={maxrate_str}")
+                    else:
+                        self.logger.warning(f"<maxrate> not found but required for QVBR mode when <cabr>=yes")
                         
-                        if maxrate_str:
-                            self._set_nested_value(target_data, f"{target_path}.MaxBitrate", maxrate)
-                            processed_params.add('maxrate')
-                            self.logger.info(f"Set MaxBitrate to {maxrate} from <maxrate>={maxrate_str}")
-                        else:
-                            self.logger.warning(f"<maxrate> not found but required for QVBR mode when <cabr>=yes")
-                            
-                        # Log if bitrate is ignored
-                        if bitrate_str:
-                            self.logger.info(f"Ignoring <bitrate>={bitrate_str} in QVBR mode (using MaxBitrate instead)")
-                            processed_params.add('bitrate')
-                            
-                    elif cabr == 'no':
-                        # Case 1.b.ii: cbr=no, cabr=no
-                        self._set_nested_value(target_data, f"{target_path}.RateControlMode", "VBR")
-                        self.logger.info(f"Set RateControlMode to VBR because <cbr>=no and <cabr>=no")
-                        
-                        if bitrate_str:
-                            self._set_nested_value(target_data, f"{target_path}.Bitrate", bitrate)
-                            processed_params.add('bitrate')
-                            self.logger.info(f"Set Bitrate to {bitrate} from <bitrate>={bitrate_str}")
-                            
-                        if maxrate_str:
-                            self._set_nested_value(target_data, f"{target_path}.MaxBitrate", maxrate)
-                            processed_params.add('maxrate')
-                            self.logger.info(f"Set MaxBitrate to {maxrate} from <maxrate>={maxrate_str}")
-                else:
-                    # New case: cbr=no and cabr doesn't exist
+                    # Log if bitrate is ignored
                     if bitrate_str:
-                        # Set RateControlMode to VBR
-                        self._set_nested_value(target_data, f"{target_path}.RateControlMode", "VBR")
-                        self.logger.info(f"Set RateControlMode to VBR because <cbr>=no and <cabr> doesn't exist")
+                        self.logger.info(f"Ignoring <bitrate>={bitrate_str} in QVBR mode (using MaxBitrate instead)")
+                        processed_params.add('bitrate')
                         
-                        # Set Bitrate
+                elif cabr == 'no':
+                    # Case 2.b: cbr=no, hard_cbr=no, cabr=no
+                    self._set_nested_value(target_data, f"{target_path}.RateControlMode", "VBR")
+                    self.logger.info(f"Set RateControlMode to VBR because <cbr>=no, <hard_cbr>=no, and <cabr>=no")
+                    
+                    if bitrate_str:
                         self._set_nested_value(target_data, f"{target_path}.Bitrate", bitrate)
                         processed_params.add('bitrate')
                         self.logger.info(f"Set Bitrate to {bitrate} from <bitrate>={bitrate_str}")
                         
-                        # Set MaxBitrate to 2.5 * Bitrate
-                        calculated_maxrate = int(bitrate * 2.5)
-                        self._set_nested_value(target_data, f"{target_path}.MaxBitrate", calculated_maxrate)
-                        self.logger.info(f"Setting MaxBitrate to {calculated_maxrate} (2.5 * Bitrate)")
-                        
-                        # Log if minrate is ignored
-                        if minrate_str:
-                            self.logger.info(f"Ignoring <minrate>={minrate_str} (not supported in MediaConvert)")
-                            processed_params.add('minrate')
-                            
+                    if maxrate_str:
+                        self._set_nested_value(target_data, f"{target_path}.MaxBitrate", maxrate)
+                        processed_params.add('maxrate')
+                        self.logger.info(f"Set MaxBitrate to {maxrate} from <maxrate>={maxrate_str}")
+            else:
+                # Case 2.c: cbr=no, hard_cbr=no, cabr doesn't exist
+                if bitrate_str:
+                    # Set RateControlMode to VBR
+                    self._set_nested_value(target_data, f"{target_path}.RateControlMode", "VBR")
+                    self.logger.info(f"Set RateControlMode to VBR because <cbr>=no, <hard_cbr>=no, and <cabr> doesn't exist")
+                    
+                    # Set Bitrate
+                    self._set_nested_value(target_data, f"{target_path}.Bitrate", bitrate)
+                    processed_params.add('bitrate')
+                    self.logger.info(f"Set Bitrate to {bitrate} from <bitrate>={bitrate_str}")
+                    
+                    # Set MaxBitrate to 2.5 * Bitrate
+                    calculated_maxrate = int(bitrate * 2.5)
+                    self._set_nested_value(target_data, f"{target_path}.MaxBitrate", calculated_maxrate)
+                    self.logger.info(f"Setting MaxBitrate to {calculated_maxrate} (2.5 * Bitrate)")
+                    
+                    # Log if minrate is ignored
+                    if minrate_str:
+                        self.logger.info(f"Ignoring <minrate>={minrate_str} (not supported in MediaConvert)")
+                        processed_params.add('minrate')
         
-        # Case 2: If <cbr> doesn't exist
+        # Case 3: If <cbr> is set to "no" but <hard_cbr> is not specified or vice versa
+        elif (cbr is not None and cbr == 'no') or (hard_cbr is not None and hard_cbr == 'no'):
+            # Mark the parameter that exists as processed
+            if cbr is not None:
+                processed_params.add('cbr')
+            if hard_cbr is not None:
+                processed_params.add('hard_cbr')
+                
+            # Check for cabr parameter
+            if cabr is not None:
+                processed_params.add('cabr')
+                
+                if cabr == 'yes':
+                    # Case 3.a: Either cbr=no or hard_cbr=no, cabr=yes
+                    self._set_nested_value(target_data, f"{target_path}.RateControlMode", "QVBR")
+                    self.logger.info(f"Set RateControlMode to QVBR because {'<cbr>=no' if cbr == 'no' else ''} {'<hard_cbr>=no' if hard_cbr == 'no' else ''} and <cabr>=yes")
+                    
+                    if maxrate_str:
+                        self._set_nested_value(target_data, f"{target_path}.MaxBitrate", maxrate)
+                        processed_params.add('maxrate')
+                        self.logger.info(f"Set MaxBitrate to {maxrate} from <maxrate>={maxrate_str}")
+                    else:
+                        self.logger.warning(f"<maxrate> not found but required for QVBR mode when <cabr>=yes")
+                        
+                    # Log if bitrate is ignored
+                    if bitrate_str:
+                        self.logger.info(f"Ignoring <bitrate>={bitrate_str} in QVBR mode (using MaxBitrate instead)")
+                        processed_params.add('bitrate')
+                        
+                elif cabr == 'no':
+                    # Case 3.b: Either cbr=no or hard_cbr=no, cabr=no
+                    self._set_nested_value(target_data, f"{target_path}.RateControlMode", "VBR")
+                    self.logger.info(f"Set RateControlMode to VBR because {'<cbr>=no' if cbr == 'no' else ''} {'<hard_cbr>=no' if hard_cbr == 'no' else ''} and <cabr>=no")
+                    
+                    if bitrate_str:
+                        self._set_nested_value(target_data, f"{target_path}.Bitrate", bitrate)
+                        processed_params.add('bitrate')
+                        self.logger.info(f"Set Bitrate to {bitrate} from <bitrate>={bitrate_str}")
+                        
+                    if maxrate_str:
+                        self._set_nested_value(target_data, f"{target_path}.MaxBitrate", maxrate)
+                        processed_params.add('maxrate')
+                        self.logger.info(f"Set MaxBitrate to {maxrate} from <maxrate>={maxrate_str}")
+            else:
+                # Case 3.c: Either cbr=no or hard_cbr=no, cabr doesn't exist
+                if bitrate_str:
+                    # Set RateControlMode to VBR
+                    self._set_nested_value(target_data, f"{target_path}.RateControlMode", "VBR")
+                    self.logger.info(f"Set RateControlMode to VBR because {'<cbr>=no' if cbr == 'no' else ''} {'<hard_cbr>=no' if hard_cbr == 'no' else ''} and <cabr> doesn't exist")
+                    
+                    # Set Bitrate
+                    self._set_nested_value(target_data, f"{target_path}.Bitrate", bitrate)
+                    processed_params.add('bitrate')
+                    self.logger.info(f"Set Bitrate to {bitrate} from <bitrate>={bitrate_str}")
+                    
+                    # Set MaxBitrate to 2.5 * Bitrate
+                    calculated_maxrate = int(bitrate * 2.5)
+                    self._set_nested_value(target_data, f"{target_path}.MaxBitrate", calculated_maxrate)
+                    self.logger.info(f"Setting MaxBitrate to {calculated_maxrate} (2.5 * Bitrate)")
+                    
+                    # Log if minrate is ignored
+                    if minrate_str:
+                        self.logger.info(f"Ignoring <minrate>={minrate_str} (not supported in MediaConvert)")
+                        processed_params.add('minrate')
+        
+        # Case 4: If neither <cbr> nor <hard_cbr> exists, but we have bitrate
         elif bitrate_str:
             processed_params.add('bitrate')
             
             if not maxrate_str:
-                # Case 2.a: bitrate exists, maxrate doesn't exist or is empty
+                # Case 4.a: bitrate exists, maxrate doesn't exist or is empty
                 self._set_nested_value(target_data, f"{target_path}.RateControlMode", "VBR")
-                self.logger.info(f"Set RateControlMode to VBR because <cbr> doesn't exist and <maxrate> doesn't exist")
+                self.logger.info(f"Set RateControlMode to VBR because neither <cbr> nor <hard_cbr> exists and <maxrate> doesn't exist")
                 self._set_nested_value(target_data, f"{target_path}.Bitrate", bitrate)
                 self.logger.info(f"Set Bitrate to {bitrate} from <bitrate>={bitrate_str}")
                 
@@ -1310,18 +1391,18 @@ class ConfigConverter:
                 bitrate_value = bitrate
                 
                 if maxrate_value > bitrate_value:
-                    # Case 2.b: bitrate exists, maxrate exists and is greater than bitrate
+                    # Case 4.b: bitrate exists, maxrate exists and is greater than bitrate
                     self._set_nested_value(target_data, f"{target_path}.RateControlMode", "VBR")
-                    self.logger.info(f"Set RateControlMode to VBR because <cbr> doesn't exist and <maxrate> > <bitrate>")
+                    self.logger.info(f"Set RateControlMode to VBR because neither <cbr> nor <hard_cbr> exists and <maxrate> > <bitrate>")
                     self._set_nested_value(target_data, f"{target_path}.Bitrate", bitrate_value)
                     self._set_nested_value(target_data, f"{target_path}.MaxBitrate", maxrate_value)
                     self.logger.info(f"Set Bitrate to {bitrate_value} from <bitrate>={bitrate_str}")
                     self.logger.info(f"Set MaxBitrate to {maxrate_value} from <maxrate>={maxrate_str}")
                     
                 elif maxrate_value == bitrate_value:
-                    # Case 2.c: bitrate exists, maxrate exists and equals bitrate
+                    # Case 4.c: bitrate exists, maxrate exists and equals bitrate
                     self._set_nested_value(target_data, f"{target_path}.RateControlMode", "CBR")
-                    self.logger.info(f"Set RateControlMode to CBR because <cbr> doesn't exist and <maxrate> equals <bitrate>")
+                    self.logger.info(f"Set RateControlMode to CBR because neither <cbr> nor <hard_cbr> exists and <maxrate> equals <bitrate>")
                     self._set_nested_value(target_data, f"{target_path}.Bitrate", bitrate_value)
                     self.logger.info(f"Set Bitrate to {bitrate_value} from <bitrate>={bitrate_str}")
                     self.logger.info(f"Using CBR mode because maxrate equals bitrate")
@@ -1334,7 +1415,7 @@ class ConfigConverter:
         # Return processed parameters
         return processed_params
     
-    def _process_video_codec_settings(self, source_data: Dict, target_data: Dict) -> bool:
+    def _process_video_codec_settings(self, source_data: Dict, target_data: Dict) -> set:
         """
         Process video codec settings, setting defaults if needed
         
@@ -1343,8 +1424,11 @@ class ConfigConverter:
             target_data: Target data dictionary to update
             
         Returns:
-            True if video codec settings were processed, False otherwise
+            Set of processed parameter names
         """
+        # Track processed parameters
+        processed_params = set()
+        
         # Check if video_codec exists
         video_codec = self.get_value_by_path(source_data, 'video_codec')
         
@@ -1353,9 +1437,12 @@ class ConfigConverter:
             target_path = "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Codec"
             self._set_nested_value(target_data, target_path, "H_264")
             self.logger.info(f"Set {target_path} to H_264 (default because <video_codec> not specified)")
-            return {'video_codec'}
+            processed_params.add('video_codec')
+        else:
+            # If video_codec exists, mark it as processed
+            processed_params.add('video_codec')
         
-        return set()
+        return processed_params
     
     def _process_audio_settings(self, source_data: Dict, target_data: Dict) -> bool:
         """
@@ -1829,7 +1916,7 @@ class ConfigConverter:
             # Process rate control settings first (special handling for CBR/VBR/QVBR)
             if self._process_rate_control_settings(source_data, target_data):
                 # Mark these parameters as processed
-                for param in ['cbr', 'cabr', 'bitrate', 'maxrate', 'minrate']:
+                for param in ['cbr', 'hard_cbr', 'cabr', 'bitrate', 'maxrate', 'minrate']:
                     if self.get_value_by_path(source_data, param) is not None:
                         processed_params.add(param)
                         self.logger.info(f"Parameter {param} processed by custom rate control handler")
@@ -2058,7 +2145,7 @@ class ConfigConverter:
                 if path_was_processed:
                     self.logger.info(f"Successfully applied rules for parameter: {path}={value}")
                 else:
-                    self.logger.info(f"No rules were successfully applied for parameter: {path}={value}")
+                    self.logger.warning(f"No rules were successfully applied for parameter: {path}={value}")
                     # Add to unmapped_parameters list since no rules were successfully applied
                     if not hasattr(self, 'unmapped_parameters'):
                         self.unmapped_parameters = []
@@ -2070,6 +2157,7 @@ class ConfigConverter:
             # Generate warning if path wasn't processed and it's a leaf node
             if not path_was_processed and not isinstance(value, (dict, list)) and path not in processed_params:
                 self.logger.warning(f"No matching rules applied for parameter: {path}={value}")
+                self.logger.warning(f"Current processed parameters are: {processed_params}")
                 # Add to unmapped_parameters list
                 if not hasattr(self, 'unmapped_parameters'):
                     self.unmapped_parameters = []
@@ -2095,7 +2183,7 @@ class ConfigConverter:
         self.logger.info(f"Processing rule for {source_path}, value: {source_value}")
         
         # Check if this parameter was already processed by rate control settings handler
-        rate_control_params = ['cbr', 'cabr', 'bitrate', 'maxrate', 'minrate']
+        rate_control_params = ['cbr', 'hard_cbr', 'cabr', 'bitrate', 'maxrate', 'minrate']
         if source_path in rate_control_params and source_path in processed_params:
             self.logger.info(f"Skipping rule for {source_path}={source_value} as it was already processed by rate control settings handler")
             return
@@ -2449,14 +2537,17 @@ class ConfigConverter:
         
         # Special handling for stream parameters that are processed by _process_rate_control_settings
         # These parameters should be considered as processed even if they don't appear directly in processed_params
-        rate_control_params = ['cbr', 'cabr', 'bitrate', 'maxrate', 'minrate']
+        rate_control_params = ['cbr', 'hard_cbr', 'cabr', 'bitrate', 'maxrate', 'minrate']
         audio_params = ['audio_codec', 'audio_bitrate', 'audio_sample_rate', 'audio_maxrate', 'audio_minrate']
         
         # Check if we're processing a stream
         is_stream = parent_path.startswith('stream') or parent_path == 'stream'
+        self.logger.debug(f"processed_ params are: {processed_params}")
+        self.logger.debug(f"unmapped_ params are: {self.unmapped_parameters}")
             
         for key, value in source_data.items():
             current_path = f"{parent_path}.{key}" if parent_path else key
+            self.logger.debug(f"current_path is: {current_path}")
             
             # Skip already processed parameters
             if current_path in processed_params:

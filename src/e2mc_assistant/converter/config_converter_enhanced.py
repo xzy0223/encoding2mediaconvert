@@ -259,10 +259,16 @@ class ConfigConverter:
                 
                 # Process each parameter in the stream using the rules
                 self.logger.info(f"Applying rules to stream {i+1}/{len(streams)}")
+                self.logger.info(f"The structure of stream is {stream}")
+
+                # insert stream data into context for processing rule
+                if context:
+                    context["current_stream"] = stream
                 
                 # Process the stream with rules, but avoid recursive processing
                 # by not processing 'stream' paths
-                self._process_source_data(stream, "", rule_lookup, temp_target, stream_processed_params, context)
+                # Pass the complete stream as both source_data and current_dict to maintain full context
+                self._process_source_data(stream, "", rule_lookup, temp_target, stream_processed_params, context, stream)
                 
                 # Extract the processed output back
                 processed_output = temp_target["Settings"]["OutputGroups"][0]["Outputs"][0]
@@ -1869,7 +1875,7 @@ class ConfigConverter:
             self.mapped_parameters.append((source_path, source_value, "DUMMY_RULE", None))
         
         # Now, traverse the source data structure and apply matching rules
-        self._process_source_data(source_data, "", rule_lookup, target_data, processed_params)
+        self._process_source_data(source_data, "", rule_lookup, target_data, processed_params, None, source_data)
         
         # Log unmapped parameters
         self._log_unmapped_parameters(source_data, processed_params)
@@ -1993,9 +1999,23 @@ class ConfigConverter:
         
         return "_mc"  # Default if we can't extract resolution/bitrate
         
-    def _process_source_data(self, source_data, current_path, rule_lookup, target_data, processed_params, context=None):
-        """Process source data recursively and apply matching rules"""
-        if not isinstance(source_data, dict):
+    def _process_source_data(self, source_data, current_path, rule_lookup, target_data, processed_params, context=None, current_dict=None):
+        """Process source data recursively and apply matching rules
+        
+        Args:
+            source_data: Complete source data dictionary (contains full stream information)
+            current_path: Current path being processed (e.g., "video_codec_parameters.level")
+            rule_lookup: Dictionary of rules indexed by source path
+            target_data: Target data dictionary to update
+            processed_params: Set of already processed parameters
+            context: Context dictionary with additional information
+            current_dict: Current dictionary being processed (defaults to source_data if None)
+        """
+        # If current_dict is not specified, use source_data
+        if current_dict is None:
+            current_dict = source_data
+            
+        if not isinstance(current_dict, dict):
             return
         
         # Initialize mapped_parameters if it doesn't exist
@@ -2003,7 +2023,7 @@ class ConfigConverter:
             self.mapped_parameters = []
             
         # self.logger.debug(f"Processing source data at path: {current_path}, {context}")
-        for key, value in source_data.items():
+        for key, value in current_dict.items():
             # Build the current path
             path = f"{current_path}.{key}" if current_path else key
             
@@ -2019,13 +2039,17 @@ class ConfigConverter:
             # Check if we have rules for this path
             if path_has_rules:
                 self.logger.info(f"Found {len(rule_lookup[path])} rules for parameter: {path}={value}")
-                
+                # if path == 'video_codec_parameters.level':
+                #     self.logger.info(f"context for video_codec_parameters.level is {context}")
+                #     self.logger.info(f"source data for video_codec_parameters.level is {source_data}")
+
                 # Store the current length of mapped_parameters to check if it changes
                 mapped_params_count_before = len(self.mapped_parameters)
                 
                 # Process all rules for this path
                 for rule in rule_lookup[path]:
                     # self.logger.debug(f"Processing rule with context:{context}")
+                    # Pass the complete source_data to _process_rule to maintain full context
                     self._process_rule(rule, path, value, source_data, target_data, processed_params, context)
                 
                 # Check if mapped_parameters grew, indicating a rule was successfully applied
@@ -2053,13 +2077,15 @@ class ConfigConverter:
             
             # If this is a dictionary, process it recursively
             if isinstance(value, dict):
-                self._process_source_data(value, path, rule_lookup, target_data, processed_params, context)
+                # Pass the complete source_data and the nested dictionary separately
+                self._process_source_data(source_data, path, rule_lookup, target_data, processed_params, context, value)
             # If this is a list, process each item if they are dictionaries
             elif isinstance(value, list) and key != 'stream':  # Skip stream array as it's handled specially
                 for i, item in enumerate(value):
                     if isinstance(item, dict):
                         list_path = f"{path}[{i}]"
-                        self._process_source_data(item, list_path, rule_lookup, target_data, processed_params, context)
+                        # Pass the complete source_data and the list item separately
+                        self._process_source_data(source_data, list_path, rule_lookup, target_data, processed_params, context, item)
                         
     
     def _process_rule(self, rule, source_path, source_value, source_data, target_data, processed_params, context=None):
@@ -2088,7 +2114,8 @@ class ConfigConverter:
                 # Also add the current value being processed
                 condition_source_data['value'] = source_value
                 self.logger.info(f"Added output and value to condition_source_data: output={context['source_data']['output']}, value={source_value}")
-                
+                # self.logger.debug(f"Condition source data is {condition_source_data}")
+
             condition_result = self.evaluate_condition(rule['source']['condition'], source_value, condition_source_data)
             self.logger.info(f"Source condition evaluation for {source_path}: {condition_result}")
             if not condition_result:
@@ -2419,6 +2446,14 @@ class ConfigConverter:
             
         # Create a set of already unmapped paths for faster lookup
         unmapped_paths = set(path for path, _ in self.unmapped_parameters)
+        
+        # Special handling for stream parameters that are processed by _process_rate_control_settings
+        # These parameters should be considered as processed even if they don't appear directly in processed_params
+        rate_control_params = ['cbr', 'cabr', 'bitrate', 'maxrate', 'minrate']
+        audio_params = ['audio_codec', 'audio_bitrate', 'audio_sample_rate', 'audio_maxrate', 'audio_minrate']
+        
+        # Check if we're processing a stream
+        is_stream = parent_path.startswith('stream') or parent_path == 'stream'
             
         for key, value in source_data.items():
             current_path = f"{parent_path}.{key}" if parent_path else key
@@ -2429,6 +2464,13 @@ class ConfigConverter:
                 
             # Skip parameters already in unmapped_parameters
             if current_path in unmapped_paths:
+                continue
+                
+            # Special handling for rate control and audio parameters in streams
+            if is_stream and (key in rate_control_params or key in audio_params):
+                # These parameters are processed by _process_rate_control_settings or _process_audio_settings
+                # so we should not mark them as unmapped
+                self.logger.info(f"Skipping {current_path} as it's handled by special processing functions")
                 continue
                 
             # Handle nested dictionaries

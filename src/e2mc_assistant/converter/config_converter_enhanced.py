@@ -15,6 +15,21 @@ from utils.mc_config_validator.validator import MediaConvertConfigValidator
 
 
 class ConfigConverter:
+    def _format_log_header(self, message, width=80, fill_char='-'):
+        """Format a log header with consistent width regardless of message length.
+        
+        Args:
+            message: The message to include in the header
+            width: Total width of the header (default: 80)
+            fill_char: Character to use for filling (default: '-')
+            
+        Returns:
+            A formatted string with the message centered and surrounded by fill characters
+        """
+        message = f" {message} "
+        side_fill = (width - len(message)) // 2
+        return f"{fill_char * side_fill}{message}{fill_char * side_fill}"
+    
     def __init__(self, rules_file: str):
         """Initialize converter with mapping rules"""
         with open(rules_file, 'r') as f:
@@ -242,11 +257,14 @@ class ConfigConverter:
             for rule in dummy_rules:
                 source_path = rule['source']['path']
                 source_value = self.get_value_by_path(source_data, source_path)
-                self.logger.debug(f"Processing dummy rule for {source_path}")
-                processed_params.add(source_path)
-                processed_dummy_params.add(source_path)  # 添加到专门的dummy参数集合
-                # Log the dummy rule match
-                self.logger.info(f"Mapped parameter: {source_path}={source_value} → [DUMMY RULE]")
+                # self.logger.debug(f"Processing dummy rule for {source_path}")
+                
+                # 只有当 source_value 不是 None 时才进行处理
+                if source_value is not None:
+                    processed_params.add(source_path)
+                    processed_dummy_params.add(source_path)  # 添加到专门的dummy参数集合
+                    # Log the dummy rule match
+                    self.logger.info(f"Mapped parameter: {source_path}={source_value} → [DUMMY RULE]")
             
             # Now process each stream individually with the rules
             for i, stream in enumerate(streams):
@@ -666,7 +684,7 @@ class ConfigConverter:
         else:
             result = False
             
-        self.logger.info(f"Condition evaluation: {op} {source_value} {compare_value} = {result}")
+        self.logger.info(f"Condition evaluation: {source_value} {op} {compare_value} = {result}")
         return result
     
 
@@ -1807,7 +1825,6 @@ class ConfigConverter:
                 outputs_with_settings = result
                 group_settings = {}
 
-            self.logger.info(f"meddle result is {group_settings}")
 
             # Add the outputs to the target data
             if outputs_with_settings:
@@ -1963,14 +1980,17 @@ class ConfigConverter:
         for rule in dummy_rules:
             source_path = rule['source']['path']
             source_value = self.get_value_by_path(source_data, source_path)
-            self.logger.debug(f"Processing dummy rule for {source_path}")
-            processed_params.add(source_path)
-            # Log the dummy rule match in the same format as regular mappings
-            self.logger.info(f"Mapped parameter: {source_path}={source_value} → [DUMMY RULE]")
-            # Add to mapped parameters list
-            if not hasattr(self, 'mapped_parameters'):
-                self.mapped_parameters = []
-            self.mapped_parameters.append((source_path, source_value, "DUMMY_RULE", None))
+            # self.logger.debug(f"Processing dummy rule for {source_path}")
+            
+            # 只有当 source_value 不是 None 时才进行处理
+            if source_value is not None:
+                processed_params.add(source_path)
+                # Log the dummy rule match in the same format as regular mappings
+                self.logger.info(f"Mapped parameter: {source_path}={source_value} → [DUMMY RULE]")
+                # Add to mapped parameters list
+                if not hasattr(self, 'mapped_parameters'):
+                    self.mapped_parameters = []
+                self.mapped_parameters.append((source_path, source_value, [("DUMMY_RULE", None)]))
         
         # Now, traverse the source data structure and apply matching rules
         self._process_source_data(source_data, "", rule_lookup, target_data, processed_params, None, source_data)
@@ -1983,7 +2003,10 @@ class ConfigConverter:
         unmapped_count = len(self.unmapped_parameters)
         total_params = mapped_count + unmapped_count
         # mapped_parameters = self.mapped_parameters
-        
+
+        self.logger.debug(f"mapped_ params are: {self.mapped_parameters}")
+        self.logger.debug(f"unmapped_ params are: {self.unmapped_parameters}")
+
         # Log summary
         self.logger.info(f"Conversion summary for {source_file}:")
         self.logger.info(f"  - Total parameters: {total_params}")
@@ -2124,10 +2147,14 @@ class ConfigConverter:
         for key, value in current_dict.items():
             # Build the current path
             path = f"{current_path}.{key}" if current_path else key
-            
+
+            if not isinstance(value, dict):
+                self.logger.info(self._format_log_header(f"Processing rule for {path}"))
+
             # Skip already processed parameters
             if path in processed_params:
-                self.logger.info(f"Skipping already processed parameter: {path}={value}")
+                self.logger.info(f" Skip the processed parameter: {path}={value}")
+                self.logger.info(self._format_log_header(f"Finished rule processing for {path}"))
                 continue
                 
             # Track if this path was processed by any rule
@@ -2185,14 +2212,15 @@ class ConfigConverter:
                         list_path = f"{path}[{i}]"
                         # Pass the complete source_data and the list item separately
                         self._process_source_data(source_data, list_path, rule_lookup, target_data, processed_params, context, item)
-                        
+        
+            if not isinstance(value, dict):
+                self.logger.info(self._format_log_header(f"Finished rule processing for {path}"))
+               
     
     def _process_rule(self, rule, source_path, source_value, source_data, target_data, processed_params, context=None):
         """Process a single rule for a given source path and value"""
         source_regex = rule['source'].get('regex')
-        
-        self.logger.info(f"Processing rule for {source_path}, value: {source_value}")
-        
+                
         # Check if this parameter was already processed by rate control settings handler
         rate_control_params = ['cbr', 'hard_cbr', 'cabr', 'bitrate', 'maxrate', 'minrate']
         if source_path in rate_control_params and source_path in processed_params:
@@ -2212,7 +2240,7 @@ class ConfigConverter:
                 condition_source_data['output'] = context['source_data']['output']
                 # Also add the current value being processed
                 condition_source_data['value'] = source_value
-                self.logger.info(f"Added output and value to condition_source_data: output={context['source_data']['output']}, value={source_value}")
+                self.logger.info(f"Added output and value to condition_source_data for condition evaluation: output={context['source_data']['output']}, value={source_value}")
                 # self.logger.debug(f"Condition source data is {condition_source_data}")
 
             condition_result = self.evaluate_condition(rule['source']['condition'], source_value, condition_source_data)
@@ -2232,6 +2260,9 @@ class ConfigConverter:
         
         # Process target mapping (can be single target or multiple targets)
         targets = rule['target'] if isinstance(rule['target'], list) else [rule['target']]
+        
+        # Create a temporary list to store all target mappings for this source parameter
+        target_mappings = []
         
         for target in targets:
             target_path = target['path']
@@ -2324,7 +2355,7 @@ class ConfigConverter:
                         # Add to mapped parameters list (as mapped but skipped)
                         if not hasattr(self, 'mapped_parameters'):
                             self.mapped_parameters = []
-                        self.mapped_parameters.append((source_path, source_value, target_path, "SKIPPED_NO_MATCHING_TRANSFORM"))
+                        self.mapped_parameters.append((source_path, source_value, [(target_path, "SKIPPED_NO_MATCHING_TRANSFORM")]))
                         continue
                         
                     self.logger.info(f"Transformed {original_value} using {transform} to {target_value}")
@@ -2334,11 +2365,16 @@ class ConfigConverter:
             # Log the parameter mapping with more detail
             self.logger.info(f"Mapped parameter: {source_path}={source_value} → {target_path}={target_value}")
             
-            # Add to mapped parameters list
+            # Add to temporary target mappings list
+            target_mappings.append((target_path, target_value))
+            
+        # After processing all targets, add a single entry to mapped_parameters with all target mappings
+        if target_mappings:  # Only add if at least one target mapping was successful
             if not hasattr(self, 'mapped_parameters'):
                 self.mapped_parameters = []
-            self.mapped_parameters.append((source_path, source_value, target_path, target_value))
-            
+            # Add source parameter with all its target mappings
+            self.mapped_parameters.append((source_path, source_value, target_mappings))
+
         
     def _process_use_alternate_id(self, alternate_id: Any, context: Dict = None) -> Dict:
         """
@@ -2553,7 +2589,7 @@ class ConfigConverter:
         
         # Check if we're processing a stream
         is_stream = parent_path.startswith('stream') or parent_path == 'stream'
-        self.logger.debug(f"processed_ params are: {processed_params}")
+        # self.logger.debug(f"processed_ params are: {processed_params}")
         # self.logger.debug(f"unmapped_ params are: {self.unmapped_parameters}")
             
         for key, value in source_data.items():

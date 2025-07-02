@@ -178,8 +178,6 @@ class ConfigConverter:
             
             # Track processed parameters
             processed_params = set()
-            # 创建一个专门的集合来跟踪通过dummy规则处理的参数
-            processed_dummy_params = set()
             
             # Process each output to apply rate control and audio settings
             for i, output in enumerate(outputs):
@@ -209,7 +207,7 @@ class ConfigConverter:
                     if rate_control_processed:
                         processed_params.update(rate_control_processed)
                     self.logger.debug(f"Applied rate control settings for output {i} using stream-specific data")
-                    self.logger.debug(f"Processed parameters for output{i} are: {processed_params}")
+                    self.logger.debug(f"Processed parameters for output {i} are: {processed_params}")
                 elif is_audio_only:
                     self.logger.debug(f"Skipping rate control settings for audio-only output {i}")
                 
@@ -253,19 +251,6 @@ class ConfigConverter:
                     rule_lookup[source_path] = []
                 rule_lookup[source_path].append(rule)
             
-            # Process dummy rules to mark parameters as processed
-            for rule in dummy_rules:
-                source_path = rule['source']['path']
-                source_value = self.get_value_by_path(source_data, source_path)
-                # self.logger.debug(f"Processing dummy rule for {source_path}")
-                
-                # 只有当 source_value 不是 None 时才进行处理
-                if source_value is not None:
-                    processed_params.add(source_path)
-                    processed_dummy_params.add(source_path)  # 添加到专门的dummy参数集合
-                    # Log the dummy rule match
-                    self.logger.info(f"Mapped parameter: {source_path}={source_value} → [DUMMY RULE]")
-            
             # Now process each stream individually with the rules
             for i, stream in enumerate(streams):
                 # Create a temporary target data structure for this stream's output
@@ -275,8 +260,24 @@ class ConfigConverter:
                 if 'OutputGroupSettings' not in temp_target["Settings"]["OutputGroups"][0]:
                     temp_target["Settings"]["OutputGroups"][0]["OutputGroupSettings"] = {}
                 
-                # 创建一个新的stream_processed_params，并复制processed_dummy_params
-                stream_processed_params = set(processed_dummy_params)  # 只复制dummy参数
+                # 创建一个新的stream_processed_params
+                stream_processed_params = set()
+                
+                # 处理当前stream的dummy规则
+                for rule in dummy_rules:
+                    source_path = rule['source']['path']
+                    # 使用当前stream作为source_data，而不是全局source_data
+                    source_value = self.get_value_by_path(stream, source_path)
+                    
+                    # 只有当 source_value 不是 None 时才进行处理
+                    if source_value is not None:
+                        stream_processed_params.add(source_path)
+                        # Log the dummy rule match
+                        self.logger.info(f"Mapped parameter: {source_path}={source_value} → [DUMMY RULE]")
+                        # 添加到mapped_parameters列表
+                        if not hasattr(self, 'mapped_parameters'):
+                            self.mapped_parameters = []
+                        self.mapped_parameters.append((source_path, source_value, [("DUMMY_RULE", None)]))
                 
                 # 添加已经通过_process_rate_control_settings和_process_audio_settings处理过的参数
                 # 这些参数在前面的代码中已经被处理，但没有添加到stream_processed_params中
@@ -290,8 +291,8 @@ class ConfigConverter:
                         self.logger.debug(f"Added pre-processed parameter {param} to stream_processed_params for stream {i}")
                 
                 # Process each parameter in the stream using the rules
-                self.logger.info(f"Applying rules to stream {i+1}/{len(streams)}")
-                self.logger.info(f"The structure of stream is {stream}")
+                self.logger.info(self._format_log_header(f"Applying rules to stream {i+1}/{len(streams)}", fill_char='='))
+                self.logger.debug(f"The structure of stream is {stream}")
 
                 # insert stream data into context for processing rule
                 if context:
@@ -445,16 +446,16 @@ class ConfigConverter:
         multi_value_fields = ['bitrates', 'size', 'keyframes', 'framerates']
         has_multi_values = False
         
+        # Check if we have multi-value fields
         for field in multi_value_fields:
             if field in result and isinstance(result[field], str) and ',' in result[field]:
                 # This is a multi-value field, split it into a list
                 values = [v.strip() for v in result[field].split(',')]
-                result[f'_original_{field}'] = result[field]  # Store original value
                 result[field] = values
                 has_multi_values = True
                 self.logger.info(f"Split multi-value field {field} into list: {values}")
         
-        # If we have multi-value fields, generate streams
+        # If we have multi-value fields, generate streams and replace the original result
         if has_multi_values and all(field in result for field in multi_value_fields):
             # Check if all multi-value fields have the same number of elements
             lengths = [len(result[field]) for field in multi_value_fields]
@@ -488,14 +489,17 @@ class ConfigConverter:
                     
                     # Copy other relevant fields from the source
                     for key, value in result.items():
-                        if key not in multi_value_fields and not key.startswith('_original_'):
+                        if key not in multi_value_fields:
                             stream[key] = value
                     
                     streams.append(stream)
                 
-                # Store the generated streams
-                result['_generated_streams'] = streams
-                self.logger.info(f"Generated {len(streams)} streams from multi-value fields")
+                # Replace the original result with a new dictionary containing only the streams
+                # This way, only the generated streams will be processed later
+                new_result = {'stream': streams}
+                
+                self.logger.info(f"Generated {len(streams)} streams from multi-value fields and replaced original parameters")
+                return new_result
             else:
                 self.logger.warning(f"Multi-value fields have different lengths: {lengths}, cannot generate streams")
         
@@ -1722,6 +1726,8 @@ class ConfigConverter:
             with open(source_file, 'r') as f:
                 source_data = json.load(f)
         
+        self.logger.debug(f"parsed xml is: {source_data}")
+        
         # Load target template (if provided)
         if template_file:
             with open(template_file, 'r') as f:
@@ -1777,38 +1783,10 @@ class ConfigConverter:
         streams = self.get_value_by_path(source_data, 'stream')
         is_multi_stream = streams is not None and isinstance(streams, list) and len(streams) > 0
         
-        # Check if this is a multi-stream configuration from multi-value fields
-        generated_streams = self.get_value_by_path(source_data, '_generated_streams')
-        is_generated_multi_stream = generated_streams is not None and isinstance(generated_streams, list) and len(generated_streams) > 0
-        
         # Handle multi-stream scenarios
-        if is_multi_stream or is_generated_multi_stream:
-            # Determine which streams to use
-            if is_generated_multi_stream:
-                self.logger.info(f"Using generated streams from multi-value fields: {len(generated_streams)} streams")
-                streams_to_use = generated_streams
-                
-                # Mark multi-value fields as processed
-                for field in ['bitrates', 'size', 'keyframes', 'framerates']:
-                    if field in source_data:
-                        processed_params.add(field)
-                        self.logger.info(f"Marked {field} as processed (used in generated streams)")
-                
-                # Also mark the original fields as processed
-                for field in ['_original_bitrates', '_original_size', '_original_keyframes', '_original_framerates']:
-                    if field in source_data:
-                        processed_params.add(field)
-                        self.logger.info(f"Marked {field} as processed (original multi-value field)")
-                
-                # Mark _generated_streams as processed
-                processed_params.add('_generated_streams')
-                
-                # Mark all parameters in the source_data as processed to avoid duplicate processing
-                self._mark_all_params_processed(source_data, "", processed_params)
-                self.logger.info("Marked all original parameters as processed to avoid duplicate processing")
-            else:
-                self.logger.info(f"Using explicit stream definitions: {len(streams)} streams")
-                streams_to_use = streams
+        if is_multi_stream:
+            self.logger.info(f"Using stream definitions: {len(streams)} streams")
+            streams_to_use = streams
             
             # Handle multi-stream scenario using specialized functions
             context = {'source_data': source_data, 'alternate_source_mapping': alternate_source_mapping}
@@ -2031,7 +2009,7 @@ class ConfigConverter:
         self._add_missing_name_modifiers(target_data)
         
         # Check and clean up video_only and audio_only streams
-        streams_to_check = streams if is_multi_stream else (generated_streams if is_generated_multi_stream else None)
+        streams_to_check = streams if is_multi_stream  else None
         if streams_to_check and 'Settings' in target_data and 'OutputGroups' in target_data['Settings']:
             for output_group in target_data['Settings']['OutputGroups']:
                 if 'Outputs' in output_group:
@@ -2193,7 +2171,7 @@ class ConfigConverter:
                     self.logger.info(f"No rules found for parameter: {path}={value}")
             
             # Generate warning if path wasn't processed and it's a leaf node
-            if not path_was_processed and not isinstance(value, (dict, list)) and path not in processed_params:
+            if not path_was_processed and not isinstance(value, (dict, list)) and path not in processed_params and value is not None:
                 self.logger.warning(f"No matching rules applied for parameter: {path}={value}")
                 self.logger.warning(f"Current processed parameters are: {processed_params}")
                 # Add to unmapped_parameters list

@@ -27,7 +27,8 @@ MANIFEST
 
 # Project specific
 /encoding_profiles/
-# /tranformed_mc_profiles/
+/tranformed_mc_profiles/
+/source_profile/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

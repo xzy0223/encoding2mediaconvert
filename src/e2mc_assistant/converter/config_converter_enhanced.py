@@ -1750,7 +1750,7 @@ class ConfigConverter:
             with open(source_file, 'r') as f:
                 source_data = json.load(f)
         
-        self.logger.debug(f"parsed xml is: {source_data}")
+        # self.logger.debug(f"parsed xml is: {source_data}")
         
         # Load target template (if provided)
         if template_file:
@@ -1958,10 +1958,10 @@ class ConfigConverter:
                 self.logger.info(f"Audio parameters processed by custom audio settings handler")
                 
             # Process video codec settings (set default if needed)
-            video_processed_params = self._process_video_codec_settings(source_data, target_data)
-            if video_processed_params:
-                processed_params.update(video_processed_params)
-                self.logger.info(f"Video codec parameters processed by custom video codec handler")
+            # video_processed_params = self._process_video_codec_settings(source_data, target_data)
+            # if video_processed_params:
+            #     processed_params.update(video_processed_params)
+            #     self.logger.info(f"Video codec parameters processed by custom video codec handler")
         
         # Create a rule lookup dictionary for faster access
         rule_lookup = {}

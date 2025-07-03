@@ -1,0 +1,138 @@
+2025-06-17 05:38:38,397 - ConfigConverter - INFO - Starting conversion of /home/ec2-user/e2mc_assistant/encoding_profiles/iphone/276.xml
+2025-06-17 05:38:38,397 - ConfigConverter - INFO - Using H264Settings for video_codec=None
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Set RateControlMode to VBR because <cbr> doesn't exist and <maxrate> doesn't exist
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Set Bitrate to 2000000 from <bitrate>=2000k
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Setting MaxBitrate to 5000000 (2.5 * Bitrate)
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Parameter bitrate processed by custom rate control handler
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Set AudioDescriptions[0].CodecSettings.Codec to AAC (default because <audio_codec> not specified)
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Set AudioDescriptions[0].CodecSettings.AacSettings.Bitrate to default value 96000
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Set AudioDescriptions[0].CodecSettings.AacSettings.SampleRate to default value 48000
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Set AudioDescriptions[0].CodecSettings.AacSettings.CodingMode to CODING_MODE_2_0 (default stereo)
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Set Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Codec to H_264 (default because <video_codec> not specified)
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Video codec parameters processed by custom video codec handler
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Mapped parameter: VCodecParameters=None → [DUMMY RULE]
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Mapped parameter: acbr=None → [DUMMY RULE]
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Mapped parameter: add_audio_only=None → [DUMMY RULE]
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Mapped parameter: clipmode=None → [DUMMY RULE]
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Mapped parameter: closed_captions.cc_extract_before=None → [DUMMY RULE]
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Mapped parameter: closed_captions.direct_copy=None → [DUMMY RULE]
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Mapped parameter: closed_captions.get_from_manifest=None → [DUMMY RULE]
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Mapped parameter: closed_captions.ignore_cc_absence=None → [DUMMY RULE]
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Mapped parameter: closed_captions.role=None → [DUMMY RULE]
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Mapped parameter: closed_captions.vtt_split_segments=None → [DUMMY RULE]
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Mapped parameter: drm=None → [DUMMY RULE]
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Mapped parameter: encoder=None → [DUMMY RULE]
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Mapped parameter: encryption=None → [DUMMY RULE]
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Mapped parameter: hint=None → [DUMMY RULE]
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Mapped parameter: pix_format=None → [DUMMY RULE]
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Mapped parameter: set_video_duration=None → [DUMMY RULE]
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Mapped parameter: strip_chapters=None → [DUMMY RULE]
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.cmp=None → [DUMMY RULE]
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.code=None → [DUMMY RULE]
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.flags=None → [DUMMY RULE]
+2025-06-17 05:38:38,398 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.flags2=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.i_qfactor=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.mbtree=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.me_method=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.me_range=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.qcomp=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.qdiff=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.subq=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.trellis=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.qmax=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.qmin=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: closed_captions.forced=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: file_extension=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: rotate=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: main_source.type=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: playlist_version=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: video_only=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: audio_only=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: closed_captions.cea_data_field=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: loudnorm_range=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: pack_files=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: pack_type=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: pack_each_stream=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: cmaf_conformant=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: manifest.basename=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: use_manifest=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: use_main_source=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: use_alternate_source=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: AdditionalCfDestination=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: framerate_upper_threshold=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: segmenter=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: copy_nielsen_metadata=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: metadata.copy=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: refs=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: reduce_structural_overhead=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.nal-hrd=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: timescale=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.transfer_characteristics=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: metadata_copy=None → [DUMMY RULE]
+2025-06-17 05:38:38,399 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.partitions=None → [DUMMY RULE]
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Found 5 rules for parameter: output=iphone
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Processing rule for output, value: iphone
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Condition evaluation: in iphone ['mpeg_dash', 'advanced_dash'] = False
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Source condition evaluation for output: False
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Skipping rule for output=iphone due to source condition not matching
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Processing rule for output, value: iphone
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Condition evaluation: in iphone ['fmp4_hls', 'advanced_fmp4'] = False
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Source condition evaluation for output: False
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Skipping rule for output=iphone due to source condition not matching
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Processing rule for output, value: iphone
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Condition evaluation: eq iphone advanced_hls = False
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Source condition evaluation for output: False
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Skipping rule for output=iphone due to source condition not matching
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Processing rule for output, value: iphone
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Condition evaluation: in iphone ['mp4', 'flv', 'iphone', 'ipad_stream', 'mov', 'mpegts', 'webm'] = True
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Source condition evaluation for output: True
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Using static value: FILE_GROUP_SETTINGS
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Mapped parameter: output=iphone → Settings.OutputGroups[0].OutputGroupSettings.Type=FILE_GROUP_SETTINGS
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Processing rule for output, value: iphone
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Condition evaluation: eq iphone smooth_streaming = False
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Source condition evaluation for output: False
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Skipping rule for output=iphone due to source condition not matching
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Found 2 rules for parameter: size=1280x0
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Processing rule for size, value: 1280x0
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Regex pattern (\d+)x([1-9]\d*) did not match 1280x0 for size
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Regex pattern (\d+)x([1-9]\d*) did not match 1280x0 for size
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Processing rule for size, value: 1280x0
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Regex transformed 1280x0 to 1280 using pattern (\d+)x0
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Mapped parameter: size=1280x0 → Settings.OutputGroups[0].Outputs[0].VideoDescription.Width=1280
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Regex transformed 1280x0 to DEFAULT using pattern (\d+)x0
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Mapped parameter: size=1280x0 → Settings.OutputGroups[0].Outputs[0].VideoDescription.ScalingBehavior=DEFAULT
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Skipping already processed parameter: bitrate=2000k
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Found 1 rules for parameter: two_pass=yes
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Processing rule for two_pass, value: yes
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Applying transformation two_pass_format to yes
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Transformed yes using two_pass_format to MULTI_PASS_HQ
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Mapped parameter: two_pass=yes → Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.QualityTuningLevel=MULTI_PASS_HQ
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Found 4 rules for parameter: destination=http://test_url.s3.amazonaws.com/encoding.com.output/mock_mock_output_rendition_name_11111_276.mp4?acl=public-read
+2025-06-17 05:38:38,400 - ConfigConverter - INFO - Processing rule for destination, value: http://test_url.s3.amazonaws.com/encoding.com.output/mock_mock_output_rendition_name_11111_276.mp4?acl=public-read
+2025-06-17 05:38:38,401 - ConfigConverter - INFO - Condition using source_path output, value: iphone
+2025-06-17 05:38:38,401 - ConfigConverter - INFO - Condition evaluation: eq iphone mp4 = False
+2025-06-17 05:38:38,401 - ConfigConverter - INFO - Source condition evaluation for destination: False
+2025-06-17 05:38:38,401 - ConfigConverter - INFO - Skipping rule for destination=http://test_url.s3.amazonaws.com/encoding.com.output/mock_mock_output_rendition_name_11111_276.mp4?acl=public-read due to source condition not matching
+2025-06-17 05:38:38,401 - ConfigConverter - INFO - Processing rule for destination, value: http://test_url.s3.amazonaws.com/encoding.com.output/mock_mock_output_rendition_name_11111_276.mp4?acl=public-read
+2025-06-17 05:38:38,401 - ConfigConverter - INFO - Condition using source_path output, value: iphone
+2025-06-17 05:38:38,401 - ConfigConverter - INFO - Condition evaluation: eq iphone advanced_hls = False
+2025-06-17 05:38:38,401 - ConfigConverter - INFO - Source condition evaluation for destination: False
+2025-06-17 05:38:38,401 - ConfigConverter - INFO - Skipping rule for destination=http://test_url.s3.amazonaws.com/encoding.com.output/mock_mock_output_rendition_name_11111_276.mp4?acl=public-read due to source condition not matching
+2025-06-17 05:38:38,401 - ConfigConverter - INFO - Processing rule for destination, value: http://test_url.s3.amazonaws.com/encoding.com.output/mock_mock_output_rendition_name_11111_276.mp4?acl=public-read
+2025-06-17 05:38:38,401 - ConfigConverter - INFO - Condition using source_path output, value: iphone
+2025-06-17 05:38:38,401 - ConfigConverter - INFO - Condition evaluation: in iphone ['advanced_dash', 'mpeg_dash'] = False
+2025-06-17 05:38:38,401 - ConfigConverter - INFO - Source condition evaluation for destination: False
+2025-06-17 05:38:38,401 - ConfigConverter - INFO - Skipping rule for destination=http://test_url.s3.amazonaws.com/encoding.com.output/mock_mock_output_rendition_name_11111_276.mp4?acl=public-read due to source condition not matching
+2025-06-17 05:38:38,401 - ConfigConverter - INFO - Processing rule for destination, value: http://test_url.s3.amazonaws.com/encoding.com.output/mock_mock_output_rendition_name_11111_276.mp4?acl=public-read
+2025-06-17 05:38:38,401 - ConfigConverter - INFO - Condition using source_path output, value: iphone
+2025-06-17 05:38:38,401 - ConfigConverter - INFO - Condition evaluation: in iphone ['fmp4_hls', 'advanced_fmp4'] = False
+2025-06-17 05:38:38,401 - ConfigConverter - INFO - Source condition evaluation for destination: False
+2025-06-17 05:38:38,401 - ConfigConverter - INFO - Skipping rule for destination=http://test_url.s3.amazonaws.com/encoding.com.output/mock_mock_output_rendition_name_11111_276.mp4?acl=public-read due to source condition not matching
+2025-06-17 05:38:38,401 - ConfigConverter - INFO - Conversion summary for /home/ec2-user/e2mc_assistant/encoding_profiles/iphone/276.xml:
+2025-06-17 05:38:38,401 - ConfigConverter - INFO -   - Total parameters: 64
+2025-06-17 05:38:38,401 - ConfigConverter - INFO -   - Mapped parameters: 64 (100.0%)
+2025-06-17 05:38:38,401 - ConfigConverter - INFO -   - Unmapped parameters: 0 (0.0%)
+2025-06-17 05:38:38,401 - ConfigConverter - INFO - Added missing NameModifier: _mc
+2025-06-17 05:38:38,401 - ConfigConverter - INFO - Successfully converted /home/ec2-user/e2mc_assistant/encoding_profiles/iphone/276.xml to /home/ec2-user/e2mc_assistant/tranformed_mc_profiles/iphone/276.json
+2025-06-17 05:38:38,402 - ConfigConverter - INFO - Validating /home/ec2-user/e2mc_assistant/tranformed_mc_profiles/iphone/276.json against schema /home/ec2-user/e2mc_assistant/utils/mc_config_validator/mc_setting_schema.json
+2025-06-17 05:38:38,402 - ConfigConverter - INFO - Validation successful for /home/ec2-user/e2mc_assistant/tranformed_mc_profiles/iphone/276.json

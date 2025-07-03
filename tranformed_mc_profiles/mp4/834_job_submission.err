@@ -1,0 +1,87 @@
+Error submitting MediaConvert job for 834
+Timestamp: 2025-06-03T03:56:05.314230
+
+Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 720
+
+Job settings:
+{
+  "Settings": {
+    "Inputs": [
+      {
+        "TimecodeSource": "ZEROBASED",
+        "VideoSelector": {},
+        "AudioSelectors": {
+          "Audio Selector 1": {
+            "DefaultSelection": "DEFAULT"
+          }
+        },
+        "FileInput": "s3://fw-mc-test/mp4/834/834_882769295_source.mp4"
+      }
+    ],
+    "OutputGroups": [
+      {
+        "Name": "File Group",
+        "OutputGroupSettings": {
+          "Type": "FILE_GROUP_SETTINGS",
+          "FileGroupSettings": {
+            "Destination": "s3://fw-mc-test/mp4/834/"
+          }
+        },
+        "Outputs": [
+          {
+            "ContainerSettings": {
+              "Container": "MP4",
+              "Mp4Settings": {}
+            },
+            "VideoDescription": {
+              "CodecSettings": {
+                "H264Settings": {
+                  "RateControlMode": "VBR",
+                  "Bitrate": 1400000,
+                  "MaxBitrate": 3500000,
+                  "GopSize": 125,
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateNumerator": 25,
+                  "FramerateDenominator": 1,
+                  "QualityTuningLevel": "MULTI_PASS_HQ",
+                  "MinIInterval": 1,
+                  "NumberReferenceFrames": 4,
+                  "CodecProfile": "MAIN",
+                  "CodecLevel": "LEVEL_3"
+                },
+                "Codec": "H_264"
+              },
+              "Width": 1024,
+              "Height": 576,
+              "ScalingBehavior": "DEFAULT",
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              }
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 128000,
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
+                },
+                "AudioNormalizationSettings": {
+                  "TargetLkfs": -9.5
+                }
+              }
+            ],
+            "NameModifier": "_1024x576_1400000_mc"
+          }
+        ]
+      }
+    ],
+    "TimecodeConfig": {
+      "Source": "ZEROBASED"
+    },
+    "FollowSource": 1
+  },
+  "Role": "arn:aws:iam::935206693453:role/MediaConvertRole"
+}

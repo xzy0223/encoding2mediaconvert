@@ -1,0 +1,76 @@
+
+--- Job Execution Summary (2025-06-20 02:37:15) ---
+Submitted 28 MediaConvert jobs
+Job 1043: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/captionDescriptions/0/destinationSettings/burninDestinationSettings: Should match all dependencies: See other errors for more details | /outputGroups/0/outputs/0/captionDescriptions/0/destinationSettings/destinationType: Must be BURN_IN
+File ID: 1066:1750386674434-slkg9w, Status: COMPLETE
+File ID: 1071:1750386695939-n1tblm, Status: ERROR
+File ID: 220:1750386706811-oepqbs, Status: COMPLETE
+Job 241: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/audioDescriptions/0/codecSettings/eac3Settings/bitrate: You specified a Dolby Digital Plus audio bitrate that is outside the allowed values for the coding mode you selected. Specify a bitrate from 192000 up to 3024000, and resubmit your job.
+Job 254: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/5/audioDescriptions/0/codecSettings/aacSettings/bitrate: You specified a value for Bitrate that is not valid with the combination of Profile LC, Coding mode CODING_MODE_2_0, and Sample rate 48000 you selected. Specify a bitrate in the range of 64000-576000, and resubmit your job For a list of supported bitrates, see: https://docs.aws.amazon.com/mediaconvert/latest/ug/aac-support.html
+Job 282: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/5/audioDescriptions/0/codecSettings/aacSettings/bitrate: You specified a value for Bitrate that is not valid with the combination of Profile LC, Coding mode CODING_MODE_2_0, and Sample rate 48000 you selected. Specify a bitrate in the range of 64000-576000, and resubmit your job For a list of supported bitrates, see: https://docs.aws.amazon.com/mediaconvert/latest/ug/aac-support.html
+File ID: 336:1750386719246-eo59e4, Status: COMPLETE
+Job 337: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/3/audioDescriptions/0/codecSettings/aacSettings/bitrate: You specified a value for Bitrate that is not valid with the combination of Profile LC, Coding mode CODING_MODE_2_0, and Sample rate 44100 you selected. Specify a bitrate in the range of 64000-512000, and resubmit your job For a list of supported bitrates, see: https://docs.aws.amazon.com/mediaconvert/latest/ug/aac-support.html
+File ID: 475:1750386730791-2i7pyg, Status: COMPLETE
+File ID: 487:1750386742181-js40fk, Status: ERROR
+File ID: 493:1750386753001-z9891m, Status: COMPLETE
+Job 525: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/codecSettings/h265Settings: Your job contains values for the following settings that are incompatible: Rate control mode, Bitrate, and Max bitrate. Adjust your settings and resubmit your job. Some valid combinations of settings are these: Set Rate control mode to QVBR, specify a value for Max bitrate, and don't specify a value for Bitrate. Or, set Rate control mode to CBR, specify a value for Bitrate, and don't specify a value for Max bitrate.
+File ID: 558:1750386774921-s7bzcb, Status: COMPLETE
+File ID: 591:1750386796640-ixy7a4, Status: COMPLETE
+File ID: 606:1750386808098-14iy79, Status: COMPLETE
+File ID: 696:1750386829674-w7ve67, Status: COMPLETE
+File ID: 768:1750386840939-8s4rlg, Status: COMPLETE
+File ID: 820:1750386862407-8csa1j, Status: COMPLETE
+File ID: 838:1750386873665-w2gvly, Status: COMPLETE
+File ID: 889:1750386895119-ypmco0, Status: COMPLETE
+File ID: 895:1750386906502-16ff6p, Status: COMPLETE
+File ID: 897:1750386928047-f6xbm9, Status: ERROR
+Job 941: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/captionDescriptions/0/destinationSettings/burninDestinationSettings: Should match all dependencies: See other errors for more details | /outputGroups/0/outputs/0/captionDescriptions/0/destinationSettings/destinationType: Must be BURN_IN
+File ID: 953:1750386939298-h6t8z7, Status: COMPLETE
+File ID: 955:1750386960723-kpfpfe, Status: COMPLETE
+File ID: 969:1750386982220-8he5ye, Status: COMPLETE
+File ID: 979:1750387003734-k646n5, Status: COMPLETE
+Success: 18, Errors: 10
+--- End of Summary ---
+
+--- Job Execution Summary (2025-06-20 02:57:34) ---
+Submitted 7 MediaConvert jobs
+Job 1043: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/captionDescriptions/0: captionSelectorName is a required property
+File ID: 241:1750388137189-y8tocq, Status: COMPLETE
+File ID: 254:1750388158716-tx0s7y, Status: COMPLETE
+File ID: 282:1750388190315-3nzn1k, Status: COMPLETE
+File ID: 337:1750388221879-cap90j, Status: COMPLETE
+File ID: 487:1750388243266-e0gv16, Status: COMPLETE
+Job 941: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/captionDescriptions/0/destinationSettings/burninDestinationSettings: Should match all dependencies: See other errors for more details | /outputGroups/0/outputs/0/captionDescriptions/0/destinationSettings/destinationType: Must be BURN_IN
+Success: 5, Errors: 2
+--- End of Summary ---
+
+--- Job Execution Summary (2025-06-20 06:10:22) ---
+Submitted 1 MediaConvert jobs
+Job 892: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/audioDescriptions/0/codecSettings/aacSettings: sampleRate is a required property
+Success: 0, Errors: 1
+--- End of Summary ---
+
+--- Job Execution Summary (2025-06-20 06:16:32) ---
+Submitted 1 MediaConvert jobs
+File ID: 892:1750400181584-p9xwv6, Status: COMPLETE
+Success: 1, Errors: 0
+--- End of Summary ---
+
+--- Job Execution Summary (2025-06-20 06:35:15) ---
+Submitted 1 MediaConvert jobs
+File ID: 525:1750401294168-hrkqnk, Status: COMPLETE
+Success: 1, Errors: 0
+--- End of Summary ---
+
+--- Job Execution Summary (2025-06-20 06:39:09) ---
+Submitted 1 MediaConvert jobs
+File ID: 525:1750401528679-r67r38, Status: COMPLETE
+Success: 1, Errors: 0
+--- End of Summary ---
+
+--- Job Execution Summary (2025-06-25 03:53:35) ---
+Submitted 2 MediaConvert jobs
+File ID: 1071:1750823572815-r3g0nt, Status: COMPLETE
+File ID: 897:1750823594308-jd4cl5, Status: COMPLETE
+Success: 2, Errors: 0
+--- End of Summary ---

@@ -1,0 +1,82 @@
+Error submitting MediaConvert job for 776
+Timestamp: 2025-06-03T03:55:50.393693
+
+Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 576
+
+Job settings:
+{
+  "Settings": {
+    "Inputs": [
+      {
+        "TimecodeSource": "ZEROBASED",
+        "VideoSelector": {},
+        "AudioSelectors": {
+          "Audio Selector 1": {
+            "DefaultSelection": "DEFAULT"
+          }
+        },
+        "FileInput": "s3://fw-mc-test/mp4/776/776_882685094_source.mp4"
+      }
+    ],
+    "OutputGroups": [
+      {
+        "Name": "File Group",
+        "OutputGroupSettings": {
+          "Type": "FILE_GROUP_SETTINGS",
+          "FileGroupSettings": {
+            "Destination": "s3://fw-mc-test/mp4/776/"
+          }
+        },
+        "Outputs": [
+          {
+            "ContainerSettings": {
+              "Container": "MP4",
+              "Mp4Settings": {}
+            },
+            "VideoDescription": {
+              "CodecSettings": {
+                "H264Settings": {
+                  "RateControlMode": "VBR",
+                  "Bitrate": 2200000,
+                  "MaxBitrate": 5500000,
+                  "GopSize": 50,
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateNumerator": 25,
+                  "FramerateDenominator": 1,
+                  "QualityTuningLevel": "MULTI_PASS_HQ",
+                  "CodecProfile": "MAIN",
+                  "CodecLevel": "LEVEL_3"
+                },
+                "Codec": "H_264"
+              },
+              "Width": 1280,
+              "Height": 720
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 160000,
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
+                },
+                "AudioNormalizationSettings": {
+                  "TargetLkfs": -23.0,
+                  "TruePeakLimiterThreshold": -1.0
+                }
+              }
+            ],
+            "NameModifier": "_1280x720_2200000_mc"
+          }
+        ]
+      }
+    ],
+    "TimecodeConfig": {
+      "Source": "ZEROBASED"
+    },
+    "FollowSource": 1
+  },
+  "Role": "arn:aws:iam::935206693453:role/MediaConvertRole"
+}

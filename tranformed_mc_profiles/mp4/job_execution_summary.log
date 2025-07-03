@@ -1,0 +1,325 @@
+
+--- Job Execution Summary (2025-06-03 04:06:10) ---
+Submitted 185 MediaConvert jobs
+Job 1002: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/audioDescriptions/0/codecSettings/aacSettings/bitrate: You specified a value for Bitrate that is not valid with the combination of Profile LC, Coding mode CODING_MODE_2_0, and Sample rate 48000 you selected. Specify a bitrate in the range of 64000-576000, and resubmit your job For a list of supported bitrates, see: https://docs.aws.amazon.com/mediaconvert/latest/ug/aac-support.html
+File ID: 1003:1748921481101-2e2zp9, Status: COMPLETE
+File ID: 1004:1748921492487-dlwuvl, Status: COMPLETE
+File ID: 1005:1748921503929-oe9gch, Status: COMPLETE
+File ID: 1006:1748921515318-si4lgk, Status: COMPLETE
+File ID: 1007:1748921526714-red833, Status: COMPLETE
+File ID: 1009:1748921538279-0vy9zj, Status: COMPLETE
+File ID: 1010:1748921559793-w2sjm6, Status: COMPLETE
+File ID: 1011:1748921571151-9eeww9, Status: COMPLETE
+File ID: 1013:1748921592651-rjmtvx, Status: COMPLETE
+Job 1014: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/audioDescriptions/0/codecSettings/aacSettings/bitrate: You specified a value for Bitrate that is not valid with the combination of Profile LC, Coding mode CODING_MODE_2_0, and Sample rate 48000 you selected. Specify a bitrate in the range of 64000-576000, and resubmit your job For a list of supported bitrates, see: https://docs.aws.amazon.com/mediaconvert/latest/ug/aac-support.html
+File ID: 1015:1748921614416-fh7po5, Status: COMPLETE
+File ID: 1016:1748921625987-cdkb44, Status: COMPLETE
+File ID: 1017:1748921637306-vgd4zh, Status: COMPLETE
+File ID: 1021:1748921668859-jur03i, Status: COMPLETE
+File ID: 1030:1748921680231-0cenh5, Status: COMPLETE
+File ID: 1031:1748921691586-ipd0g5, Status: COMPLETE
+File ID: 1033:1748921713089-jqgh99, Status: COMPLETE
+Job 1042: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 720
+File ID: 1048:1748921724604-pj2b6c, Status: COMPLETE
+File ID: 1052:1748921746077-qgxze1, Status: COMPLETE
+File ID: 1057:1748921757461-5fmm23, Status: COMPLETE
+Job 1058: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/codecProfile: Should match all dependencies: See other errors for more details | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings: Should match exactly one schema defined in "oneOf" | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/numberBFramesBetweenReferenceFrames: Should be less than or equal to 0 | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/codecProfile: Should be equal to one of the allowed values in ["HIGH","HIGH_10BIT","HIGH_422","HIGH_422_10BIT","MAIN"]
+File ID: 1059:1748921789448-0sorno, Status: COMPLETE
+File ID: 1060:1748921811004-29i9n8, Status: COMPLETE
+Job 1061: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 752
+File ID: 1062:1748921832835-h7syf1, Status: COMPLETE
+File ID: 1064:1748921864536-1h99a5, Status: COMPLETE
+File ID: 108:1748921875848-2drkqa, Status: ERROR
+File ID: 109:1748921886669-il6ug7, Status: COMPLETE
+File ID: 110:1748921908202-rgoid0, Status: ERROR
+File ID: 111:1748921918902-nelou7, Status: ERROR
+File ID: 112:1748921929676-janxv9, Status: COMPLETE
+File ID: 113:1748921940906-ergvog, Status: COMPLETE
+File ID: 114:1748921952165-dc3ouh, Status: COMPLETE
+File ID: 13:1748921963468-1q4cyp, Status: COMPLETE
+File ID: 143:1748921974837-cl678k, Status: COMPLETE
+File ID: 144:1748921996297-d9r21n, Status: COMPLETE
+File ID: 145:1748922017836-59clz5, Status: COMPLETE
+File ID: 159:1748922039413-1qomyo, Status: COMPLETE
+File ID: 162:1748922060958-n38lpx, Status: COMPLETE
+File ID: 164:1748922092589-c8fep2, Status: COMPLETE
+File ID: 17:1748922124280-48azkn, Status: COMPLETE
+File ID: 181:1748922135634-hdobv3, Status: COMPLETE
+File ID: 19:1748922147015-0wzp0e, Status: COMPLETE
+File ID: 20:1748922158457-hw5d2t, Status: COMPLETE
+File ID: 23:1748922169825-dj6k5n, Status: COMPLETE
+File ID: 234:1748922181196-tvpt1s, Status: COMPLETE
+File ID: 238:1748922192587-ulxrfj, Status: COMPLETE
+File ID: 340:1748922203853-6eh6ci, Status: COMPLETE
+Job 341: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 752
+Job 342: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 576
+File ID: 365:1748922215621-p6ge6c, Status: COMPLETE
+File ID: 369:1748922237111-ngkrpe, Status: COMPLETE
+Job 434: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 1200
+Job 435: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 832
+Job 437: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/maxBitrate: Should be less than or equal to 16800000
+File ID: 440:1748922249105-ij78p5, Status: ERROR
+File ID: 443:1748922259930-38esvi, Status: COMPLETE
+File ID: 455:1748922271274-vx8koe, Status: COMPLETE
+File ID: 456:1748922292729-hdnttn, Status: COMPLETE
+File ID: 457:1748922324310-r4aruk, Status: COMPLETE
+File ID: 459:1748922345837-rrb464, Status: COMPLETE
+Job 460: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/codecProfile: Should match all dependencies: See other errors for more details | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings: Should match exactly one schema defined in "oneOf" | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/numberBFramesBetweenReferenceFrames: Should be less than or equal to 0 | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/codecProfile: Should be equal to one of the allowed values in ["HIGH","HIGH_10BIT","HIGH_422","HIGH_422_10BIT","MAIN"]
+File ID: 463:1748922377762-qwinp8, Status: COMPLETE
+File ID: 464:1748922399615-jrwaaf, Status: COMPLETE
+Job 465: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 752
+File ID: 482:1748922421321-rxe1yw, Status: ERROR
+File ID: 496:1748922432133-788w8q, Status: COMPLETE
+File ID: 50:1748922443560-ebxl47, Status: COMPLETE
+File ID: 504:1748922454906-ph9l6y, Status: COMPLETE
+File ID: 505:1748922466331-yi69rb, Status: COMPLETE
+Job 521: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings: Your job contains values for the following settings that are incompatible: Rate control mode, Bitrate, and Max bitrate. Adjust your settings and resubmit your job. Some valid combinations of settings are these: Set Rate control mode to QVBR, specify a value for Max bitrate, and don't specify a value for Bitrate. Or, set Rate control mode to CBR, specify a value for Bitrate, and don't specify a value for Max bitrate.
+Job 522: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings: Your job contains values for the following settings that are incompatible: Rate control mode, Bitrate, and Max bitrate. Adjust your settings and resubmit your job. Some valid combinations of settings are these: Set Rate control mode to QVBR, specify a value for Max bitrate, and don't specify a value for Bitrate. Or, set Rate control mode to CBR, specify a value for Bitrate, and don't specify a value for Max bitrate.
+Job 523: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings: Your job contains values for the following settings that are incompatible: Rate control mode, Bitrate, and Max bitrate. Adjust your settings and resubmit your job. Some valid combinations of settings are these: Set Rate control mode to QVBR, specify a value for Max bitrate, and don't specify a value for Bitrate. Or, set Rate control mode to CBR, specify a value for Bitrate, and don't specify a value for Max bitrate.
+File ID: 526:1748922478307-98esk5, Status: COMPLETE
+File ID: 527:1748922499778-dlpl5s, Status: COMPLETE
+File ID: 528:1748922531397-t1h7rp, Status: COMPLETE
+File ID: 530:1748922553004-9bwmh6, Status: COMPLETE
+File ID: 540:1748922584613-j0lm2t, Status: ERROR
+File ID: 541:1748922595532-9aej3w, Status: ERROR
+File ID: 542:1748922606284-9p5d82, Status: COMPLETE
+File ID: 544:1748922627736-gjx60f, Status: COMPLETE
+File ID: 559:1748922639051-4nycfp, Status: ERROR
+File ID: 575:1748922649925-14m5au, Status: COMPLETE
+Job 577: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings: You set Rate control mode to CBR but the settings values for Bitrate and Max bitrate aren't compatible with CBR. When you use CBR, you must specify a value for Bitrate and you must not specify a value for Max bitrate. Adjust your job settings and then resubmit your job.
+Job 579: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/audioDescriptions/0/codecSettings/aacSettings/bitrate: You specified a value for Bitrate that is not valid with the combination of Profile LC, Coding mode CODING_MODE_2_0, and Sample rate 44100 you selected. Specify a bitrate in the range of 64000-512000, and resubmit your job For a list of supported bitrates, see: https://docs.aws.amazon.com/mediaconvert/latest/ug/aac-support.html
+File ID: 58:1748922681981-o3hnvh, Status: COMPLETE
+File ID: 59:1748922693239-uj8q28, Status: COMPLETE
+File ID: 595:1748922704649-yeaztw, Status: COMPLETE
+Job 596: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 832
+File ID: 60:1748922716152-2xn4d1, Status: COMPLETE
+File ID: 61:1748922727376-9l4lqc, Status: COMPLETE
+File ID: 63:1748922738648-tbvura, Status: COMPLETE
+File ID: 683:1748922770217-4z1spo, Status: COMPLETE
+File ID: 688:1748922791743-iuah7m, Status: COMPLETE
+File ID: 689:1748922803099-csexcs, Status: COMPLETE
+File ID: 690:1748922814459-hveg18, Status: COMPLETE
+File ID: 693:1748922825858-ew2g9c, Status: COMPLETE
+File ID: 695:1748922837430-qsls74, Status: COMPLETE
+File ID: 697:1748922848775-9fam37, Status: COMPLETE
+File ID: 717:1748922860166-o7i8im, Status: COMPLETE
+File ID: 718:1748922871556-6bffqm, Status: COMPLETE
+File ID: 719:1748922883044-kag6ss, Status: COMPLETE
+File ID: 720:1748922894483-sjj554, Status: COMPLETE
+File ID: 723:1748922905830-sb12jm, Status: COMPLETE
+File ID: 747:1748922917236-4jnvb1, Status: COMPLETE
+File ID: 770:1748922938747-8jbpv5, Status: COMPLETE
+Job 772: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 1808
+Job 776: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 576
+File ID: 789:1748922950550-bsqd4c, Status: COMPLETE
+Job 80: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 1808
+Job 802: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 720
+Job 803: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 720
+Job 804: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 720
+Job 805: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 720
+Job 806: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 720
+Job 807: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 576
+Job 808: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 1808
+Job 81: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 576
+Job 816: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 1808
+Job 82: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 752
+Job 821: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 720
+Job 822: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 720
+Job 823: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 720
+Job 824: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 720
+Job 826: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 720
+Job 834: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 720
+Job 835: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 720
+Job 836: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 720
+Job 837: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 720
+File ID: 846:1748922966079-b7r0eu, Status: COMPLETE
+Job 849: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 832
+File ID: 85:1748922977692-lpcokz, Status: COMPLETE
+File ID: 850:1748922989110-u3tldc, Status: COMPLETE
+Job 852: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 720
+File ID: 854:1748923020983-egdyes, Status: COMPLETE
+File ID: 856:1748923032325-amenrt, Status: COMPLETE
+Job 857: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 1808
+File ID: 86:1748923043829-xet6qr, Status: COMPLETE
+File ID: 867:1748923055222-t3nlqc, Status: COMPLETE
+File ID: 868:1748923076800-6w5qj5, Status: COMPLETE
+File ID: 87:1748923098269-yxqkte, Status: COMPLETE
+File ID: 872:1748923109624-btky2n, Status: COMPLETE
+File ID: 873:1748923120958-cknlbe, Status: COMPLETE
+Job 874: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 1808
+File ID: 88:1748923132562-oatdfz, Status: COMPLETE
+Job 887: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 1808
+File ID: 89:1748923144042-meb0lj, Status: COMPLETE
+File ID: 90:1748923155217-8va4k5, Status: COMPLETE
+File ID: 91:1748923176699-yrvvq4, Status: COMPLETE
+Job 913: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/captionDescriptions/0/destinationSettings/burninDestinationSettings: Should match all dependencies: See other errors for more details | /outputGroups/0/outputs/0/captionDescriptions/0/destinationSettings/destinationType: Must be BURN_IN
+File ID: 919:1748923188218-phnt6k, Status: COMPLETE
+File ID: 92:1748923209525-nrywbx, Status: COMPLETE
+Job 920: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/audioDescriptions/0/codecSettings/aacSettings/bitrate: You specified a value for Bitrate that is not valid with the combination of Profile LC, Coding mode CODING_MODE_2_0, and Sample rate 48000 you selected. Specify a bitrate in the range of 64000-576000, and resubmit your job For a list of supported bitrates, see: https://docs.aws.amazon.com/mediaconvert/latest/ug/aac-support.html
+File ID: 93:1748923231298-nzo9m5, Status: COMPLETE
+File ID: 94:1748923252743-nbupcp, Status: COMPLETE
+File ID: 948:1748923264126-1v2g5e, Status: COMPLETE
+File ID: 949:1748923275594-6t9enw, Status: COMPLETE
+File ID: 950:1748923286905-0ap6iw, Status: COMPLETE
+File ID: 951:1748923298285-zecx8q, Status: COMPLETE
+File ID: 957:1748923309610-zbnuvk, Status: COMPLETE
+Job 958: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/audioDescriptions/0/codecSettings/aacSettings/bitrate: You specified a value for Bitrate that is not valid with the combination of Profile LC, Coding mode CODING_MODE_2_0, and Sample rate 48000 you selected. Specify a bitrate in the range of 64000-576000, and resubmit your job For a list of supported bitrates, see: https://docs.aws.amazon.com/mediaconvert/latest/ug/aac-support.html
+File ID: 959:1748923321254-m5ze0l, Status: COMPLETE
+File ID: 960:1748923332545-ivqisj, Status: COMPLETE
+Job 961: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/audioDescriptions/0/codecSettings/aacSettings/bitrate: You specified a value for Bitrate that is not valid with the combination of Profile LC, Coding mode CODING_MODE_2_0, and Sample rate 48000 you selected. Specify a bitrate in the range of 64000-576000, and resubmit your job For a list of supported bitrates, see: https://docs.aws.amazon.com/mediaconvert/latest/ug/aac-support.html
+File ID: 962:1748923344240-1tjcbu, Status: COMPLETE
+File ID: 963:1748923355516-5g2ivj, Status: COMPLETE
+File ID: 964:1748923366957-pbsbw6, Status: COMPLETE
+File ID: 965:1748923378437-hgyqcb, Status: COMPLETE
+File ID: 966:1748923389926-y4zwmy, Status: COMPLETE
+File ID: 967:1748923401294-izauwt, Status: COMPLETE
+File ID: 975:1748923412745-f1tx63, Status: ERROR
+File ID: 982:1748923423568-seuten, Status: COMPLETE
+File ID: 986:1748923435058-1lu61q, Status: COMPLETE
+File ID: 987:1748923446505-bg9dyw, Status: COMPLETE
+File ID: 988:1748923457843-h5pas8, Status: COMPLETE
+File ID: 989:1748923469398-z7r16m, Status: COMPLETE
+File ID: 990:1748923480708-y53167, Status: COMPLETE
+File ID: 991:1748923492124-6tys5j, Status: COMPLETE
+File ID: 993:1748923503438-7jdxez, Status: COMPLETE
+File ID: 994:1748923514759-wgear0, Status: COMPLETE
+File ID: 995:1748923526184-9jriuk, Status: COMPLETE
+File ID: 996:1748923537563-jf27ja, Status: COMPLETE
+File ID: 997:1748923548958-lsefud, Status: COMPLETE
+Success: 127, Errors: 58
+--- End of Summary ---
+
+--- Job Execution Summary (2025-06-03 05:44:15) ---
+Submitted 49 MediaConvert jobs
+File ID: 1002:1748928675661-ikqbi9, Status: COMPLETE
+File ID: 1014:1748928687005-0g3fmb, Status: COMPLETE
+File ID: 1042:1748928698245-f1yre5, Status: COMPLETE
+Job 1058: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/codecProfile: Should match all dependencies: See other errors for more details | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings: Should match exactly one schema defined in "oneOf" | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/numberBFramesBetweenReferenceFrames: Should be less than or equal to 0 | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/codecProfile: Should be equal to one of the allowed values in ["HIGH","HIGH_10BIT","HIGH_422","HIGH_422_10BIT","MAIN"]
+File ID: 1061:1748928709740-kq5tbb, Status: COMPLETE
+File ID: 341:1748928731182-jm3zmp, Status: COMPLETE
+File ID: 342:1748928742400-a1q72g, Status: COMPLETE
+File ID: 434:1748928753618-qolvhf, Status: COMPLETE
+File ID: 435:1748928805357-4f6skx, Status: COMPLETE
+File ID: 437:1748928856988-lx02bb, Status: COMPLETE
+File ID: 440:1748928868253-qzqmye, Status: COMPLETE
+Job 460: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/codecProfile: Should match all dependencies: See other errors for more details | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings: Should match exactly one schema defined in "oneOf" | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/numberBFramesBetweenReferenceFrames: Should be less than or equal to 0 | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/codecProfile: Should be equal to one of the allowed values in ["HIGH","HIGH_10BIT","HIGH_422","HIGH_422_10BIT","MAIN"]
+File ID: 465:1748928899945-hbma0o, Status: COMPLETE
+File ID: 482:1748928921312-9ihk7o, Status: ERROR
+Job 521: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/bitrate: Should be less than or equal to 12000000
+Job 522: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 720
+File ID: 523:1748928932520-n10u3w, Status: COMPLETE
+File ID: 579:1748928943760-c0336s, Status: COMPLETE
+File ID: 596:1748928965080-kmzdy6, Status: COMPLETE
+File ID: 772:1748928986403-yad85k, Status: ERROR
+File ID: 776:1748928997092-h8rxw5, Status: COMPLETE
+File ID: 80:1748929018499-i1y9sp, Status: COMPLETE
+File ID: 802:1748929029687-snx1cy, Status: ERROR
+File ID: 803:1748929040621-59o24i, Status: COMPLETE
+File ID: 804:1748929051815-tapzvq, Status: COMPLETE
+File ID: 805:1748929063099-3hgorx, Status: COMPLETE
+File ID: 806:1748929074456-txd40q, Status: COMPLETE
+File ID: 807:1748929085760-m72jbw, Status: COMPLETE
+File ID: 808:1748929097005-7j81hj, Status: COMPLETE
+File ID: 81:1748929118345-hbe0sf, Status: COMPLETE
+File ID: 816:1748929129648-602qm9, Status: COMPLETE
+File ID: 82:1748929140974-gbhz2l, Status: COMPLETE
+File ID: 821:1748929152252-acy5z3, Status: COMPLETE
+File ID: 822:1748929173765-83kty5, Status: COMPLETE
+File ID: 823:1748929185026-lmrbvh, Status: COMPLETE
+File ID: 824:1748929196298-pnmx8l, Status: COMPLETE
+File ID: 826:1748929217664-yw8h95, Status: COMPLETE
+File ID: 834:1748929228904-aq4ko5, Status: COMPLETE
+File ID: 835:1748929250298-5vlt1b, Status: COMPLETE
+File ID: 836:1748929271798-roaayi, Status: COMPLETE
+File ID: 837:1748929293110-iyr2cw, Status: COMPLETE
+File ID: 849:1748929304341-0p1mmc, Status: COMPLETE
+File ID: 852:1748929346024-ak1co6, Status: COMPLETE
+File ID: 857:1748929357284-869258, Status: COMPLETE
+File ID: 874:1748929378713-znsh92, Status: COMPLETE
+File ID: 887:1748929389999-4gkrp1, Status: COMPLETE
+File ID: 920:1748929421478-110k1a, Status: COMPLETE
+File ID: 958:1748929432747-ghqeba, Status: COMPLETE
+File ID: 961:1748929444004-a65eyj, Status: COMPLETE
+Success: 42, Errors: 7
+--- End of Summary ---
+
+--- Job Execution Summary (2025-06-03 05:58:42) ---
+Submitted 2 MediaConvert jobs
+File ID: 521:1748930290109-0xdcgz, Status: COMPLETE
+File ID: 522:1748930311560-i4z5sy, Status: ERROR
+Success: 1, Errors: 1
+--- End of Summary ---
+
+--- Job Execution Summary (2025-06-03 11:51:21) ---
+Submitted 1 MediaConvert jobs
+Job 913: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 720
+Success: 0, Errors: 1
+--- End of Summary ---
+
+--- Job Execution Summary (2025-06-03 11:51:56) ---
+Submitted 1 MediaConvert jobs
+File ID: 913:1748951505836-e7wn7j, Status: COMPLETE
+Success: 1, Errors: 0
+--- End of Summary ---
+
+--- Job Execution Summary (2025-06-03 11:55:15) ---
+Submitted 1 MediaConvert jobs
+Job 913: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/captionDescriptions/0/destinationSettings/burninDestinationSettings: Should match all dependencies: See other errors for more details | /outputGroups/0/outputs/0/captionDescriptions/0/destinationSettings/destinationType: Must be BURN_IN
+Success: 0, Errors: 1
+--- End of Summary ---
+
+--- Job Execution Summary (2025-06-03 12:03:05) ---
+Submitted 1 MediaConvert jobs
+File ID: 913:1748952174466-stpx0i, Status: COMPLETE
+Success: 1, Errors: 0
+--- End of Summary ---
+
+--- Job Execution Summary (2025-06-03 12:09:09) ---
+Submitted 1 MediaConvert jobs
+File ID: 913:1748952537931-p5hyuu, Status: COMPLETE
+Success: 1, Errors: 0
+--- End of Summary ---
+
+--- Job Execution Summary (2025-06-04 05:02:46) ---
+Submitted 1 MediaConvert jobs
+File ID: 111:1749013345047-gy6k5z, Status: COMPLETE
+Success: 1, Errors: 0
+--- End of Summary ---
+
+--- Job Execution Summary (2025-06-04 05:32:35) ---
+Submitted 1 MediaConvert jobs
+Job 577: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings: You set Rate control mode to VBR and you left the value for Bitrate undefined. But Bitrate is a required setting when you use VBR. Adjust your job settings and then resubmit your job.
+Success: 0, Errors: 1
+--- End of Summary ---
+
+--- Job Execution Summary (2025-06-04 05:32:57) ---
+Submitted 1 MediaConvert jobs
+Job 577: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings: maxBitrate is a required property
+Success: 0, Errors: 1
+--- End of Summary ---
+
+--- Job Execution Summary (2025-06-04 05:35:13) ---
+Submitted 1 MediaConvert jobs
+File ID: 577:1749015301954-7qs992, Status: COMPLETE
+Success: 1, Errors: 0
+--- End of Summary ---
+
+--- Job Execution Summary (2025-06-04 05:38:33) ---
+Submitted 1 MediaConvert jobs
+File ID: 577:1749015502488-037q2e, Status: COMPLETE
+Success: 1, Errors: 0
+--- End of Summary ---
+
+--- Job Execution Summary (2025-06-04 08:35:27) ---
+Submitted 9 MediaConvert jobs
+File ID: 108:1749025974858-v768s7, Status: COMPLETE
+File ID: 110:1749025996262-oxy7tl, Status: COMPLETE
+File ID: 522:1749026017710-7lsrnq, Status: COMPLETE
+File ID: 540:1749026029013-6afzll, Status: COMPLETE
+File ID: 541:1749026040351-1ar1oy, Status: COMPLETE
+File ID: 559:1749026061834-h3fx4k, Status: COMPLETE
+File ID: 772:1749026073070-18kcli, Status: COMPLETE
+File ID: 802:1749026094468-i3d5lb, Status: COMPLETE
+File ID: 975:1749026115984-aa7d3y, Status: COMPLETE
+Success: 9, Errors: 0
+--- End of Summary ---

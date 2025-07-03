@@ -1,0 +1,87 @@
+Error submitting MediaConvert job for 915
+Timestamp: 2025-05-29T08:56:11.807862
+
+Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/audioDescriptions/0/codecSettings/aacSettings/bitrate: You specified a value for Bitrate that is not valid with the combination of Profile LC, Coding mode CODING_MODE_2_0, and Sample rate 48000 you selected. Specify a bitrate in the range of 64000-576000, and resubmit your job For a list of supported bitrates, see: https://docs.aws.amazon.com/mediaconvert/latest/ug/aac-support.html
+
+Job settings:
+{
+  "Settings": {
+    "Inputs": [
+      {
+        "TimecodeSource": "ZEROBASED",
+        "VideoSelector": {},
+        "AudioSelectors": {
+          "Audio Selector 1": {
+            "DefaultSelection": "DEFAULT"
+          }
+        },
+        "FileInput": "s3://fw-mc-test/mp4/915/915_882684961_source.mp4"
+      }
+    ],
+    "OutputGroups": [
+      {
+        "Name": "File Group",
+        "OutputGroupSettings": {
+          "Type": "FILE_GROUP_SETTINGS",
+          "FileGroupSettings": {
+            "Destination": "s3://fw-mc-test/mp4/915/"
+          }
+        },
+        "Outputs": [
+          {
+            "ContainerSettings": {
+              "Container": "MP4",
+              "Mp4Settings": {}
+            },
+            "VideoDescription": {
+              "CodecSettings": {
+                "H264Settings": {
+                  "RateControlMode": "VBR",
+                  "Bitrate": 128000,
+                  "MaxBitrate": 320000,
+                  "FramerateControl": "INITIALIZE_FROM_SOURCE",
+                  "FramerateNumerator": 25,
+                  "FramerateDenominator": 1,
+                  "CodecProfile": "BASELINE",
+                  "EntropyEncoding": "CAVLC",
+                  "NumberBFramesBetweenReferenceFrames": 0,
+                  "CodecLevel": "LEVEL_1_3"
+                },
+                "Codec": "H_264"
+              },
+              "Width": 320,
+              "Height": 180,
+              "VideoPreprocessors": {
+                "ColorCorrector": {
+                  "ColorSpaceConversion": "FORCE_709"
+                }
+              }
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 24000,
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
+                },
+                "AudioNormalizationSettings": {
+                  "TargetLkfs": -23.0,
+                  "TruePeakLimiterThreshold": -1.5
+                }
+              }
+            ],
+            "NameModifier": "_320x180_128000_mc"
+          }
+        ]
+      }
+    ],
+    "TimecodeConfig": {
+      "Source": "ZEROBASED"
+    },
+    "FollowSource": 1
+  },
+  "Role": "arn:aws:iam::935206693453:role/MediaConvertRole"
+}

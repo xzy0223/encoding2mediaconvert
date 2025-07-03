@@ -1,0 +1,65 @@
+{
+  "Settings": {
+    "Inputs": [
+      {
+        "TimecodeSource": "ZEROBASED",
+        "VideoSelector": {},
+        "AudioSelectors": {
+          "Audio Selector 1": {
+            "DefaultSelection": "DEFAULT"
+          }
+        },
+        "FileInput": "{SOURCE_S3_URL}"
+      }
+    ],
+    "OutputGroups": [
+      {
+        "Name": "File Group",
+        "OutputGroupSettings": {
+          "Type": "FILE_GROUP_SETTINGS",
+          "FileGroupSettings": {
+            "Destination": "S3_OUTPUT_URL"
+          }
+        },
+        "Outputs": [
+          {
+            "ContainerSettings": {
+              "Container": "MP4",
+              "Mp4Settings": {}
+            },
+            "VideoDescription": {
+              "CodecSettings": {
+                "H264Settings": {
+                  "RateControlMode": "VBR",
+                  "Bitrate": 700000,
+                  "MaxBitrate": 1750000,
+                  "QualityTuningLevel": "MULTI_PASS_HQ"
+                },
+                "Codec": "H_264"
+              },
+              "Width": 1280,
+              "Height": 720
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 192000,
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
+                }
+              }
+            ],
+            "NameModifier": "_1280x720_700000_mc"
+          }
+        ]
+      }
+    ],
+    "TimecodeConfig": {
+      "Source": "ZEROBASED"
+    },
+    "FollowSource": 1
+  }
+}

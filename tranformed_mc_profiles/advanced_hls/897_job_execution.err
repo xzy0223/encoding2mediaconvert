@@ -1,0 +1,274 @@
+MediaConvert job 1750386928047-f6xbm9 failed
+Timestamp: 2025-06-20T02:35:38.723613
+
+Job details:
+{
+  "AccelerationSettings": {
+    "Mode": "DISABLED"
+  },
+  "AccelerationStatus": "NOT_APPLICABLE",
+  "Arn": "arn:aws:mediaconvert:us-east-1:935206693453:jobs/1750386928047-f6xbm9",
+  "BillingTagsSource": "JOB",
+  "ClientRequestToken": "a6fe0529-f7ca-49d7-885e-82a8db72cae7",
+  "CreatedAt": "2025-06-20 02:35:28+00:00",
+  "ErrorCode": 1075,
+  "ErrorMessage": "Unable to open input file [s3://fw-mc-test/advanced_hls/897/897_647198849_source.mp4]: [Failed probe/open: [no moov box found in file]]",
+  "Id": "1750386928047-f6xbm9",
+  "Messages": {
+    "Info": [],
+    "Warning": []
+  },
+  "Priority": 0,
+  "Queue": "arn:aws:mediaconvert:us-east-1:935206693453:queues/Default",
+  "Role": "arn:aws:iam::935206693453:role/MediaConvertRole",
+  "Settings": {
+    "FollowSource": 1,
+    "Inputs": [
+      {
+        "AudioSelectors": {
+          "Audio Selector 1": {
+            "DefaultSelection": "DEFAULT"
+          }
+        },
+        "FileInput": "s3://fw-mc-test/advanced_hls/897/897_647198849_source.mp4",
+        "TimecodeSource": "ZEROBASED",
+        "VideoSelector": {}
+      }
+    ],
+    "OutputGroups": [
+      {
+        "Name": "e2mc test",
+        "OutputGroupSettings": {
+          "HlsGroupSettings": {
+            "Destination": "s3://fw-mc-test/advanced_hls/897/",
+            "ManifestDurationFormat": "FLOATING_POINT",
+            "MinSegmentLength": 0,
+            "SegmentLength": 6
+          },
+          "Type": "HLS_GROUP_SETTINGS"
+        },
+        "Outputs": [
+          {
+            "ContainerSettings": {
+              "Container": "M3U8",
+              "M3u8Settings": {}
+            },
+            "NameModifier": "_1920x1080_5000K",
+            "VideoDescription": {
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "Bitrate": 5000000,
+                  "CodecProfile": "HIGH",
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateDenominator": 1,
+                  "FramerateNumerator": 25,
+                  "GopSize": 50.0,
+                  "GopSizeUnits": "FRAMES",
+                  "HrdBufferSize": 10000000,
+                  "MaxBitrate": 6250000,
+                  "MinIInterval": 5,
+                  "NumberBFramesBetweenReferenceFrames": 2,
+                  "ParControl": "SPECIFIED",
+                  "ParDenominator": 1,
+                  "ParNumerator": 1,
+                  "QualityTuningLevel": "MULTI_PASS_HQ",
+                  "RateControlMode": "VBR"
+                }
+              },
+              "Height": 1080,
+              "ScalingBehavior": "DEFAULT",
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "Width": 1920
+            }
+          },
+          {
+            "ContainerSettings": {
+              "Container": "M3U8",
+              "M3u8Settings": {}
+            },
+            "NameModifier": "_1920x1080_3000K",
+            "VideoDescription": {
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "Bitrate": 3000000,
+                  "CodecProfile": "HIGH",
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateDenominator": 1,
+                  "FramerateNumerator": 25,
+                  "GopSize": 50.0,
+                  "GopSizeUnits": "FRAMES",
+                  "HrdBufferSize": 6000000,
+                  "MaxBitrate": 3750000,
+                  "MinIInterval": 5,
+                  "NumberBFramesBetweenReferenceFrames": 2,
+                  "ParControl": "SPECIFIED",
+                  "ParDenominator": 1,
+                  "ParNumerator": 1,
+                  "QualityTuningLevel": "MULTI_PASS_HQ",
+                  "RateControlMode": "VBR"
+                }
+              },
+              "Height": 1080,
+              "ScalingBehavior": "DEFAULT",
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "Width": 1920
+            }
+          },
+          {
+            "ContainerSettings": {
+              "Container": "M3U8",
+              "M3u8Settings": {}
+            },
+            "NameModifier": "_1280x720_2000K",
+            "VideoDescription": {
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "Bitrate": 2000000,
+                  "CodecProfile": "HIGH",
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateDenominator": 1,
+                  "FramerateNumerator": 25,
+                  "GopSize": 50.0,
+                  "GopSizeUnits": "FRAMES",
+                  "HrdBufferSize": 4000000,
+                  "MaxBitrate": 2500000,
+                  "MinIInterval": 5,
+                  "NumberBFramesBetweenReferenceFrames": 2,
+                  "ParControl": "SPECIFIED",
+                  "ParDenominator": 1,
+                  "ParNumerator": 1,
+                  "QualityTuningLevel": "MULTI_PASS_HQ",
+                  "RateControlMode": "VBR"
+                }
+              },
+              "Height": 720,
+              "ScalingBehavior": "DEFAULT",
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "Width": 1280
+            }
+          },
+          {
+            "ContainerSettings": {
+              "Container": "M3U8",
+              "M3u8Settings": {}
+            },
+            "NameModifier": "_1024x576_1200K",
+            "VideoDescription": {
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "Bitrate": 1200000,
+                  "CodecProfile": "HIGH",
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateDenominator": 1,
+                  "FramerateNumerator": 25,
+                  "GopSize": 50.0,
+                  "GopSizeUnits": "FRAMES",
+                  "HrdBufferSize": 1400000,
+                  "MaxBitrate": 1500000,
+                  "MinIInterval": 5,
+                  "NumberBFramesBetweenReferenceFrames": 2,
+                  "ParControl": "SPECIFIED",
+                  "ParDenominator": 1,
+                  "ParNumerator": 1,
+                  "QualityTuningLevel": "MULTI_PASS_HQ",
+                  "RateControlMode": "VBR"
+                }
+              },
+              "Height": 576,
+              "ScalingBehavior": "DEFAULT",
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "Width": 1024
+            }
+          },
+          {
+            "ContainerSettings": {
+              "Container": "M3U8",
+              "M3u8Settings": {}
+            },
+            "NameModifier": "_512x288_500K",
+            "VideoDescription": {
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "Bitrate": 500000,
+                  "CodecProfile": "BASELINE",
+                  "EntropyEncoding": "CAVLC",
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateDenominator": 1,
+                  "FramerateNumerator": 25,
+                  "GopSize": 50.0,
+                  "GopSizeUnits": "FRAMES",
+                  "HrdBufferSize": 1000000,
+                  "MaxBitrate": 625000,
+                  "MinIInterval": 5,
+                  "NumberBFramesBetweenReferenceFrames": 0,
+                  "ParControl": "SPECIFIED",
+                  "ParDenominator": 1,
+                  "ParNumerator": 1,
+                  "QualityTuningLevel": "MULTI_PASS_HQ",
+                  "RateControlMode": "VBR"
+                }
+              },
+              "Height": 288,
+              "ScalingBehavior": "DEFAULT",
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "Width": 512
+            }
+          },
+          {
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "AacSettings": {
+                    "Bitrate": 128000,
+                    "CodingMode": "CODING_MODE_2_0",
+                    "SampleRate": 48000
+                  },
+                  "Codec": "AAC"
+                }
+              }
+            ],
+            "ContainerSettings": {
+              "Container": "M3U8",
+              "M3u8Settings": {}
+            },
+            "NameModifier": "_audio_128K_aac_stereo",
+            "OutputSettings": {
+              "HlsSettings": {
+                "AudioTrackType": "AUDIO_ONLY_VARIANT_STREAM"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "TimecodeConfig": {
+      "Source": "ZEROBASED"
+    }
+  },
+  "Status": "ERROR",
+  "StatusUpdateInterval": "SECONDS_60",
+  "Timing": {
+    "FinishTime": "2025-06-20 02:35:30+00:00",
+    "StartTime": "2025-06-20 02:35:29+00:00",
+    "SubmitTime": "2025-06-20 02:35:28+00:00"
+  },
+  "UserMetadata": {}
+}
+
+Error message:
+Unable to open input file [s3://fw-mc-test/advanced_hls/897/897_647198849_source.mp4]: [Failed probe/open: [no moov box found in file]]

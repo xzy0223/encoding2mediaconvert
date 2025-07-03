@@ -1,0 +1,86 @@
+Error submitting MediaConvert job for 1039
+Timestamp: 2025-06-17T07:01:20.323467
+
+Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/captionDescriptions/0/destinationSettings/burninDestinationSettings: You specified one or more custom font files in your output captions, but did not specify all required types: regular, bold, italic, and bold italic. To resolve: Specify each required custom font file type, or remove all custom font files. Then resubmit your job.
+
+Job settings:
+{
+  "Settings": {
+    "Inputs": [
+      {
+        "TimecodeSource": "ZEROBASED",
+        "VideoSelector": {},
+        "AudioSelectors": {
+          "Audio Selector 1": {
+            "DefaultSelection": "DEFAULT"
+          }
+        },
+        "FileInput": "s3://fw-mc-test/mpegts/1039/1039_808758726_source.mp4"
+      }
+    ],
+    "OutputGroups": [
+      {
+        "Name": "File Group",
+        "OutputGroupSettings": {
+          "Type": "FILE_GROUP_SETTINGS",
+          "FileGroupSettings": {
+            "Destination": "s3://fw-mc-test/mpegts/1039/"
+          }
+        },
+        "Outputs": [
+          {
+            "ContainerSettings": {
+              "Container": "M2TS",
+              "M2tsSettings": {}
+            },
+            "VideoDescription": {
+              "CodecSettings": {
+                "H264Settings": {
+                  "RateControlMode": "CBR",
+                  "Bitrate": 5000000,
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateNumerator": 25,
+                  "FramerateDenominator": 1,
+                  "GopSize": 50,
+                  "MinIInterval": 30,
+                  "QualityTuningLevel": "MULTI_PASS_HQ"
+                },
+                "Codec": "H_264"
+              },
+              "Width": 1920,
+              "Height": 1080
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 160000,
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
+                }
+              }
+            ],
+            "CaptionDescriptions": [
+              {
+                "DestinationSettings": {
+                  "DestinationType": "BURN_IN",
+                  "BurninDestinationSettings": {
+                    "FontFileRegular": "https://dvbsubtitlefonts.channel4.com/TiresiasScreenfont.ttf"
+                  }
+                }
+              }
+            ],
+            "NameModifier": "_1920x1080_5000000_mc"
+          }
+        ]
+      }
+    ],
+    "TimecodeConfig": {
+      "Source": "ZEROBASED"
+    },
+    "FollowSource": 1
+  },
+  "Role": "arn:aws:iam::935206693453:role/MediaConvertRole"
+}

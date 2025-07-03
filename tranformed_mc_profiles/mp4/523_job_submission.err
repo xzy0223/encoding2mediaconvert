@@ -1,0 +1,81 @@
+Error submitting MediaConvert job for 523
+Timestamp: 2025-06-03T03:47:58.139317
+
+Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings: Your job contains values for the following settings that are incompatible: Rate control mode, Bitrate, and Max bitrate. Adjust your settings and resubmit your job. Some valid combinations of settings are these: Set Rate control mode to QVBR, specify a value for Max bitrate, and don't specify a value for Bitrate. Or, set Rate control mode to CBR, specify a value for Bitrate, and don't specify a value for Max bitrate.
+
+Job settings:
+{
+  "Settings": {
+    "Inputs": [
+      {
+        "TimecodeSource": "ZEROBASED",
+        "VideoSelector": {},
+        "AudioSelectors": {
+          "Audio Selector 1": {
+            "DefaultSelection": "DEFAULT"
+          }
+        },
+        "FileInput": "s3://fw-mc-test/mp4/523/523_881364028_source.mp4"
+      }
+    ],
+    "OutputGroups": [
+      {
+        "Name": "File Group",
+        "OutputGroupSettings": {
+          "Type": "FILE_GROUP_SETTINGS",
+          "FileGroupSettings": {
+            "Destination": "s3://fw-mc-test/mp4/523/"
+          }
+        },
+        "Outputs": [
+          {
+            "ContainerSettings": {
+              "Container": "MP4",
+              "Mp4Settings": {}
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 128000,
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
+                },
+                "AudioNormalizationSettings": {
+                  "Algorithm": "ITU_BS_1770_2",
+                  "TargetLkfs": -24.0
+                }
+              }
+            ],
+            "VideoDescription": {
+              "CodecSettings": {
+                "H264Settings": {
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateNumerator": 30000,
+                  "FramerateDenominator": 1001,
+                  "CodecProfile": "MAIN",
+                  "CodecLevel": "LEVEL_3",
+                  "NumberReferenceFrames": 4
+                },
+                "Codec": "H_264"
+              },
+              "Width": 640,
+              "Height": 360,
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              }
+            },
+            "NameModifier": "_640x360_mc"
+          }
+        ]
+      }
+    ],
+    "TimecodeConfig": {
+      "Source": "ZEROBASED"
+    },
+    "FollowSource": 1
+  },
+  "Role": "arn:aws:iam::935206693453:role/MediaConvertRole"
+}

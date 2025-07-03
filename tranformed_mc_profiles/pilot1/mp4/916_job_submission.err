@@ -1,0 +1,85 @@
+Error submitting MediaConvert job for 916
+Timestamp: 2025-05-26T06:27:07.197633
+
+Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/codecProfile: Should match all dependencies: See other errors for more details | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings: Should match exactly one schema defined in "oneOf" | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings: numberBFramesBetweenReferenceFrames is a required property | /outputGroups/0/outputs/0/videoDescription/codecSettings/h264Settings/codecProfile: Should be equal to one of the allowed values in ["HIGH","HIGH_10BIT","HIGH_422","HIGH_422_10BIT","MAIN"]
+
+Job settings:
+{
+  "Settings": {
+    "Inputs": [
+      {
+        "TimecodeSource": "ZEROBASED",
+        "VideoSelector": {},
+        "AudioSelectors": {
+          "Audio Selector 1": {
+            "DefaultSelection": "DEFAULT"
+          }
+        },
+        "FileInput": "s3://fw-mc-test/mp4/916/916_882685063_source.mp4"
+      }
+    ],
+    "OutputGroups": [
+      {
+        "Name": "File Group",
+        "OutputGroupSettings": {
+          "Type": "FILE_GROUP_SETTINGS",
+          "FileGroupSettings": {
+            "Destination": "s3://fw-mc-test/mp4/916/"
+          }
+        },
+        "Outputs": [
+          {
+            "ContainerSettings": {
+              "Container": "MP4",
+              "Mp4Settings": {}
+            },
+            "VideoDescription": {
+              "CodecSettings": {
+                "H264Settings": {
+                  "RateControlMode": "VBR",
+                  "Bitrate": 160000,
+                  "MaxBitrate": 400000,
+                  "FramerateControl": "INITIALIZE_FROM_SOURCE",
+                  "FramerateNumerator": 25,
+                  "FramerateDenominator": 1,
+                  "CodecProfile": "BASELINE",
+                  "EntropyEncoding": "CAVLC"
+                },
+                "Codec": "H_264"
+              },
+              "Width": 480,
+              "Height": 270,
+              "VideoPreprocessors": {
+                "ColorCorrector": {
+                  "ColorSpaceConversion": "FORCE_709"
+                }
+              }
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 96000,
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
+                },
+                "AudioNormalizationSettings": {
+                  "TargetLkfs": -23.0,
+                  "TruePeakLimiterThreshold": -1.5
+                }
+              }
+            ],
+            "NameModifier": "_480x270_160000_mc"
+          }
+        ]
+      }
+    ],
+    "TimecodeConfig": {
+      "Source": "ZEROBASED"
+    },
+    "FollowSource": 1
+  },
+  "Role": "arn:aws:iam::935206693453:role/MediaConvertRole"
+}

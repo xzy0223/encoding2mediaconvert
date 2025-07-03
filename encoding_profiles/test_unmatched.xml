@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<query>
+  <userid>123456</userid>
+  <userkey>abcdef</userkey>
+  <action>AddMedia</action>
+  <source>http://example.com/source.mp4</source>
+  <format>
+    <output>mp44</output>
+    <video_codec>libx264</video_codec>
+    <bitrate>1000k</bitrate>
+    <size>1280x720</size>
+    <framerate>300</framerate>
+    <custom_param1>test1</custom_param1>
+    <custom_param2>test2</custom_param2>
+    <audio_codec>aac</audio_codec>
+    <audio_bitrate>128k</audio_bitrate>
+    <audio_sample_rate>44100</audio_sample_rate>
+    <destination>http://example.com/output.mp4</destination>
+  </format>
+</query>

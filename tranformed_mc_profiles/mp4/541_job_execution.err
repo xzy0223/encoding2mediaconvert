@@ -1,0 +1,110 @@
+MediaConvert job 1748922595532-9aej3w failed
+Timestamp: 2025-06-03T03:50:05.975114
+
+Job details:
+{
+  "AccelerationSettings": {
+    "Mode": "DISABLED"
+  },
+  "AccelerationStatus": "NOT_APPLICABLE",
+  "Arn": "arn:aws:mediaconvert:us-east-1:935206693453:jobs/1748922595532-9aej3w",
+  "BillingTagsSource": "JOB",
+  "ClientRequestToken": "7d6a11c1-a26e-446b-8ae3-50b040b76580",
+  "CreatedAt": "2025-06-03 03:49:55+00:00",
+  "ErrorCode": 1075,
+  "ErrorMessage": "Unable to open input file [s3://fw-mc-test/mp4/541/541_882418980_source.mp4]: [Failed probe/open: [no moov box found in file]]",
+  "Id": "1748922595532-9aej3w",
+  "Messages": {
+    "Info": [],
+    "Warning": []
+  },
+  "Priority": 0,
+  "Queue": "arn:aws:mediaconvert:us-east-1:935206693453:queues/Default",
+  "Role": "arn:aws:iam::935206693453:role/MediaConvertRole",
+  "Settings": {
+    "FollowSource": 1,
+    "Inputs": [
+      {
+        "AudioSelectors": {
+          "Audio Selector 1": {
+            "DefaultSelection": "DEFAULT"
+          }
+        },
+        "FileInput": "s3://fw-mc-test/mp4/541/541_882418980_source.mp4",
+        "TimecodeSource": "ZEROBASED",
+        "VideoSelector": {}
+      }
+    ],
+    "OutputGroups": [
+      {
+        "Name": "File Group",
+        "OutputGroupSettings": {
+          "FileGroupSettings": {
+            "Destination": "s3://fw-mc-test/mp4/541/"
+          },
+          "Type": "FILE_GROUP_SETTINGS"
+        },
+        "Outputs": [
+          {
+            "AudioDescriptions": [
+              {
+                "AudioNormalizationSettings": {
+                  "Algorithm": "ITU_BS_1770_2",
+                  "TargetLkfs": -24.0
+                },
+                "CodecSettings": {
+                  "AacSettings": {
+                    "Bitrate": 128000,
+                    "CodingMode": "CODING_MODE_2_0",
+                    "SampleRate": 48000
+                  },
+                  "Codec": "AAC"
+                }
+              }
+            ],
+            "ContainerSettings": {
+              "Container": "MP4",
+              "Mp4Settings": {}
+            },
+            "NameModifier": "_1280x720_1200000_mc",
+            "VideoDescription": {
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "Bitrate": 1200000,
+                  "CodecLevel": "LEVEL_3_1",
+                  "CodecProfile": "MAIN",
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateDenominator": 1,
+                  "FramerateNumerator": 30,
+                  "MaxBitrate": 1210000,
+                  "NumberReferenceFrames": 4,
+                  "RateControlMode": "VBR"
+                }
+              },
+              "Height": 720,
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "Width": 1280
+            }
+          }
+        ]
+      }
+    ],
+    "TimecodeConfig": {
+      "Source": "ZEROBASED"
+    }
+  },
+  "Status": "ERROR",
+  "StatusUpdateInterval": "SECONDS_60",
+  "Timing": {
+    "FinishTime": "2025-06-03 03:49:57+00:00",
+    "StartTime": "2025-06-03 03:49:56+00:00",
+    "SubmitTime": "2025-06-03 03:49:55+00:00"
+  },
+  "UserMetadata": {}
+}
+
+Error message:
+Unable to open input file [s3://fw-mc-test/mp4/541/541_882418980_source.mp4]: [Failed probe/open: [no moov box found in file]]

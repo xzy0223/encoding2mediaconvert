@@ -1,0 +1,448 @@
+2025-05-26 06:26:16,950 - root - INFO - Logging conversion details to: /home/ec2-user/e2mc_assistant/tranformed_mc_profiles/pilot1/mp4/916.log
+2025-05-26 06:26:16,951 - ConfigConverter - DEBUG - Parsed XML structure: {'output': 'mp4', 'video_codec': 'libx264', 'framerate': 25, 'profile': 'baseline', 'bitrate': '160k', 'size': '480x270', 'audio_codec': 'libfaac', 'audio_bitrate': '96k', 'audio_sample_rate': 48000, 'loudnorm': -23.0, 'loudnorm_range': 11, 'loudnorm_peak': -1.5, 'video_codec_parameters': {'colorprim': 'bt709', 'transfer': 'bt709', 'colormatrix': 'bt709', 'level': 30}, 'video_sync': 'passthrough', 'encoder': 'edc1', 'set_video_duration': 'yes', 'destination': 'http://test_url.s3.amazonaws.com/encoding.com.output/mock_mock_output_rendition_name_11111_916.mp4?acl=public-read'}
+2025-05-26 06:26:16,951 - ConfigConverter - INFO - Set RateControlMode to VBR because <cbr> doesn't exist and <maxrate> doesn't exist
+2025-05-26 06:26:16,951 - ConfigConverter - INFO - Set Bitrate to 160000 from <bitrate>=160k
+2025-05-26 06:26:16,951 - ConfigConverter - INFO - Setting MaxBitrate to 400000 (2.5 * Bitrate)
+2025-05-26 06:26:16,951 - ConfigConverter - INFO - Parameter bitrate processed by custom rate control handler
+2025-05-26 06:26:16,951 - ConfigConverter - INFO - Set AudioDescriptions[0].CodecSettings.Codec to AAC from <audio_codec>=libfaac
+2025-05-26 06:26:16,951 - ConfigConverter - INFO - Set AudioDescriptions[0].CodecSettings.AacSettings.Bitrate to default value 96000
+2025-05-26 06:26:16,951 - ConfigConverter - INFO - Set AudioDescriptions[0].CodecSettings.AacSettings.SampleRate to default value 48000
+2025-05-26 06:26:16,951 - ConfigConverter - INFO - Set AudioDescriptions[0].CodecSettings.AacSettings.CodingMode to CODING_MODE_2_0 (default stereo)
+2025-05-26 06:26:16,951 - ConfigConverter - INFO - Set AudioDescriptions[0].CodecSettings.AacSettings.Bitrate to 96000 from <audio_bitrate>=96k
+2025-05-26 06:26:16,951 - ConfigConverter - INFO - Set AudioDescriptions[0].CodecSettings.AacSettings.SampleRate to 48000 from <audio_sample_rate>=48000
+2025-05-26 06:26:16,951 - ConfigConverter - INFO - Audio parameters processed by custom audio settings handler
+2025-05-26 06:26:16,951 - ConfigConverter - DEBUG - Processing iteration rule for alternate_source
+2025-05-26 06:26:16,952 - ConfigConverter - DEBUG - No array found at alternate_source or not a list
+2025-05-26 06:26:16,952 - ConfigConverter - DEBUG - Processing dummy rule for VCodecParameters
+2025-05-26 06:26:16,952 - ConfigConverter - INFO - Mapped parameter: VCodecParameters=None → [DUMMY RULE]
+2025-05-26 06:26:16,952 - ConfigConverter - DEBUG - Processing dummy rule for acbr
+2025-05-26 06:26:16,952 - ConfigConverter - INFO - Mapped parameter: acbr=None → [DUMMY RULE]
+2025-05-26 06:26:16,952 - ConfigConverter - DEBUG - Processing dummy rule for add_audio_only
+2025-05-26 06:26:16,952 - ConfigConverter - INFO - Mapped parameter: add_audio_only=None → [DUMMY RULE]
+2025-05-26 06:26:16,952 - ConfigConverter - DEBUG - Processing dummy rule for clipmode
+2025-05-26 06:26:16,952 - ConfigConverter - INFO - Mapped parameter: clipmode=None → [DUMMY RULE]
+2025-05-26 06:26:16,952 - ConfigConverter - DEBUG - Processing dummy rule for closed_captions.cc_extract_before
+2025-05-26 06:26:16,952 - ConfigConverter - INFO - Mapped parameter: closed_captions.cc_extract_before=None → [DUMMY RULE]
+2025-05-26 06:26:16,952 - ConfigConverter - DEBUG - Processing dummy rule for closed_captions.direct_copy
+2025-05-26 06:26:16,952 - ConfigConverter - INFO - Mapped parameter: closed_captions.direct_copy=None → [DUMMY RULE]
+2025-05-26 06:26:16,952 - ConfigConverter - DEBUG - Processing dummy rule for closed_captions.get_from_manifest
+2025-05-26 06:26:16,952 - ConfigConverter - INFO - Mapped parameter: closed_captions.get_from_manifest=None → [DUMMY RULE]
+2025-05-26 06:26:16,952 - ConfigConverter - DEBUG - Processing dummy rule for closed_captions.ignore_cc_absence
+2025-05-26 06:26:16,952 - ConfigConverter - INFO - Mapped parameter: closed_captions.ignore_cc_absence=None → [DUMMY RULE]
+2025-05-26 06:26:16,952 - ConfigConverter - DEBUG - Processing dummy rule for closed_captions.role
+2025-05-26 06:26:16,952 - ConfigConverter - INFO - Mapped parameter: closed_captions.role=None → [DUMMY RULE]
+2025-05-26 06:26:16,952 - ConfigConverter - DEBUG - Processing dummy rule for closed_captions.vtt_split_segments
+2025-05-26 06:26:16,952 - ConfigConverter - INFO - Mapped parameter: closed_captions.vtt_split_segments=None → [DUMMY RULE]
+2025-05-26 06:26:16,952 - ConfigConverter - DEBUG - Processing dummy rule for drm
+2025-05-26 06:26:16,952 - ConfigConverter - INFO - Mapped parameter: drm=None → [DUMMY RULE]
+2025-05-26 06:26:16,952 - ConfigConverter - DEBUG - Processing dummy rule for encoder
+2025-05-26 06:26:16,952 - ConfigConverter - INFO - Mapped parameter: encoder=edc1 → [DUMMY RULE]
+2025-05-26 06:26:16,952 - ConfigConverter - DEBUG - Processing dummy rule for encryption
+2025-05-26 06:26:16,952 - ConfigConverter - INFO - Mapped parameter: encryption=None → [DUMMY RULE]
+2025-05-26 06:26:16,952 - ConfigConverter - DEBUG - Processing dummy rule for hint
+2025-05-26 06:26:16,952 - ConfigConverter - INFO - Mapped parameter: hint=None → [DUMMY RULE]
+2025-05-26 06:26:16,952 - ConfigConverter - DEBUG - Processing dummy rule for pix_format
+2025-05-26 06:26:16,952 - ConfigConverter - INFO - Mapped parameter: pix_format=None → [DUMMY RULE]
+2025-05-26 06:26:16,952 - ConfigConverter - DEBUG - Processing dummy rule for set_video_duration
+2025-05-26 06:26:16,952 - ConfigConverter - INFO - Mapped parameter: set_video_duration=yes → [DUMMY RULE]
+2025-05-26 06:26:16,952 - ConfigConverter - DEBUG - Processing dummy rule for strip_chapters
+2025-05-26 06:26:16,952 - ConfigConverter - INFO - Mapped parameter: strip_chapters=None → [DUMMY RULE]
+2025-05-26 06:26:16,952 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.cmp
+2025-05-26 06:26:16,952 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.cmp=None → [DUMMY RULE]
+2025-05-26 06:26:16,952 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.code
+2025-05-26 06:26:16,952 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.code=None → [DUMMY RULE]
+2025-05-26 06:26:16,952 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.flags
+2025-05-26 06:26:16,952 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.flags=None → [DUMMY RULE]
+2025-05-26 06:26:16,952 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.flags2
+2025-05-26 06:26:16,952 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.flags2=None → [DUMMY RULE]
+2025-05-26 06:26:16,952 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.i_qfactor
+2025-05-26 06:26:16,952 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.i_qfactor=None → [DUMMY RULE]
+2025-05-26 06:26:16,952 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.mbtree
+2025-05-26 06:26:16,952 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.mbtree=None → [DUMMY RULE]
+2025-05-26 06:26:16,952 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.me_method
+2025-05-26 06:26:16,952 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.me_method=None → [DUMMY RULE]
+2025-05-26 06:26:16,952 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.me_range
+2025-05-26 06:26:16,952 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.me_range=None → [DUMMY RULE]
+2025-05-26 06:26:16,952 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.qcomp
+2025-05-26 06:26:16,952 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.qcomp=None → [DUMMY RULE]
+2025-05-26 06:26:16,953 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.qdiff
+2025-05-26 06:26:16,953 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.qdiff=None → [DUMMY RULE]
+2025-05-26 06:26:16,953 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.subq
+2025-05-26 06:26:16,953 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.subq=None → [DUMMY RULE]
+2025-05-26 06:26:16,953 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.trellis
+2025-05-26 06:26:16,953 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.trellis=None → [DUMMY RULE]
+2025-05-26 06:26:16,953 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.qmax
+2025-05-26 06:26:16,953 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.qmax=None → [DUMMY RULE]
+2025-05-26 06:26:16,953 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.qmin
+2025-05-26 06:26:16,953 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.qmin=None → [DUMMY RULE]
+2025-05-26 06:26:16,953 - ConfigConverter - DEBUG - Processing dummy rule for closed_captions.forced
+2025-05-26 06:26:16,953 - ConfigConverter - INFO - Mapped parameter: closed_captions.forced=None → [DUMMY RULE]
+2025-05-26 06:26:16,953 - ConfigConverter - DEBUG - Processing dummy rule for file_extension
+2025-05-26 06:26:16,953 - ConfigConverter - INFO - Mapped parameter: file_extension=None → [DUMMY RULE]
+2025-05-26 06:26:16,953 - ConfigConverter - DEBUG - Processing dummy rule for rotate
+2025-05-26 06:26:16,953 - ConfigConverter - INFO - Mapped parameter: rotate=None → [DUMMY RULE]
+2025-05-26 06:26:16,953 - ConfigConverter - DEBUG - Processing dummy rule for metadata_copy
+2025-05-26 06:26:16,953 - ConfigConverter - INFO - Mapped parameter: metadata_copy=None → [DUMMY RULE]
+2025-05-26 06:26:16,953 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.transfer_characteristics
+2025-05-26 06:26:16,953 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.transfer_characteristics=None → [DUMMY RULE]
+2025-05-26 06:26:16,953 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.partitions
+2025-05-26 06:26:16,953 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.partitions=None → [DUMMY RULE]
+2025-05-26 06:26:16,953 - ConfigConverter - DEBUG - Processing dummy rule for closed_captions.cea_data_field
+2025-05-26 06:26:16,953 - ConfigConverter - INFO - Mapped parameter: closed_captions.cea_data_field=None → [DUMMY RULE]
+2025-05-26 06:26:16,953 - ConfigConverter - DEBUG - Processing dummy rule for loudnorm_range
+2025-05-26 06:26:16,953 - ConfigConverter - INFO - Mapped parameter: loudnorm_range=11 → [DUMMY RULE]
+2025-05-26 06:26:16,953 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.level
+2025-05-26 06:26:16,953 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.level=30 → [DUMMY RULE]
+2025-05-26 06:26:16,953 - ConfigConverter - DEBUG - Processing dummy rule for level
+2025-05-26 06:26:16,953 - ConfigConverter - INFO - Mapped parameter: level=None → [DUMMY RULE]
+2025-05-26 06:26:16,953 - ConfigConverter - DEBUG - Processing rule for output, value: mp4
+2025-05-26 06:26:16,953 - ConfigConverter - DEBUG - Condition evaluation: eq mp4 advanced_dash = False
+2025-05-26 06:26:16,953 - ConfigConverter - WARNING - Skipping rule for output=mp4 due to source condition not matching
+2025-05-26 06:26:16,953 - ConfigConverter - DEBUG - Processing rule for output, value: mp4
+2025-05-26 06:26:16,953 - ConfigConverter - DEBUG - Condition evaluation: eq mp4 advanced_fmp4 = False
+2025-05-26 06:26:16,953 - ConfigConverter - WARNING - Skipping rule for output=mp4 due to source condition not matching
+2025-05-26 06:26:16,953 - ConfigConverter - DEBUG - Processing rule for output, value: mp4
+2025-05-26 06:26:16,953 - ConfigConverter - DEBUG - Condition evaluation: eq mp4 advanced_hls = False
+2025-05-26 06:26:16,953 - ConfigConverter - WARNING - Skipping rule for output=mp4 due to source condition not matching
+2025-05-26 06:26:16,953 - ConfigConverter - DEBUG - Processing rule for output, value: mp4
+2025-05-26 06:26:16,953 - ConfigConverter - DEBUG - Condition evaluation: eq mp4 flv = False
+2025-05-26 06:26:16,953 - ConfigConverter - WARNING - Skipping rule for output=mp4 due to source condition not matching
+2025-05-26 06:26:16,953 - ConfigConverter - DEBUG - Processing rule for output, value: mp4
+2025-05-26 06:26:16,953 - ConfigConverter - DEBUG - Condition evaluation: eq mp4 fmp4_hls = False
+2025-05-26 06:26:16,953 - ConfigConverter - WARNING - Skipping rule for output=mp4 due to source condition not matching
+2025-05-26 06:26:16,953 - ConfigConverter - DEBUG - Processing rule for output, value: mp4
+2025-05-26 06:26:16,953 - ConfigConverter - DEBUG - Condition evaluation: eq mp4 ipad_stream = False
+2025-05-26 06:26:16,953 - ConfigConverter - WARNING - Skipping rule for output=mp4 due to source condition not matching
+2025-05-26 06:26:16,953 - ConfigConverter - DEBUG - Processing rule for output, value: mp4
+2025-05-26 06:26:16,953 - ConfigConverter - DEBUG - Condition evaluation: eq mp4 iphone = False
+2025-05-26 06:26:16,953 - ConfigConverter - WARNING - Skipping rule for output=mp4 due to source condition not matching
+2025-05-26 06:26:16,953 - ConfigConverter - DEBUG - Processing rule for output, value: mp4
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Condition evaluation: eq mp4 mov = False
+2025-05-26 06:26:16,954 - ConfigConverter - WARNING - Skipping rule for output=mp4 due to source condition not matching
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Processing rule for output, value: mp4
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Condition evaluation: eq mp4 mp4 = True
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Using static value: FILE_GROUP_SETTINGS
+2025-05-26 06:26:16,954 - ConfigConverter - INFO - Mapped parameter: output=mp4 → Settings.OutputGroups[0].OutputGroupSettings.Type=FILE_GROUP_SETTINGS
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Using static value: MP4
+2025-05-26 06:26:16,954 - ConfigConverter - INFO - Mapped parameter: output=mp4 → Settings.OutputGroups[0].Outputs[0].ContainerSettings.Container=MP4
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Processing rule for output, value: mp4
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Condition evaluation: eq mp4 mpeg_dash = False
+2025-05-26 06:26:16,954 - ConfigConverter - WARNING - Skipping rule for output=mp4 due to source condition not matching
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Processing rule for output, value: mp4
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Condition evaluation: eq mp4 mpegts = False
+2025-05-26 06:26:16,954 - ConfigConverter - WARNING - Skipping rule for output=mp4 due to source condition not matching
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Processing rule for output, value: mp4
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Condition evaluation: eq mp4 smooth_streaming = False
+2025-05-26 06:26:16,954 - ConfigConverter - WARNING - Skipping rule for output=mp4 due to source condition not matching
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Processing rule for output, value: mp4
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Condition evaluation: eq mp4 webm = False
+2025-05-26 06:26:16,954 - ConfigConverter - WARNING - Skipping rule for output=mp4 due to source condition not matching
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Processing rule for video_codec, value: libx264
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Condition using source_path output from original data, value: mp4
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Condition evaluation: eq mp4 mp4 = True
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Transformed libx264 using video_codec_format to <class 'str'>
+2025-05-26 06:26:16,954 - ConfigConverter - INFO - Mapped parameter: video_codec=libx264 → Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Codec=H_264
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Processing rule for framerate, value: 25
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Condition evaluation: eq 25 24000/1001 = False
+2025-05-26 06:26:16,954 - ConfigConverter - WARNING - Skipping rule for framerate=25 due to source condition not matching
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Processing rule for framerate, value: 25
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Condition evaluation: eq 25 29.97 = False
+2025-05-26 06:26:16,954 - ConfigConverter - WARNING - Skipping rule for framerate=25 due to source condition not matching
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Processing rule for framerate, value: 25
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Condition evaluation: eq 25 59.94 = False
+2025-05-26 06:26:16,954 - ConfigConverter - WARNING - Skipping rule for framerate=25 due to source condition not matching
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Processing rule for framerate, value: 25
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Condition evaluation: eq 25 25 = True
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Using static value: SPECIFIED
+2025-05-26 06:26:16,954 - ConfigConverter - INFO - Mapped parameter: framerate=25 → Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateControl=SPECIFIED
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Using static value: 25
+2025-05-26 06:26:16,954 - ConfigConverter - INFO - Mapped parameter: framerate=25 → Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateNumerator=25
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Using static value: 1
+2025-05-26 06:26:16,954 - ConfigConverter - INFO - Mapped parameter: framerate=25 → Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateDenominator=1
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Processing rule for framerate, value: 25
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Condition evaluation: eq 25 30 = False
+2025-05-26 06:26:16,954 - ConfigConverter - WARNING - Skipping rule for framerate=25 due to source condition not matching
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Processing rule for framerate, value: 25
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Condition evaluation: eq 25  = False
+2025-05-26 06:26:16,954 - ConfigConverter - WARNING - Skipping rule for framerate=25 due to source condition not matching
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Processing rule for profile, value: baseline
+2025-05-26 06:26:16,954 - ConfigConverter - DEBUG - Transformed baseline using profile_format to <class 'str'>
+2025-05-26 06:26:16,954 - ConfigConverter - INFO - Mapped parameter: profile=baseline → Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.CodecProfile=BASELINE
+2025-05-26 06:26:16,955 - ConfigConverter - DEBUG - Processing rule for profile, value: baseline
+2025-05-26 06:26:16,955 - ConfigConverter - DEBUG - Condition evaluation: eq baseline baseline = True
+2025-05-26 06:26:16,955 - ConfigConverter - DEBUG - Using static value: BASELINE
+2025-05-26 06:26:16,955 - ConfigConverter - INFO - Mapped parameter: profile=baseline → Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.CodecProfile=BASELINE
+2025-05-26 06:26:16,955 - ConfigConverter - DEBUG - Using static value: CAVLC
+2025-05-26 06:26:16,955 - ConfigConverter - INFO - Mapped parameter: profile=baseline → Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.EntropyEncoding=CAVLC
+2025-05-26 06:26:16,955 - ConfigConverter - DEBUG - Skipping already processed parameter: bitrate
+2025-05-26 06:26:16,955 - ConfigConverter - DEBUG - Processing rule for size, value: 480x270
+2025-05-26 06:26:16,955 - ConfigConverter - DEBUG - Regex transformed 480x270 to 480
+2025-05-26 06:26:16,955 - ConfigConverter - INFO - Mapped parameter: size=480x270 → Settings.OutputGroups[0].Outputs[0].VideoDescription.Width=480
+2025-05-26 06:26:16,955 - ConfigConverter - DEBUG - Regex transformed 480x270 to 270
+2025-05-26 06:26:16,955 - ConfigConverter - INFO - Mapped parameter: size=480x270 → Settings.OutputGroups[0].Outputs[0].VideoDescription.Height=270
+2025-05-26 06:26:16,955 - ConfigConverter - DEBUG - Processing rule for size, value: 480x270
+2025-05-26 06:26:16,955 - ConfigConverter - WARNING - Regex pattern (\d+)x0 did not match 480x270 for size
+2025-05-26 06:26:16,955 - ConfigConverter - WARNING - Regex pattern (\d+)x0 did not match 480x270 for size
+2025-05-26 06:26:16,955 - ConfigConverter - DEBUG - Skipping already processed parameter: audio_codec
+2025-05-26 06:26:16,955 - ConfigConverter - DEBUG - Skipping already processed parameter: audio_bitrate
+2025-05-26 06:26:16,955 - ConfigConverter - DEBUG - Skipping already processed parameter: audio_sample_rate
+2025-05-26 06:26:16,955 - ConfigConverter - DEBUG - Processing rule for loudnorm, value: -23.0
+2025-05-26 06:26:16,955 - ConfigConverter - INFO - Mapped parameter: loudnorm=-23.0 → Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].AudioNormalizationSettings.TargetLkfs=-23.0
+2025-05-26 06:26:16,955 - ConfigConverter - DEBUG - Skipping already processed parameter: loudnorm_range
+2025-05-26 06:26:16,955 - ConfigConverter - DEBUG - Processing rule for loudnorm_peak, value: -1.5
+2025-05-26 06:26:16,955 - ConfigConverter - INFO - Mapped parameter: loudnorm_peak=-1.5 → Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].AudioNormalizationSettings.TruePeakLimiterThreshold=-1.5
+2025-05-26 06:26:16,955 - ConfigConverter - DEBUG - Processing rule for video_codec_parameters.colorprim, value: bt709
+2025-05-26 06:26:16,955 - ConfigConverter - DEBUG - Transformed bt709 using color_prim_format to <class 'str'>
+2025-05-26 06:26:16,955 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.colorprim=bt709 → Settings.OutputGroups[0].Outputs[0].VideoDescription.VideoPreprocessors.ColorCorrector.ColorSpaceConversion=FORCE_709
+2025-05-26 06:26:16,955 - ConfigConverter - DEBUG - Processing rule for video_codec_parameters.transfer, value: bt709
+2025-05-26 06:26:16,955 - ConfigConverter - DEBUG - Transformed bt709 using transfer_format to <class 'str'>
+2025-05-26 06:26:16,955 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.transfer=bt709 → Settings.OutputGroups[0].Outputs[0].VideoDescription.VideoPreprocessors.ColorCorrector.ColorSpaceConversion=FORCE_709
+2025-05-26 06:26:16,955 - ConfigConverter - DEBUG - Processing rule for video_codec_parameters.colormatrix, value: bt709
+2025-05-26 06:26:16,955 - ConfigConverter - DEBUG - Transformed bt709 using color_matrix_format to <class 'str'>
+2025-05-26 06:26:16,955 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.colormatrix=bt709 → Settings.OutputGroups[0].Outputs[0].VideoDescription.VideoPreprocessors.ColorCorrector.ColorSpaceConversion=FORCE_709
+2025-05-26 06:26:16,955 - ConfigConverter - DEBUG - Skipping already processed parameter: video_codec_parameters.level
+2025-05-26 06:26:16,955 - ConfigConverter - DEBUG - Processing rule for video_sync, value: passthrough
+2025-05-26 06:26:16,955 - ConfigConverter - DEBUG - Condition evaluation: eq passthrough cfr = False
+2025-05-26 06:26:16,955 - ConfigConverter - WARNING - Skipping rule for video_sync=passthrough due to source condition not matching
+2025-05-26 06:26:16,955 - ConfigConverter - DEBUG - Processing rule for video_sync, value: passthrough
+2025-05-26 06:26:16,955 - ConfigConverter - DEBUG - Condition evaluation: in passthrough ['old', 'passthrough'] = True
+2025-05-26 06:26:16,955 - ConfigConverter - DEBUG - Using static value: INITIALIZE_FROM_SOURCE
+2025-05-26 06:26:16,955 - ConfigConverter - DEBUG - Overwriting existing value at Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateControl: SPECIFIED -> INITIALIZE_FROM_SOURCE
+2025-05-26 06:26:16,955 - ConfigConverter - INFO - Mapped parameter: video_sync=passthrough → Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateControl=INITIALIZE_FROM_SOURCE
+2025-05-26 06:26:16,955 - ConfigConverter - DEBUG - Skipping already processed parameter: encoder
+2025-05-26 06:26:16,955 - ConfigConverter - DEBUG - Skipping already processed parameter: set_video_duration
+2025-05-26 06:26:16,956 - ConfigConverter - DEBUG - Processing rule for destination, value: http://test_url.s3.amazonaws.com/encoding.com.output/mock_mock_output_rendition_name_11111_916.mp4?acl=public-read
+2025-05-26 06:26:16,956 - ConfigConverter - DEBUG - Using static value: S3_OUTPUT_URL
+2025-05-26 06:26:16,956 - ConfigConverter - DEBUG - Overwriting existing value at Settings.OutputGroups[0].OutputGroupSettings.FileGroupSettings.Destination: {DEST_S3_URL} -> S3_OUTPUT_URL
+2025-05-26 06:26:16,956 - ConfigConverter - INFO - Mapped parameter: destination=http://test_url.s3.amazonaws.com/encoding.com.output/mock_mock_output_rendition_name_11111_916.mp4?acl=public-read → Settings.OutputGroups[0].OutputGroupSettings.FileGroupSettings.Destination=S3_OUTPUT_URL
+2025-05-26 06:26:16,956 - ConfigConverter - INFO - Conversion summary for /home/ec2-user/e2mc_assistant/encoding_profiles/pilot1/mp4/916.xml:
+2025-05-26 06:26:16,956 - ConfigConverter - INFO -   - Total parameters: 59
+2025-05-26 06:26:16,956 - ConfigConverter - INFO -   - Mapped parameters: 59 (100.0%)
+2025-05-26 06:26:16,956 - ConfigConverter - INFO -   - Unmapped parameters: 0 (0.0%)
+2025-05-26 06:26:16,956 - ConfigConverter - INFO - Added missing NameModifier: _480x270_160000_mc
+2025-05-26 06:26:16,956 - root - INFO - Conversion completed. Output saved to /home/ec2-user/e2mc_assistant/tranformed_mc_profiles/pilot1/mp4/916.json
+2025-05-26 08:34:08,974 - root - INFO - Logging conversion details to: /home/ec2-user/e2mc_assistant/tranformed_mc_profiles/pilot1/mp4/916.log
+2025-05-26 08:34:08,974 - ConfigConverter - DEBUG - Parsed XML structure: {'output': 'mp4', 'video_codec': 'libx264', 'framerate': 25, 'profile': 'baseline', 'bitrate': '160k', 'size': '480x270', 'audio_codec': 'libfaac', 'audio_bitrate': '96k', 'audio_sample_rate': 48000, 'loudnorm': -23.0, 'loudnorm_range': 11, 'loudnorm_peak': -1.5, 'video_codec_parameters': {'colorprim': 'bt709', 'transfer': 'bt709', 'colormatrix': 'bt709', 'level': 30}, 'video_sync': 'passthrough', 'encoder': 'edc1', 'set_video_duration': 'yes', 'destination': 'http://test_url.s3.amazonaws.com/encoding.com.output/mock_mock_output_rendition_name_11111_916.mp4?acl=public-read'}
+2025-05-26 08:34:08,975 - ConfigConverter - INFO - Set RateControlMode to VBR because <cbr> doesn't exist and <maxrate> doesn't exist
+2025-05-26 08:34:08,975 - ConfigConverter - INFO - Set Bitrate to 160000 from <bitrate>=160k
+2025-05-26 08:34:08,975 - ConfigConverter - INFO - Setting MaxBitrate to 400000 (2.5 * Bitrate)
+2025-05-26 08:34:08,975 - ConfigConverter - INFO - Parameter bitrate processed by custom rate control handler
+2025-05-26 08:34:08,975 - ConfigConverter - INFO - Set AudioDescriptions[0].CodecSettings.Codec to AAC from <audio_codec>=libfaac
+2025-05-26 08:34:08,975 - ConfigConverter - INFO - Set AudioDescriptions[0].CodecSettings.AacSettings.Bitrate to default value 96000
+2025-05-26 08:34:08,975 - ConfigConverter - INFO - Set AudioDescriptions[0].CodecSettings.AacSettings.SampleRate to default value 48000
+2025-05-26 08:34:08,975 - ConfigConverter - INFO - Set AudioDescriptions[0].CodecSettings.AacSettings.CodingMode to CODING_MODE_2_0 (default stereo)
+2025-05-26 08:34:08,975 - ConfigConverter - INFO - Set AudioDescriptions[0].CodecSettings.AacSettings.Bitrate to 96000 from <audio_bitrate>=96k
+2025-05-26 08:34:08,975 - ConfigConverter - INFO - Set AudioDescriptions[0].CodecSettings.AacSettings.SampleRate to 48000 from <audio_sample_rate>=48000
+2025-05-26 08:34:08,975 - ConfigConverter - INFO - Audio parameters processed by custom audio settings handler
+2025-05-26 08:34:08,975 - ConfigConverter - DEBUG - Processing iteration rule for alternate_source
+2025-05-26 08:34:08,975 - ConfigConverter - DEBUG - No array found at alternate_source or not a list
+2025-05-26 08:34:08,975 - ConfigConverter - DEBUG - Processing dummy rule for VCodecParameters
+2025-05-26 08:34:08,975 - ConfigConverter - INFO - Mapped parameter: VCodecParameters=None → [DUMMY RULE]
+2025-05-26 08:34:08,975 - ConfigConverter - DEBUG - Processing dummy rule for acbr
+2025-05-26 08:34:08,975 - ConfigConverter - INFO - Mapped parameter: acbr=None → [DUMMY RULE]
+2025-05-26 08:34:08,975 - ConfigConverter - DEBUG - Processing dummy rule for add_audio_only
+2025-05-26 08:34:08,975 - ConfigConverter - INFO - Mapped parameter: add_audio_only=None → [DUMMY RULE]
+2025-05-26 08:34:08,975 - ConfigConverter - DEBUG - Processing dummy rule for clipmode
+2025-05-26 08:34:08,975 - ConfigConverter - INFO - Mapped parameter: clipmode=None → [DUMMY RULE]
+2025-05-26 08:34:08,975 - ConfigConverter - DEBUG - Processing dummy rule for closed_captions.cc_extract_before
+2025-05-26 08:34:08,975 - ConfigConverter - INFO - Mapped parameter: closed_captions.cc_extract_before=None → [DUMMY RULE]
+2025-05-26 08:34:08,975 - ConfigConverter - DEBUG - Processing dummy rule for closed_captions.direct_copy
+2025-05-26 08:34:08,975 - ConfigConverter - INFO - Mapped parameter: closed_captions.direct_copy=None → [DUMMY RULE]
+2025-05-26 08:34:08,975 - ConfigConverter - DEBUG - Processing dummy rule for closed_captions.get_from_manifest
+2025-05-26 08:34:08,975 - ConfigConverter - INFO - Mapped parameter: closed_captions.get_from_manifest=None → [DUMMY RULE]
+2025-05-26 08:34:08,975 - ConfigConverter - DEBUG - Processing dummy rule for closed_captions.ignore_cc_absence
+2025-05-26 08:34:08,975 - ConfigConverter - INFO - Mapped parameter: closed_captions.ignore_cc_absence=None → [DUMMY RULE]
+2025-05-26 08:34:08,975 - ConfigConverter - DEBUG - Processing dummy rule for closed_captions.role
+2025-05-26 08:34:08,975 - ConfigConverter - INFO - Mapped parameter: closed_captions.role=None → [DUMMY RULE]
+2025-05-26 08:34:08,975 - ConfigConverter - DEBUG - Processing dummy rule for closed_captions.vtt_split_segments
+2025-05-26 08:34:08,975 - ConfigConverter - INFO - Mapped parameter: closed_captions.vtt_split_segments=None → [DUMMY RULE]
+2025-05-26 08:34:08,975 - ConfigConverter - DEBUG - Processing dummy rule for drm
+2025-05-26 08:34:08,975 - ConfigConverter - INFO - Mapped parameter: drm=None → [DUMMY RULE]
+2025-05-26 08:34:08,975 - ConfigConverter - DEBUG - Processing dummy rule for encoder
+2025-05-26 08:34:08,975 - ConfigConverter - INFO - Mapped parameter: encoder=edc1 → [DUMMY RULE]
+2025-05-26 08:34:08,975 - ConfigConverter - DEBUG - Processing dummy rule for encryption
+2025-05-26 08:34:08,976 - ConfigConverter - INFO - Mapped parameter: encryption=None → [DUMMY RULE]
+2025-05-26 08:34:08,976 - ConfigConverter - DEBUG - Processing dummy rule for hint
+2025-05-26 08:34:08,976 - ConfigConverter - INFO - Mapped parameter: hint=None → [DUMMY RULE]
+2025-05-26 08:34:08,976 - ConfigConverter - DEBUG - Processing dummy rule for pix_format
+2025-05-26 08:34:08,976 - ConfigConverter - INFO - Mapped parameter: pix_format=None → [DUMMY RULE]
+2025-05-26 08:34:08,976 - ConfigConverter - DEBUG - Processing dummy rule for set_video_duration
+2025-05-26 08:34:08,976 - ConfigConverter - INFO - Mapped parameter: set_video_duration=yes → [DUMMY RULE]
+2025-05-26 08:34:08,976 - ConfigConverter - DEBUG - Processing dummy rule for strip_chapters
+2025-05-26 08:34:08,976 - ConfigConverter - INFO - Mapped parameter: strip_chapters=None → [DUMMY RULE]
+2025-05-26 08:34:08,976 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.cmp
+2025-05-26 08:34:08,976 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.cmp=None → [DUMMY RULE]
+2025-05-26 08:34:08,976 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.code
+2025-05-26 08:34:08,976 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.code=None → [DUMMY RULE]
+2025-05-26 08:34:08,976 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.flags
+2025-05-26 08:34:08,976 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.flags=None → [DUMMY RULE]
+2025-05-26 08:34:08,976 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.flags2
+2025-05-26 08:34:08,976 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.flags2=None → [DUMMY RULE]
+2025-05-26 08:34:08,976 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.i_qfactor
+2025-05-26 08:34:08,976 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.i_qfactor=None → [DUMMY RULE]
+2025-05-26 08:34:08,976 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.mbtree
+2025-05-26 08:34:08,976 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.mbtree=None → [DUMMY RULE]
+2025-05-26 08:34:08,976 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.me_method
+2025-05-26 08:34:08,976 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.me_method=None → [DUMMY RULE]
+2025-05-26 08:34:08,976 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.me_range
+2025-05-26 08:34:08,976 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.me_range=None → [DUMMY RULE]
+2025-05-26 08:34:08,976 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.qcomp
+2025-05-26 08:34:08,976 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.qcomp=None → [DUMMY RULE]
+2025-05-26 08:34:08,976 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.qdiff
+2025-05-26 08:34:08,976 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.qdiff=None → [DUMMY RULE]
+2025-05-26 08:34:08,976 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.subq
+2025-05-26 08:34:08,976 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.subq=None → [DUMMY RULE]
+2025-05-26 08:34:08,976 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.trellis
+2025-05-26 08:34:08,976 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.trellis=None → [DUMMY RULE]
+2025-05-26 08:34:08,976 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.qmax
+2025-05-26 08:34:08,976 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.qmax=None → [DUMMY RULE]
+2025-05-26 08:34:08,976 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.qmin
+2025-05-26 08:34:08,976 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.qmin=None → [DUMMY RULE]
+2025-05-26 08:34:08,976 - ConfigConverter - DEBUG - Processing dummy rule for closed_captions.forced
+2025-05-26 08:34:08,976 - ConfigConverter - INFO - Mapped parameter: closed_captions.forced=None → [DUMMY RULE]
+2025-05-26 08:34:08,976 - ConfigConverter - DEBUG - Processing dummy rule for file_extension
+2025-05-26 08:34:08,976 - ConfigConverter - INFO - Mapped parameter: file_extension=None → [DUMMY RULE]
+2025-05-26 08:34:08,976 - ConfigConverter - DEBUG - Processing dummy rule for rotate
+2025-05-26 08:34:08,976 - ConfigConverter - INFO - Mapped parameter: rotate=None → [DUMMY RULE]
+2025-05-26 08:34:08,976 - ConfigConverter - DEBUG - Processing dummy rule for metadata_copy
+2025-05-26 08:34:08,976 - ConfigConverter - INFO - Mapped parameter: metadata_copy=None → [DUMMY RULE]
+2025-05-26 08:34:08,976 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.transfer_characteristics
+2025-05-26 08:34:08,976 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.transfer_characteristics=None → [DUMMY RULE]
+2025-05-26 08:34:08,976 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.partitions
+2025-05-26 08:34:08,976 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.partitions=None → [DUMMY RULE]
+2025-05-26 08:34:08,976 - ConfigConverter - DEBUG - Processing dummy rule for closed_captions.cea_data_field
+2025-05-26 08:34:08,976 - ConfigConverter - INFO - Mapped parameter: closed_captions.cea_data_field=None → [DUMMY RULE]
+2025-05-26 08:34:08,976 - ConfigConverter - DEBUG - Processing dummy rule for loudnorm_range
+2025-05-26 08:34:08,976 - ConfigConverter - INFO - Mapped parameter: loudnorm_range=11 → [DUMMY RULE]
+2025-05-26 08:34:08,976 - ConfigConverter - DEBUG - Processing dummy rule for video_codec_parameters.level
+2025-05-26 08:34:08,977 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.level=30 → [DUMMY RULE]
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Processing dummy rule for level
+2025-05-26 08:34:08,977 - ConfigConverter - INFO - Mapped parameter: level=None → [DUMMY RULE]
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Processing rule for output, value: mp4
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Condition evaluation: eq mp4 advanced_dash = False
+2025-05-26 08:34:08,977 - ConfigConverter - WARNING - Skipping rule for output=mp4 due to source condition not matching
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Processing rule for output, value: mp4
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Condition evaluation: eq mp4 advanced_fmp4 = False
+2025-05-26 08:34:08,977 - ConfigConverter - WARNING - Skipping rule for output=mp4 due to source condition not matching
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Processing rule for output, value: mp4
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Condition evaluation: eq mp4 advanced_hls = False
+2025-05-26 08:34:08,977 - ConfigConverter - WARNING - Skipping rule for output=mp4 due to source condition not matching
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Processing rule for output, value: mp4
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Condition evaluation: eq mp4 flv = False
+2025-05-26 08:34:08,977 - ConfigConverter - WARNING - Skipping rule for output=mp4 due to source condition not matching
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Processing rule for output, value: mp4
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Condition evaluation: eq mp4 fmp4_hls = False
+2025-05-26 08:34:08,977 - ConfigConverter - WARNING - Skipping rule for output=mp4 due to source condition not matching
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Processing rule for output, value: mp4
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Condition evaluation: eq mp4 ipad_stream = False
+2025-05-26 08:34:08,977 - ConfigConverter - WARNING - Skipping rule for output=mp4 due to source condition not matching
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Processing rule for output, value: mp4
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Condition evaluation: eq mp4 iphone = False
+2025-05-26 08:34:08,977 - ConfigConverter - WARNING - Skipping rule for output=mp4 due to source condition not matching
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Processing rule for output, value: mp4
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Condition evaluation: eq mp4 mov = False
+2025-05-26 08:34:08,977 - ConfigConverter - WARNING - Skipping rule for output=mp4 due to source condition not matching
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Processing rule for output, value: mp4
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Condition evaluation: eq mp4 mp4 = True
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Using static value: FILE_GROUP_SETTINGS
+2025-05-26 08:34:08,977 - ConfigConverter - INFO - Mapped parameter: output=mp4 → Settings.OutputGroups[0].OutputGroupSettings.Type=FILE_GROUP_SETTINGS
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Using static value: MP4
+2025-05-26 08:34:08,977 - ConfigConverter - INFO - Mapped parameter: output=mp4 → Settings.OutputGroups[0].Outputs[0].ContainerSettings.Container=MP4
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Processing rule for output, value: mp4
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Condition evaluation: eq mp4 mpeg_dash = False
+2025-05-26 08:34:08,977 - ConfigConverter - WARNING - Skipping rule for output=mp4 due to source condition not matching
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Processing rule for output, value: mp4
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Condition evaluation: eq mp4 mpegts = False
+2025-05-26 08:34:08,977 - ConfigConverter - WARNING - Skipping rule for output=mp4 due to source condition not matching
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Processing rule for output, value: mp4
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Condition evaluation: eq mp4 smooth_streaming = False
+2025-05-26 08:34:08,977 - ConfigConverter - WARNING - Skipping rule for output=mp4 due to source condition not matching
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Processing rule for output, value: mp4
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Condition evaluation: eq mp4 webm = False
+2025-05-26 08:34:08,977 - ConfigConverter - WARNING - Skipping rule for output=mp4 due to source condition not matching
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Processing rule for video_codec, value: libx264
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Condition using source_path output from original data, value: mp4
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Condition evaluation: eq mp4 mp4 = True
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Transformed libx264 using video_codec_format to <class 'str'>
+2025-05-26 08:34:08,977 - ConfigConverter - INFO - Mapped parameter: video_codec=libx264 → Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Codec=H_264
+2025-05-26 08:34:08,977 - ConfigConverter - DEBUG - Processing rule for framerate, value: 25
+2025-05-26 08:34:08,978 - ConfigConverter - DEBUG - Condition evaluation: eq 25 24000/1001 = False
+2025-05-26 08:34:08,978 - ConfigConverter - WARNING - Skipping rule for framerate=25 due to source condition not matching
+2025-05-26 08:34:08,978 - ConfigConverter - DEBUG - Processing rule for framerate, value: 25
+2025-05-26 08:34:08,978 - ConfigConverter - DEBUG - Condition evaluation: eq 25 29.97 = False
+2025-05-26 08:34:08,978 - ConfigConverter - WARNING - Skipping rule for framerate=25 due to source condition not matching
+2025-05-26 08:34:08,978 - ConfigConverter - DEBUG - Processing rule for framerate, value: 25
+2025-05-26 08:34:08,978 - ConfigConverter - DEBUG - Condition evaluation: eq 25 59.94 = False
+2025-05-26 08:34:08,978 - ConfigConverter - WARNING - Skipping rule for framerate=25 due to source condition not matching
+2025-05-26 08:34:08,978 - ConfigConverter - DEBUG - Processing rule for framerate, value: 25
+2025-05-26 08:34:08,978 - ConfigConverter - DEBUG - Condition evaluation: eq 25 25 = True
+2025-05-26 08:34:08,978 - ConfigConverter - DEBUG - Using static value: SPECIFIED
+2025-05-26 08:34:08,978 - ConfigConverter - INFO - Mapped parameter: framerate=25 → Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateControl=SPECIFIED
+2025-05-26 08:34:08,978 - ConfigConverter - DEBUG - Using static value: 25
+2025-05-26 08:34:08,978 - ConfigConverter - INFO - Mapped parameter: framerate=25 → Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateNumerator=25
+2025-05-26 08:34:08,978 - ConfigConverter - DEBUG - Using static value: 1
+2025-05-26 08:34:08,978 - ConfigConverter - INFO - Mapped parameter: framerate=25 → Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateDenominator=1
+2025-05-26 08:34:08,978 - ConfigConverter - DEBUG - Processing rule for framerate, value: 25
+2025-05-26 08:34:08,978 - ConfigConverter - DEBUG - Condition evaluation: eq 25 30 = False
+2025-05-26 08:34:08,978 - ConfigConverter - WARNING - Skipping rule for framerate=25 due to source condition not matching
+2025-05-26 08:34:08,978 - ConfigConverter - DEBUG - Processing rule for framerate, value: 25
+2025-05-26 08:34:08,978 - ConfigConverter - DEBUG - Condition evaluation: eq 25  = False
+2025-05-26 08:34:08,978 - ConfigConverter - WARNING - Skipping rule for framerate=25 due to source condition not matching
+2025-05-26 08:34:08,978 - ConfigConverter - DEBUG - Processing rule for profile, value: baseline
+2025-05-26 08:34:08,978 - ConfigConverter - DEBUG - Transformed baseline using profile_format to <class 'str'>
+2025-05-26 08:34:08,978 - ConfigConverter - INFO - Mapped parameter: profile=baseline → Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.CodecProfile=BASELINE
+2025-05-26 08:34:08,978 - ConfigConverter - DEBUG - Processing rule for profile, value: baseline
+2025-05-26 08:34:08,978 - ConfigConverter - DEBUG - Condition evaluation: eq baseline baseline = True
+2025-05-26 08:34:08,978 - ConfigConverter - DEBUG - Using static value: BASELINE
+2025-05-26 08:34:08,978 - ConfigConverter - INFO - Mapped parameter: profile=baseline → Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.CodecProfile=BASELINE
+2025-05-26 08:34:08,978 - ConfigConverter - DEBUG - Using static value: CAVLC
+2025-05-26 08:34:08,978 - ConfigConverter - INFO - Mapped parameter: profile=baseline → Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.EntropyEncoding=CAVLC
+2025-05-26 08:34:08,978 - ConfigConverter - DEBUG - Using static value: 0
+2025-05-26 08:34:08,978 - ConfigConverter - INFO - Mapped parameter: profile=baseline → Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.NumberBFramesBetweenReferenceFrames=0
+2025-05-26 08:34:08,978 - ConfigConverter - DEBUG - Skipping already processed parameter: bitrate
+2025-05-26 08:34:08,978 - ConfigConverter - DEBUG - Processing rule for size, value: 480x270
+2025-05-26 08:34:08,978 - ConfigConverter - DEBUG - Regex transformed 480x270 to 480
+2025-05-26 08:34:08,978 - ConfigConverter - INFO - Mapped parameter: size=480x270 → Settings.OutputGroups[0].Outputs[0].VideoDescription.Width=480
+2025-05-26 08:34:08,978 - ConfigConverter - DEBUG - Regex transformed 480x270 to 270
+2025-05-26 08:34:08,978 - ConfigConverter - INFO - Mapped parameter: size=480x270 → Settings.OutputGroups[0].Outputs[0].VideoDescription.Height=270
+2025-05-26 08:34:08,978 - ConfigConverter - DEBUG - Processing rule for size, value: 480x270
+2025-05-26 08:34:08,978 - ConfigConverter - WARNING - Regex pattern (\d+)x0 did not match 480x270 for size
+2025-05-26 08:34:08,978 - ConfigConverter - WARNING - Regex pattern (\d+)x0 did not match 480x270 for size
+2025-05-26 08:34:08,978 - ConfigConverter - DEBUG - Skipping already processed parameter: audio_codec
+2025-05-26 08:34:08,978 - ConfigConverter - DEBUG - Skipping already processed parameter: audio_bitrate
+2025-05-26 08:34:08,978 - ConfigConverter - DEBUG - Skipping already processed parameter: audio_sample_rate
+2025-05-26 08:34:08,979 - ConfigConverter - DEBUG - Processing rule for loudnorm, value: -23.0
+2025-05-26 08:34:08,979 - ConfigConverter - INFO - Mapped parameter: loudnorm=-23.0 → Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].AudioNormalizationSettings.TargetLkfs=-23.0
+2025-05-26 08:34:08,979 - ConfigConverter - DEBUG - Skipping already processed parameter: loudnorm_range
+2025-05-26 08:34:08,979 - ConfigConverter - DEBUG - Processing rule for loudnorm_peak, value: -1.5
+2025-05-26 08:34:08,979 - ConfigConverter - INFO - Mapped parameter: loudnorm_peak=-1.5 → Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].AudioNormalizationSettings.TruePeakLimiterThreshold=-1.5
+2025-05-26 08:34:08,979 - ConfigConverter - DEBUG - Processing rule for video_codec_parameters.colorprim, value: bt709
+2025-05-26 08:34:08,979 - ConfigConverter - DEBUG - Transformed bt709 using color_prim_format to <class 'str'>
+2025-05-26 08:34:08,979 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.colorprim=bt709 → Settings.OutputGroups[0].Outputs[0].VideoDescription.VideoPreprocessors.ColorCorrector.ColorSpaceConversion=FORCE_709
+2025-05-26 08:34:08,979 - ConfigConverter - DEBUG - Processing rule for video_codec_parameters.transfer, value: bt709
+2025-05-26 08:34:08,979 - ConfigConverter - DEBUG - Transformed bt709 using transfer_format to <class 'str'>
+2025-05-26 08:34:08,979 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.transfer=bt709 → Settings.OutputGroups[0].Outputs[0].VideoDescription.VideoPreprocessors.ColorCorrector.ColorSpaceConversion=FORCE_709
+2025-05-26 08:34:08,979 - ConfigConverter - DEBUG - Processing rule for video_codec_parameters.colormatrix, value: bt709
+2025-05-26 08:34:08,979 - ConfigConverter - DEBUG - Transformed bt709 using color_matrix_format to <class 'str'>
+2025-05-26 08:34:08,979 - ConfigConverter - INFO - Mapped parameter: video_codec_parameters.colormatrix=bt709 → Settings.OutputGroups[0].Outputs[0].VideoDescription.VideoPreprocessors.ColorCorrector.ColorSpaceConversion=FORCE_709
+2025-05-26 08:34:08,979 - ConfigConverter - DEBUG - Skipping already processed parameter: video_codec_parameters.level
+2025-05-26 08:34:08,979 - ConfigConverter - DEBUG - Processing rule for video_sync, value: passthrough
+2025-05-26 08:34:08,979 - ConfigConverter - DEBUG - Condition evaluation: eq passthrough cfr = False
+2025-05-26 08:34:08,979 - ConfigConverter - WARNING - Skipping rule for video_sync=passthrough due to source condition not matching
+2025-05-26 08:34:08,979 - ConfigConverter - DEBUG - Processing rule for video_sync, value: passthrough
+2025-05-26 08:34:08,979 - ConfigConverter - DEBUG - Condition evaluation: in passthrough ['old', 'passthrough'] = True
+2025-05-26 08:34:08,979 - ConfigConverter - DEBUG - Using static value: INITIALIZE_FROM_SOURCE
+2025-05-26 08:34:08,979 - ConfigConverter - DEBUG - Overwriting existing value at Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateControl: SPECIFIED -> INITIALIZE_FROM_SOURCE
+2025-05-26 08:34:08,979 - ConfigConverter - INFO - Mapped parameter: video_sync=passthrough → Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateControl=INITIALIZE_FROM_SOURCE
+2025-05-26 08:34:08,979 - ConfigConverter - DEBUG - Skipping already processed parameter: encoder
+2025-05-26 08:34:08,979 - ConfigConverter - DEBUG - Skipping already processed parameter: set_video_duration
+2025-05-26 08:34:08,979 - ConfigConverter - DEBUG - Processing rule for destination, value: http://test_url.s3.amazonaws.com/encoding.com.output/mock_mock_output_rendition_name_11111_916.mp4?acl=public-read
+2025-05-26 08:34:08,979 - ConfigConverter - DEBUG - Using static value: S3_OUTPUT_URL
+2025-05-26 08:34:08,979 - ConfigConverter - DEBUG - Overwriting existing value at Settings.OutputGroups[0].OutputGroupSettings.FileGroupSettings.Destination: {DEST_S3_URL} -> S3_OUTPUT_URL
+2025-05-26 08:34:08,979 - ConfigConverter - INFO - Mapped parameter: destination=http://test_url.s3.amazonaws.com/encoding.com.output/mock_mock_output_rendition_name_11111_916.mp4?acl=public-read → Settings.OutputGroups[0].OutputGroupSettings.FileGroupSettings.Destination=S3_OUTPUT_URL
+2025-05-26 08:34:08,979 - ConfigConverter - INFO - Conversion summary for /home/ec2-user/e2mc_assistant/encoding_profiles/pilot1/mp4/916.xml:
+2025-05-26 08:34:08,979 - ConfigConverter - INFO -   - Total parameters: 60
+2025-05-26 08:34:08,979 - ConfigConverter - INFO -   - Mapped parameters: 60 (100.0%)
+2025-05-26 08:34:08,979 - ConfigConverter - INFO -   - Unmapped parameters: 0 (0.0%)
+2025-05-26 08:34:08,979 - ConfigConverter - INFO - Added missing NameModifier: _480x270_160000_mc
+2025-05-26 08:34:08,979 - root - INFO - Conversion completed. Output saved to /home/ec2-user/e2mc_assistant/tranformed_mc_profiles/pilot1/mp4/916.json

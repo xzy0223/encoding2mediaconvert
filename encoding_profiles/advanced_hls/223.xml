@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<query>
+    <userid>mock_mock_test_user_id</userid>
+    <userkey>mock_mock_test_key</userkey>
+    <action>AddMedia</action>
+    <source>mock_mock_source_rendition__url</source>
+    <notify>mock_mock_encoding_notify_url</notify>
+    <notify_format>json</notify_format>
+    <notify_body_format>raw</notify_body_format>
+    <format>
+        <output>advanced_hls</output>
+        <video_codec>libx264</video_codec>
+        <profile>main</profile>
+        <level>30</level>
+        <bitrates>80k,370k,500k,580k,820k,965k,1190k,1515k,1840k,3080k,4440k</bitrates>
+        <size>288x162,320x180,384x216,480x270,512x288,576x324,640x360,768x432,1024x576,1216x684</size>
+        <segmenter>v3</segmenter>
+        <segment_duration>8</segment_duration>
+        <keyframes>60, 60, 60, 60, 60, 60, 60, 60, 60, 60</keyframes>
+        <framerates>30, 30, 30, 30, 30, 30, 30</framerates>
+        <refs>4</refs>
+        <audio_bitrate>128k</audio_bitrate>
+        <set_aspect_ratio>16:9</set_aspect_ratio>
+        <two_pass>yes</two_pass>
+        <keep_aspect_ratio>yes</keep_aspect_ratio>
+        <pixel_aspect_ratio>1:1</pixel_aspect_ratio>
+        <deinterlacing>auto</deinterlacing>
+        <audio_codec>libfaac</audio_codec>
+        <audio_channels_number>2</audio_channels_number>
+        <audio_volume>100</audio_volume>
+        <VCodecParameters>no</VCodecParameters>
+        <turbo>no</turbo>
+        <twin_turbo>no</twin_turbo>
+        <rotate>def</rotate>
+        <strip_chapters>no</strip_chapters>
+        <file_extension>tar</file_extension>
+        <hint>no</hint>
+        <set_rotate>source</set_rotate>
+        <pack_files>yes</pack_files>
+        <metadata>
+            <copy>no</copy>
+        </metadata>
+        <playlist_version>3</playlist_version>
+        <destination>http://test_url.s3.amazonaws.com/encoding.com.output/mock_mock_output_rendition_name_hls_11111_223.tar?acl=public-read</destination>
+    </format>
+</query>

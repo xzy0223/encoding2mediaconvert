@@ -1,0 +1,77 @@
+Error submitting MediaConvert job for 430
+Timestamp: 2025-05-26T05:04:34.318293
+
+Error message: An error occurred (BadRequestException) when calling the CreateJob operation: The request could not be interpreted.
+
+Job settings:
+{
+  "Settings": {
+    "Inputs": [
+      {
+        "TimecodeSource": "ZEROBASED",
+        "VideoSelector": {},
+        "AudioSelectors": {
+          "Audio Selector 1": {
+            "DefaultSelection": "DEFAULT"
+          }
+        },
+        "FileInput": "s3://fw-mc-test/mp4/430/430_882843476_source.mpg"
+      }
+    ],
+    "OutputGroups": [
+      {
+        "Name": "File Group",
+        "OutputGroupSettings": {
+          "Type": "FILE_GROUP_SETTINGS",
+          "FileGroupSettings": {
+            "Destination": "s3://fw-mc-test/mp4/430/"
+          }
+        },
+        "Outputs": [
+          {
+            "ContainerSettings": {
+              "Container": "MP4",
+              "Mp4Settings": {}
+            },
+            "VideoDescription": {
+              "CodecSettings": {
+                "H264Settings": {
+                  "RateControlMode": "CBR",
+                  "Bitrate": 6500000,
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateNumerator": 30000,
+                  "FramerateDenominator": 1001,
+                  "CodecProfile": "MAIN",
+                  "NumberReferenceFrames": 3
+                },
+                "Codec": "H_264"
+              },
+              "Width": 1920,
+              "Height": 1080,
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              }
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AC3",
+                  "Ac3Settings": {
+                    "Bitrate": 384000,
+                    "CodingMode": "CODING_MODE_5_1"
+                  }
+                }
+              }
+            ],
+            "NameModifier": "_1920x1080_6500000_mc"
+          }
+        ]
+      }
+    ],
+    "TimecodeConfig": {
+      "Source": "ZEROBASED"
+    },
+    "FollowSource": 1
+  },
+  "Role": "arn:aws:iam::935206693453:role/MediaConvertRole"
+}

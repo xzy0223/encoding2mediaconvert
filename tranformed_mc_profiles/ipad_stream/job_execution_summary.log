@@ -1,0 +1,36 @@
+
+--- Job Execution Summary (2025-06-25 03:57:05) ---
+Submitted 7 MediaConvert jobs
+Job 54: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/6/videoDescription/width: Should be less than or equal to 1808
+File ID: 55:1750823802815-85f5oq, Status: COMPLETE
+Job 788: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/15/videoDescription/width: Should be less than or equal to 1808
+Job 830: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/15/videoDescription/width: Should be less than or equal to 1808
+Job 863: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/2/videoDescription/width: Should be less than or equal to 1808
+Job 876: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/2/videoDescription/width: Should be less than or equal to 1808
+Job 877: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/2/videoDescription/width: Should be less than or equal to 1808
+Success: 1, Errors: 6
+--- End of Summary ---
+
+--- Job Execution Summary (2025-06-25 04:01:11) ---
+Submitted 7 MediaConvert jobs
+Job 54: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/4/videoDescription/width: Should be less than or equal to 752
+File ID: 55:1750824058361-ew4qtx, Status: COMPLETE
+Job 788: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/10/videoDescription/width: Should be less than or equal to 720
+Job 830: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/10/videoDescription/width: Should be less than or equal to 720
+Job 863: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 576
+Job 876: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 576
+Job 877: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/videoDescription/width: Should be less than or equal to 576
+Success: 1, Errors: 6
+--- End of Summary ---
+
+--- Job Execution Summary (2025-06-25 04:14:34) ---
+Submitted 7 MediaConvert jobs
+File ID: 54:1750824754007-s2hyuw, Status: COMPLETE
+File ID: 55:1750824765347-8rb6t6, Status: COMPLETE
+File ID: 788:1750824776682-1vfpx2, Status: COMPLETE
+File ID: 830:1750824788223-withx1, Status: COMPLETE
+File ID: 863:1750824809867-lz9uc6, Status: COMPLETE
+File ID: 876:1750824831432-mfble8, Status: COMPLETE
+File ID: 877:1750824852927-438p9m, Status: COMPLETE
+Success: 7, Errors: 0
+--- End of Summary ---

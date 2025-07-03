@@ -1,0 +1,109 @@
+MediaConvert job 1748922249105-ij78p5 failed
+Timestamp: 2025-06-03T03:44:19.607425
+
+Job details:
+{
+  "AccelerationSettings": {
+    "Mode": "DISABLED"
+  },
+  "AccelerationStatus": "NOT_APPLICABLE",
+  "Arn": "arn:aws:mediaconvert:us-east-1:935206693453:jobs/1748922249105-ij78p5",
+  "BillingTagsSource": "JOB",
+  "ClientRequestToken": "6d6c32c0-f462-4cfb-8578-65568f255774",
+  "CreatedAt": "2025-06-03 03:44:09+00:00",
+  "ErrorCode": 1040,
+  "ErrorMessage": "Error initializing encoder for video target [1] [initialization failed: Invalid level specified for the selected buffer size.]",
+  "Id": "1748922249105-ij78p5",
+  "Messages": {
+    "Info": [],
+    "Warning": []
+  },
+  "Priority": 0,
+  "Queue": "arn:aws:mediaconvert:us-east-1:935206693453:queues/Default",
+  "Role": "arn:aws:iam::935206693453:role/MediaConvertRole",
+  "Settings": {
+    "FollowSource": 1,
+    "Inputs": [
+      {
+        "AudioSelectors": {
+          "Audio Selector 1": {
+            "DefaultSelection": "DEFAULT"
+          }
+        },
+        "FileInput": "s3://fw-mc-test/mp4/440/440_880644324_source.mp4",
+        "TimecodeSource": "ZEROBASED",
+        "VideoSelector": {}
+      }
+    ],
+    "OutputGroups": [
+      {
+        "Name": "File Group",
+        "OutputGroupSettings": {
+          "FileGroupSettings": {
+            "Destination": "s3://fw-mc-test/mp4/440/"
+          },
+          "Type": "FILE_GROUP_SETTINGS"
+        },
+        "Outputs": [
+          {
+            "AudioDescriptions": [
+              {
+                "AudioNormalizationSettings": {
+                  "Algorithm": "ITU_BS_1770_2",
+                  "TargetLkfs": -24.0
+                },
+                "CodecSettings": {
+                  "AacSettings": {
+                    "Bitrate": 192000,
+                    "CodingMode": "CODING_MODE_2_0",
+                    "SampleRate": 48000
+                  },
+                  "Codec": "AAC"
+                }
+              }
+            ],
+            "ContainerSettings": {
+              "Container": "MP4",
+              "Mp4Settings": {}
+            },
+            "NameModifier": "_1920x1080_16000000_mc",
+            "VideoDescription": {
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "Bitrate": 16000000,
+                  "CodecLevel": "LEVEL_4",
+                  "CodecProfile": "MAIN",
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateDenominator": 1001,
+                  "FramerateNumerator": 30000,
+                  "NumberReferenceFrames": 4,
+                  "RateControlMode": "CBR"
+                }
+              },
+              "Height": 1080,
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "Width": 1920
+            }
+          }
+        ]
+      }
+    ],
+    "TimecodeConfig": {
+      "Source": "ZEROBASED"
+    }
+  },
+  "Status": "ERROR",
+  "StatusUpdateInterval": "SECONDS_60",
+  "Timing": {
+    "FinishTime": "2025-06-03 03:44:13+00:00",
+    "StartTime": "2025-06-03 03:44:10+00:00",
+    "SubmitTime": "2025-06-03 03:44:09+00:00"
+  },
+  "UserMetadata": {}
+}
+
+Error message:
+Error initializing encoder for video target [1] [initialization failed: Invalid level specified for the selected buffer size.]

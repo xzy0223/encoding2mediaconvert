@@ -1,0 +1,116 @@
+MediaConvert job 1748921918902-nelou7 failed
+Timestamp: 2025-06-03T03:38:49.376282
+
+Job details:
+{
+  "AccelerationSettings": {
+    "Mode": "DISABLED"
+  },
+  "AccelerationStatus": "NOT_APPLICABLE",
+  "Arn": "arn:aws:mediaconvert:us-east-1:935206693453:jobs/1748921918902-nelou7",
+  "BillingTagsSource": "JOB",
+  "ClientRequestToken": "3e224739-3952-4c53-9433-7d14160f446b",
+  "CreatedAt": "2025-06-03 03:38:39+00:00",
+  "ErrorCode": 1040,
+  "ErrorMessage": "Invalid resolution [912 x 513], only even values are supported. video_description [1]. For 111_881430577_source.mpg",
+  "Id": "1748921918902-nelou7",
+  "Messages": {
+    "Info": [],
+    "Warning": []
+  },
+  "Priority": 0,
+  "Queue": "arn:aws:mediaconvert:us-east-1:935206693453:queues/Default",
+  "Role": "arn:aws:iam::935206693453:role/MediaConvertRole",
+  "Settings": {
+    "FollowSource": 1,
+    "Inputs": [
+      {
+        "AudioSelectors": {
+          "Audio Selector 1": {
+            "DefaultSelection": "DEFAULT"
+          }
+        },
+        "FileInput": "s3://fw-mc-test/mp4/111/111_881430577_source.mpg",
+        "TimecodeSource": "ZEROBASED",
+        "VideoSelector": {}
+      }
+    ],
+    "OutputGroups": [
+      {
+        "Name": "File Group",
+        "OutputGroupSettings": {
+          "FileGroupSettings": {
+            "Destination": "s3://fw-mc-test/mp4/111/"
+          },
+          "Type": "FILE_GROUP_SETTINGS"
+        },
+        "Outputs": [
+          {
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "AacSettings": {
+                    "Bitrate": 128000,
+                    "CodingMode": "CODING_MODE_2_0",
+                    "SampleRate": 48000
+                  },
+                  "Codec": "AAC"
+                }
+              }
+            ],
+            "ContainerSettings": {
+              "Container": "MP4",
+              "Mp4Settings": {}
+            },
+            "NameModifier": "_912x513_1800000_mc",
+            "VideoDescription": {
+              "CodecSettings": {
+                "Codec": "H_264",
+                "H264Settings": {
+                  "Bitrate": 1800000,
+                  "CodecLevel": "LEVEL_3_1",
+                  "CodecProfile": "MAIN",
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateDenominator": 1,
+                  "FramerateNumerator": 30,
+                  "MaxBitrate": 2000000,
+                  "NumberReferenceFrames": 3,
+                  "RateControlMode": "VBR"
+                }
+              },
+              "Height": 513,
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              },
+              "Width": 912
+            }
+          }
+        ]
+      }
+    ],
+    "TimecodeConfig": {
+      "Source": "ZEROBASED"
+    }
+  },
+  "Status": "ERROR",
+  "StatusUpdateInterval": "SECONDS_60",
+  "Timing": {
+    "FinishTime": "2025-06-03 03:38:41+00:00",
+    "StartTime": "2025-06-03 03:38:40+00:00",
+    "SubmitTime": "2025-06-03 03:38:39+00:00"
+  },
+  "UserMetadata": {},
+  "Warnings": [
+    {
+      "Code": 230001,
+      "Count": 1
+    },
+    {
+      "Code": 230005,
+      "Count": 1
+    }
+  ]
+}
+
+Error message:
+Invalid resolution [912 x 513], only even values are supported. video_description [1]. For 111_881430577_source.mpg

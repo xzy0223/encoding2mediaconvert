@@ -1,0 +1,94 @@
+Error submitting MediaConvert job for 579
+Timestamp: 2025-06-03T03:51:21.792431
+
+Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/audioDescriptions/0/codecSettings/aacSettings/bitrate: You specified a value for Bitrate that is not valid with the combination of Profile LC, Coding mode CODING_MODE_2_0, and Sample rate 44100 you selected. Specify a bitrate in the range of 64000-512000, and resubmit your job For a list of supported bitrates, see: https://docs.aws.amazon.com/mediaconvert/latest/ug/aac-support.html
+
+Job settings:
+{
+  "Settings": {
+    "Inputs": [
+      {
+        "TimecodeSource": "ZEROBASED",
+        "VideoSelector": {
+          "Rotate": "DEGREE_0"
+        },
+        "AudioSelectors": {
+          "Audio Selector 1": {
+            "DefaultSelection": "DEFAULT"
+          }
+        },
+        "FileInput": "s3://fw-mc-test/mp4/579/579_848476650_source.mp4"
+      }
+    ],
+    "OutputGroups": [
+      {
+        "Name": "File Group",
+        "OutputGroupSettings": {
+          "Type": "FILE_GROUP_SETTINGS",
+          "FileGroupSettings": {
+            "Destination": "s3://fw-mc-test/mp4/579/"
+          }
+        },
+        "Outputs": [
+          {
+            "ContainerSettings": {
+              "Container": "MP4",
+              "Mp4Settings": {
+                "Mp4MajorBrand": "mp42"
+              }
+            },
+            "VideoDescription": {
+              "CodecSettings": {
+                "H264Settings": {
+                  "RateControlMode": "CBR",
+                  "Bitrate": 900000,
+                  "FramerateControl": "INITIALIZE_FROM_SOURCE",
+                  "FramerateNumerator": 30000,
+                  "FramerateDenominator": 1001,
+                  "CodecProfile": "MAIN",
+                  "SceneChangeDetect": "ENABLED",
+                  "CodecLevel": "LEVEL_3",
+                  "NumberReferenceFrames": 3,
+                  "MinIInterval": 25,
+                  "NumberBFramesBetweenReferenceFrames": 1,
+                  "Slices": 1,
+                  "QualityTuningLevel": "SINGLE_PASS_HQ",
+                  "GopSize": 60,
+                  "InterlaceMode": "PROGRESSIVE"
+                },
+                "Codec": "H_264"
+              },
+              "Width": 640,
+              "Height": 360,
+              "ScalingBehavior": "DEFAULT",
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              }
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 56000,
+                    "SampleRate": 44100,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
+                },
+                "AudioNormalizationSettings": {
+                  "TargetLkfs": -2.0
+                }
+              }
+            ],
+            "NameModifier": "_640x360_900000_mc"
+          }
+        ]
+      }
+    ],
+    "TimecodeConfig": {
+      "Source": "EMBEDDED"
+    },
+    "FollowSource": 1
+  },
+  "Role": "arn:aws:iam::935206693453:role/MediaConvertRole"
+}

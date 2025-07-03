@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<query>
+    <userid>mock_mock_test_user_id</userid>
+    <userkey>mock_mock_test_key</userkey>
+    <action>AddMedia</action>
+    <source>mock_mock_source_rendition__url</source>
+    <notify>mock_mock_encoding_notify_url</notify>
+    <notify_format>json</notify_format>
+    <notify_body_format>raw</notify_body_format>
+    <format> <!-- c4.com ABR 640x360 1400k --> 
+        <output>mp4</output> 
+        <video_codec>libx264</video_codec> 
+        <keyframe>125</keyframe> 
+        <cbr>no</cbr> 
+        <bitrate>1400k</bitrate> 
+        <framerate>25</framerate> 
+        <size>640x360</size> 
+        <keep_aspect_ratio>yes</keep_aspect_ratio> 
+        <deinterlacing>yes</deinterlacing> 
+        <two_pass>yes</two_pass> 
+        <audio_codec>libfaac</audio_codec> 
+        <audio_bitrate>96k</audio_bitrate> 
+        <acbr>no</acbr> 
+        <audio_channels_number>2</audio_channels_number> 
+        <audio_volume>70</audio_volume> 
+        <audio_sample_rate>48000</audio_sample_rate> 
+        <video_codec_parameters> 
+            <keyint_min>1</keyint_min> 
+            <refs>4</refs> 
+            <subq>7</subq> 
+            <flags>+loop</flags> 
+            <partitions>+parti8x8+parti4x4+partp8x8+partb8x8</partitions> 
+            <me_method>umh</me_method> 
+            <me_range>24</me_range> 
+            <bf>16</bf> 
+        </video_codec_parameters> 
+        <profile>main</profile> 
+        <level>30</level><!--drop the decimal, example 3.0 is 30--> 
+        <destination>http://test_url.s3.amazonaws.com/encoding.com.output/mock_mock_output_rendition_name_11111_544.mp4?acl=public-read</destination>
+    </format>
+</query>

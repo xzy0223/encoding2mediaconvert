@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<query>
+    <userid>mock_mock_test_user_id</userid>
+    <userkey>mock_mock_test_key</userkey>
+    <action>AddMedia</action>
+    <source>mock_mock_source_rendition__url</source>
+    <notify>mock_mock_encoding_notify_url</notify>
+    <notify_format>json</notify_format>
+    <notify_body_format>raw</notify_body_format>
+    <format>   
+        <output>mp4</output>   
+        <video_codec>libx264</video_codec>   
+        <keyframe>50</keyframe>   
+        <bitrate>600k</bitrate>   
+        <framerate>25</framerate>   
+        <two_pass>yes</two_pass>   
+        <size>448x252</size>   
+        <profile>main</profile>   
+        <level>30</level>   
+        <audio_codec>libfaac</audio_codec>   
+        <audio_bitrate>96k</audio_bitrate>   
+        <acbr>no</acbr>   
+        <audio_sample_rate>48000</audio_sample_rate>   
+        <audio_channels_number>2</audio_channels_number>   
+        <loudnorm>-23</loudnorm>   
+        <loudnorm_range>1</loudnorm_range>   
+        <loudnorm_peak>-1</loudnorm_peak>
+        <destination>http://test_url.s3.amazonaws.com/encoding.com.output/mock_mock_output_rendition_name_11111_770.mp4?acl=public-read</destination>
+    </format>
+</query>

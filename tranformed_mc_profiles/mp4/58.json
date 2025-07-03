@@ -1,0 +1,75 @@
+{
+  "Settings": {
+    "Inputs": [
+      {
+        "TimecodeSource": "ZEROBASED",
+        "VideoSelector": {},
+        "AudioSelectors": {
+          "Audio Selector 1": {
+            "DefaultSelection": "DEFAULT"
+          }
+        },
+        "FileInput": "{SOURCE_S3_URL}"
+      }
+    ],
+    "OutputGroups": [
+      {
+        "Name": "File Group",
+        "OutputGroupSettings": {
+          "Type": "FILE_GROUP_SETTINGS",
+          "FileGroupSettings": {
+            "Destination": "S3_OUTPUT_URL"
+          }
+        },
+        "Outputs": [
+          {
+            "ContainerSettings": {
+              "Container": "MP4",
+              "Mp4Settings": {}
+            },
+            "VideoDescription": {
+              "CodecSettings": {
+                "H264Settings": {
+                  "RateControlMode": "VBR",
+                  "Bitrate": 1300000,
+                  "MaxBitrate": 1690000,
+                  "FramerateControl": "SPECIFIED",
+                  "FramerateNumerator": 30,
+                  "FramerateDenominator": 1,
+                  "CodecProfile": "BASELINE",
+                  "EntropyEncoding": "CAVLC",
+                  "NumberBFramesBetweenReferenceFrames": 0,
+                  "CodecLevel": "LEVEL_3",
+                  "NumberReferenceFrames": 4
+                },
+                "Codec": "H_264"
+              },
+              "Width": 768,
+              "Height": 432,
+              "VideoPreprocessors": {
+                "Deinterlacer": {}
+              }
+            },
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 128000,
+                    "SampleRate": 48000,
+                    "CodingMode": "CODING_MODE_2_0"
+                  }
+                }
+              }
+            ],
+            "NameModifier": "_768x432_1300000_mc"
+          }
+        ]
+      }
+    ],
+    "TimecodeConfig": {
+      "Source": "ZEROBASED"
+    },
+    "FollowSource": 1
+  }
+}

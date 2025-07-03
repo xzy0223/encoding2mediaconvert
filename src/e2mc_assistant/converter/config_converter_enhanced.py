@@ -29,6 +29,28 @@ class ConfigConverter:
         message = f" {message} "
         side_fill = (width - len(message)) // 2
         return f"{fill_char * side_fill}{message}{fill_char * side_fill}"
+        
+    def _log_top_header(self, message, width=80, fill_char='-'):
+        """Log a header with an empty line before it (top spacing).
+        
+        Args:
+            message: The message to include in the header
+            width: Total width of the header (default: 80)
+            fill_char: Character to use for filling (default: '-')
+        """
+        self.logger.info("")  # Empty line before header
+        self.logger.info(self._format_log_header(message, width, fill_char))
+        
+    def _log_bottom_header(self, message, width=80, fill_char='-'):
+        """Log a header with an empty line after it (bottom spacing).
+        
+        Args:
+            message: The message to include in the header
+            width: Total width of the header (default: 80)
+            fill_char: Character to use for filling (default: '-')
+        """
+        self.logger.info(self._format_log_header(message, width, fill_char))
+        self.logger.info("")  # Empty line after header
     
     def __init__(self, rules_file: str):
         """Initialize converter with mapping rules"""
@@ -263,6 +285,11 @@ class ConfigConverter:
                 # 创建一个新的stream_processed_params
                 stream_processed_params = set()
                 
+                # logging for processing start of a stream
+                self._log_top_header(f"Applying rules to stream {i+1}/{len(streams)}", fill_char='=')
+                self.logger.debug(f"The structure of stream is {stream}")
+
+                self._log_top_header(f"Processing dummy rule")
                 # 处理当前stream的dummy规则
                 for rule in dummy_rules:
                     source_path = rule['source']['path']
@@ -278,6 +305,7 @@ class ConfigConverter:
                         if not hasattr(self, 'mapped_parameters'):
                             self.mapped_parameters = []
                         self.mapped_parameters.append((source_path, source_value, [("DUMMY_RULE", None)]))
+                self._log_bottom_header(f"Finished dummy rule processing")
                 
                 # 添加已经通过_process_rate_control_settings和_process_audio_settings处理过的参数
                 # 这些参数在前面的代码中已经被处理，但没有添加到stream_processed_params中
@@ -290,10 +318,6 @@ class ConfigConverter:
                         stream_processed_params.add(param)
                         self.logger.debug(f"Added pre-processed parameter {param} to stream_processed_params for stream {i}")
                 
-                # Process each parameter in the stream using the rules
-                self.logger.info(self._format_log_header(f"Applying rules to stream {i+1}/{len(streams)}", fill_char='='))
-                self.logger.debug(f"The structure of stream is {stream}")
-
                 # insert stream data into context for processing rule
                 if context:
                     context["current_stream"] = stream
@@ -1954,6 +1978,7 @@ class ConfigConverter:
                 rule_lookup[source_path] = []
             rule_lookup[source_path].append(rule)
         
+        self._log_top_header(f"Processing dummy rule")
         # Process dummy rules to mark parameters as processed
         for rule in dummy_rules:
             source_path = rule['source']['path']
@@ -1969,7 +1994,8 @@ class ConfigConverter:
                 if not hasattr(self, 'mapped_parameters'):
                     self.mapped_parameters = []
                 self.mapped_parameters.append((source_path, source_value, [("DUMMY_RULE", None)]))
-        
+        self._log_bottom_header(f"Finished dummy rule processing")
+
         # Now, traverse the source data structure and apply matching rules
         self._process_source_data(source_data, "", rule_lookup, target_data, processed_params, None, source_data)
         
@@ -1995,8 +2021,13 @@ class ConfigConverter:
             # Log unmapped parameters if there are any
             if unmapped_count > 0 and hasattr(self, 'unmapped_parameters'):
                 self.logger.info("  - Unmapped parameter details:")
-                for path, value in self.unmapped_parameters:
-                    self.logger.info(f"    * {path} = {value}")
+                for item in self.unmapped_parameters:
+                    if len(item) >= 3:  # New format with reason
+                        path, value, reason = item
+                        self.logger.info(f"    * {path} = {value} (Reason: {reason})")
+                    else:  # Old format without reason
+                        path, value = item[:2]
+                        self.logger.info(f"    * {path} = {value}")
         else:
             self.logger.info("  - No parameters found to convert")
         
@@ -2127,12 +2158,12 @@ class ConfigConverter:
             path = f"{current_path}.{key}" if current_path else key
 
             if not isinstance(value, dict):
-                self.logger.info(self._format_log_header(f"Processing rule for {path}"))
+                self._log_top_header(f"Processing rule for {path}")
 
             # Skip already processed parameters
             if path in processed_params:
                 self.logger.info(f" Skip the processed parameter: {path}={value}")
-                self.logger.info(self._format_log_header(f"Finished rule processing for {path}"))
+                self._log_bottom_header(f"Finished rule processing for {path}")
                 continue
                 
             # Track if this path was processed by any rule
@@ -2165,7 +2196,7 @@ class ConfigConverter:
                     # Add to unmapped_parameters list since no rules were successfully applied
                     if not hasattr(self, 'unmapped_parameters'):
                         self.unmapped_parameters = []
-                    self.unmapped_parameters.append((path, value))
+                    self.unmapped_parameters.append((path, value, "NO_RULES_APPLIED"))
             else:
                 if not isinstance(value, dict):
                     self.logger.info(f"No rules found for parameter: {path}={value}")
@@ -2177,7 +2208,7 @@ class ConfigConverter:
                 # Add to unmapped_parameters list
                 if not hasattr(self, 'unmapped_parameters'):
                     self.unmapped_parameters = []
-                self.unmapped_parameters.append((path, value))
+                self.unmapped_parameters.append((path, value, "NO_MATCHING_RULES"))
             
             # If this is a dictionary, process it recursively
             if isinstance(value, dict):
@@ -2192,7 +2223,7 @@ class ConfigConverter:
                         self._process_source_data(source_data, list_path, rule_lookup, target_data, processed_params, context, item)
         
             if not isinstance(value, dict):
-                self.logger.info(self._format_log_header(f"Finished rule processing for {path}"))
+                self._log_bottom_header(f"Finished rule processing for {path}")
                
     
     def _process_rule(self, rule, source_path, source_value, source_data, target_data, processed_params, context=None):
@@ -2329,11 +2360,13 @@ class ConfigConverter:
                     
                     # If transformation returns None, it means the value didn't match any mapping
                     if target_value is None:
-                        self.logger.warning(f"Skipping parameter mapping for {source_path}={source_value} → {target_path} (no matching transformation)")
-                        # Add to mapped parameters list (as mapped but skipped)
-                        if not hasattr(self, 'mapped_parameters'):
-                            self.mapped_parameters = []
-                        self.mapped_parameters.append((source_path, source_value, [(target_path, "SKIPPED_NO_MATCHING_TRANSFORM")]))
+                        reason = "NO_MATCHING_TRANSFORM"
+                        self.logger.warning(f"Skipping parameter mapping for {source_path}={source_value} → {target_path} ({reason})")
+                        # Add to unmapped parameters list with reason
+                        if not hasattr(self, 'unmapped_parameters'):
+                            self.unmapped_parameters = []
+                        # Store as a tuple with path, value, and reason
+                        self.unmapped_parameters.append((source_path, source_value, reason))
                         continue
                         
                     self.logger.info(f"Transformed {original_value} using {transform} to {target_value}")
@@ -2558,7 +2591,11 @@ class ConfigConverter:
             self.unmapped_parameters = []
             
         # Create a set of already unmapped paths for faster lookup
-        unmapped_paths = set(path for path, _ in self.unmapped_parameters)
+        # Handle both (path, value) and (path, value, reason) formats
+        unmapped_paths = set()
+        for item in self.unmapped_parameters:
+            if isinstance(item, tuple) and len(item) >= 1:
+                unmapped_paths.add(item[0])  # Add the path regardless of tuple structure
         
         # Special handling for stream parameters that are processed by _process_rate_control_settings
         # These parameters should be considered as processed even if they don't appear directly in processed_params
@@ -2599,10 +2636,12 @@ class ConfigConverter:
                         list_path = f"{current_path}[{i}]"
                         self._log_unmapped_parameters(item, processed_params, list_path)
             # Log unmapped leaf parameters
+            # Log unmapped leaf parameters
             else:
-                self.logger.warning(f"Unmapped parameter: {current_path} = {value}")
-                # Add to unmapped_parameters list
-                self.unmapped_parameters.append((current_path, value))
+                reason = "NO_MAPPING_RULE"
+                self.logger.warning(f"Unmapped parameter: {current_path} = {value} ({reason})")
+                # Add to unmapped_parameters list with reason
+                self.unmapped_parameters.append((current_path, value, reason))
                 
     def _get_output_group_type(self, output_format: str) -> str:
         """

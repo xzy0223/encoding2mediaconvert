@@ -1,0 +1,107 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "e2mc_assistant"
+dynamic = ["version"]
+description = "Encoding.com to AWS MediaConvert Assistant - Complete migration toolkit"
+readme = "README.md"
+license = "MIT"
+authors = [
+    {name = "AWS Professional Services", email = "aws-professional-services@amazon.com"}
+]
+keywords = ["aws", "mediaconvert", "encoding", "video", "transcoding", "conversion", "migration"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Video :: Conversion",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = ">=3.6"
+dependencies = [
+    "pyyaml>=5.1",
+    "boto3>=1.26.0",
+    "botocore>=1.29.0",
+    "jsonschema>=4.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0.0",
+    "pytest-cov>=2.10.0",
+    "black>=22.0.0",
+    "flake8>=4.0.0",
+    "mypy>=0.910",
+    "pre-commit>=2.15.0",
+]
+docs = [
+    "sphinx>=4.0.0",
+    "sphinx-rtd-theme>=1.0.0",
+    "myst-parser>=0.15.0",
+]
+test = [
+    "pytest>=6.0.0",
+    "pytest-cov>=2.10.0",
+    "moto>=4.0.0",
+]
+
+[project.scripts]
+e2mc-converter = "e2mc_assistant.converter.config_converter_enhanced:main"
+e2mc-analyzer = "e2mc_assistant.analyzer.video_analyzer:main"
+e2mc-submitter = "e2mc_assistant.requester.mediaconvert_job_submitter:main"
+e2mc-workflow = "e2mc_assistant.workflow.e2mc_workflow:main"
+
+[project.urls]
+Homepage = "https://github.com/xzy0223/encoding2mediaconvert"
+Repository = "https://github.com/xzy0223/encoding2mediaconvert"
+Documentation = "https://github.com/xzy0223/encoding2mediaconvert/blob/main/README.md"
+"Bug Reports" = "https://github.com/xzy0223/encoding2mediaconvert/issues"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"e2mc_assistant.converter" = ["rules/*.yaml", "templates/*.json", "*.md"]
+"e2mc_assistant.analyzer" = ["*.md"]
+"e2mc_assistant.requester" = ["*.md"]
+
+[tool.setuptools_scm]
+write_to = "src/e2mc_assistant/_version.py"
+
+[tool.black]
+line-length = 88
+target-version = ['py36']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+addopts = "-v --cov=e2mc_assistant --cov-report=term-missing"

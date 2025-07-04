@@ -1,0 +1,22 @@
+# Development dependencies
+-r requirements.txt
+
+# Testing
+pytest>=6.0.0
+pytest-cov>=2.10.0
+moto>=4.0.0
+
+# Code formatting and linting
+black>=22.0.0
+flake8>=4.0.0
+mypy>=0.910
+pre-commit>=2.15.0
+
+# Documentation
+sphinx>=4.0.0
+sphinx-rtd-theme>=1.0.0
+myst-parser>=0.15.0
+
+# Build tools
+build>=0.7.0
+twine>=3.4.0

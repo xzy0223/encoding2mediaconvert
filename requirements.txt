@@ -1,0 +1,9 @@
+# Core dependencies for E2MC Assistant
+pyyaml>=5.1
+boto3>=1.26.0
+botocore>=1.29.0
+jsonschema>=4.0.0
+
+# Optional dependencies for older Python versions
+pathlib2>=2.3.0; python_version<"3.4"
+typing>=3.7.0; python_version<"3.5"

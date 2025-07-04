@@ -1,25 +1,49 @@
-# 多条件判断功能
+# 🔀 Multi-Condition Logic - Advanced Rule Configuration
 
-## 概述
+[![YAML](https://img.shields.io/badge/config-YAML-red.svg)](https://yaml.org)
+[![Logic](https://img.shields.io/badge/logic-AND%2FOR%2FNOT-blue.svg)](#)
 
-多条件判断功能允许在规则中使用复合逻辑条件，支持 AND、OR、NOT 逻辑运算符，可以组合多个简单条件来表达复杂的判断逻辑。
+The **Multi-Condition Logic** system enables sophisticated rule evaluation using compound logical conditions with AND, OR, and NOT operators, allowing complex decision-making in configuration conversion rules.
 
-## 条件结构
+---
 
-### 基本条件结构
+## 🌟 Overview
+
+Multi-condition functionality allows rules to use compound logical conditions, supporting AND, OR, and NOT logical operators. You can combine multiple simple conditions to express complex judgment logic, enabling precise control over when rules are applied during the conversion process.
+
+---
+
+## 🏗️ Condition Structure
+
+### Basic Condition Structure
 
 ```yaml
 condition:
-  operator: "eq"  # 操作符
-  value: "mp4"    # 比较值
-  source_path: "output"  # 可选，从其他路径获取值
+  operator: "eq"              # Comparison operator
+  value: "mp4"               # Comparison value
+  source_path: "output"      # Optional: get value from another path
 ```
 
-### 复合条件结构
+### Supported Operators
 
-#### AND 条件
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `eq` | Equal to | `operator: "eq", value: "mp4"` |
+| `ne` | Not equal to | `operator: "ne", value: "flv"` |
+| `in` | Value in list | `operator: "in", value: ["mp4", "mov"]` |
+| `exists` | Parameter exists | `operator: "exists", source_path: "maxrate"` |
+| `gt` | Greater than | `operator: "gt", value: 1000` |
+| `gte` | Greater than or equal | `operator: "gte", value: 30` |
+| `lt` | Less than | `operator: "lt", value: 8192` |
+| `lte` | Less than or equal | `operator: "lte", value: 60` |
 
-当所有子条件都为真时，整个条件为真。
+---
+
+## 🔗 Compound Condition Structure
+
+### AND Conditions
+
+All sub-conditions must be true for the entire condition to be true.
 
 ```yaml
 condition:
@@ -29,11 +53,14 @@ condition:
       value: "no"
     - operator: "exists"
       source_path: "cabr"
+    - operator: "ne"
+      source_path: "video_codec"
+      value: "copy"
 ```
 
-#### OR 条件
+### OR Conditions
 
-当任一子条件为真时，整个条件为真。
+Any sub-condition being true makes the entire condition true.
 
 ```yaml
 condition:
@@ -44,11 +71,13 @@ condition:
     - operator: "eq"
       source_path: "cabr"
       value: "yes"
+    - operator: "exists"
+      source_path: "maxrate"
 ```
 
-#### NOT 条件
+### NOT Conditions
 
-对单个条件取反。
+Negates a single condition.
 
 ```yaml
 condition:
@@ -58,9 +87,13 @@ condition:
     value: "mp4"
 ```
 
-## 嵌套条件
+---
 
-条件可以任意嵌套，构建复杂的逻辑表达式。
+## 🎯 Nested Conditions
+
+Conditions can be arbitrarily nested to build complex logical expressions with unlimited depth.
+
+### Complex Nested Example
 
 ```yaml
 condition:
@@ -70,18 +103,37 @@ condition:
       value: "no"
     - operator: "OR"
       conditions:
-        - operator: "exists"
-          source_path: "cabr"
+        - operator: "AND"
+          conditions:
+            - operator: "exists"
+              source_path: "cabr"
+            - operator: "eq"
+              source_path: "cabr"
+              value: "no"
         - operator: "eq"
           source_path: "acbr"
           value: "no"
+    - operator: "NOT"
+      condition:
+        operator: "eq"
+        source_path: "video_codec"
+        value: "copy"
 ```
 
-## 实际应用示例
+This translates to the logical expression:
+```
+(cbr == "no") AND 
+((cabr exists AND cabr == "no") OR (acbr == "no")) AND 
+NOT(video_codec == "copy")
+```
 
-### 示例1: CBR 设置条件
+---
 
-当 `cbr=no` 且 `cabr` 参数存在且等于 `no` 时，设置特定的码率控制模式。
+## 📊 Real-World Examples
+
+### Example 1: CBR Rate Control Configuration
+
+Apply specific rate control mode when `cbr=no` and `cabr` parameter exists and equals `no`.
 
 ```yaml
 - source:
@@ -100,12 +152,12 @@ condition:
               value: "no"
   target:
     path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode"
-    value: "QVBR_WITH_CABR"
+    value: "QVBR"
 ```
 
-### 示例2: 输出格式条件
+### Example 2: Output Format Conditional Logic
 
-当输出格式不是 `mp4` 时，设置不同的输出组类型。
+Set different output group types when output format is not MP4.
 
 ```yaml
 - source:
@@ -120,9 +172,9 @@ condition:
     value: "HLS_GROUP_SETTINGS"
 ```
 
-### 示例3: 复杂编码设置
+### Example 3: Complex Encoding Configuration
 
-当满足多个编码参数条件时，应用特定的编码配置。
+Apply specific encoding configuration when multiple encoding parameters meet certain conditions.
 
 ```yaml
 - source:
@@ -142,25 +194,401 @@ condition:
               value: "main"
         - operator: "exists"
           source_path: "level"
+        - operator: "NOT"
+          condition:
+            operator: "eq"
+            source_path: "preset"
+            value: "ultrafast"
   target:
     path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.CodecProfile"
     value: "HIGH"
 ```
 
-## 最佳实践
+### Example 4: Streaming-Specific Conditions
 
-1. **条件组织**
-   - 将简单条件放在复合条件的开始位置，以便快速评估
-   - 使用嵌套结构表达复杂逻辑，提高可读性
+Configure streaming settings based on multiple parameters.
 
-2. **字符串值**
-   - 在YAML中使用引号包围字符串值，避免解析问题
-   - 例如：`value: "no"` 而不是 `value: no`
+```yaml
+- source:
+    path: "segment_seconds"
+    condition:
+      operator: "AND"
+      conditions:
+        - operator: "in"
+          source_path: "output"
+          value: ["advanced_hls", "mpeg_dash"]
+        - operator: "OR"
+          conditions:
+            - operator: "gte"
+              value: 2
+            - operator: "exists"
+              source_path: "keyframe_interval"
+        - operator: "NOT"
+          condition:
+            operator: "eq"
+            source_path: "live_stream"
+            value: "yes"
+  target:
+    path: "Settings.OutputGroups[0].OutputGroupSettings.HlsGroupSettings.SegmentLength"
+    value: 6
+```
 
-3. **条件调试**
-   - 使用 `--verbose` 参数查看详细的条件评估日志
-   - 检查条件评估结果，确保逻辑正确
+---
 
-4. **避免过度复杂**
-   - 过于复杂的条件难以维护，考虑拆分为多个规则
-   - 保持条件嵌套层级不超过3层
+## 🎨 Advanced Patterns
+
+### Conditional Transformations
+
+Use conditions to apply different transformations based on context.
+
+```yaml
+# High bitrate for high resolution
+- source:
+    path: "bitrate"
+    type: "string"
+    regex: "(\\d+)k"
+    condition:
+      operator: "AND"
+      conditions:
+        - operator: "exists"
+          source_path: "size"
+        - operator: "OR"
+          conditions:
+            - operator: "eq"
+              source_path: "size"
+              value: "1920x1080"
+            - operator: "eq"
+              source_path: "size"
+              value: "3840x2160"
+  target:
+    path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.Bitrate"
+    value: "$1000"
+
+# Standard bitrate for lower resolution
+- source:
+    path: "bitrate"
+    type: "string"
+    regex: "(\\d+)k"
+    condition:
+      operator: "AND"
+      conditions:
+        - operator: "exists"
+          source_path: "size"
+        - operator: "NOT"
+          condition:
+            operator: "OR"
+            conditions:
+              - operator: "eq"
+                source_path: "size"
+                value: "1920x1080"
+              - operator: "eq"
+                source_path: "size"
+                value: "3840x2160"
+  target:
+    path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.Bitrate"
+    value: "$1500"  # Higher multiplier for lower resolution
+```
+
+### Multi-Output Conditions
+
+Configure different outputs based on complex conditions.
+
+```yaml
+# Primary output for high quality
+- source:
+    path: "quality"
+    condition:
+      operator: "AND"
+      conditions:
+        - operator: "eq"
+          value: "high"
+        - operator: "exists"
+          source_path: "bitrate"
+        - operator: "gte"
+          source_path: "bitrate"
+          value: "2000k"
+  target:
+    - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.QualityTuningLevel"
+      value: "MULTI_PASS_HQ"
+    - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode"
+      value: "VBR"
+
+# Secondary output for standard quality
+- source:
+    path: "quality"
+    condition:
+      operator: "OR"
+      conditions:
+        - operator: "eq"
+          value: "standard"
+        - operator: "AND"
+          conditions:
+            - operator: "eq"
+              value: "high"
+            - operator: "lt"
+              source_path: "bitrate"
+              value: "2000k"
+  target:
+    - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.QualityTuningLevel"
+      value: "SINGLE_PASS"
+    - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.RateControlMode"
+      value: "CBR"
+```
+
+---
+
+## 🔍 Debugging Multi-Conditions
+
+### Verbose Logging
+
+Enable verbose logging to see detailed condition evaluation:
+
+```bash
+e2mc-converter \
+  --source input.xml \
+  --rules rules.yaml \
+  --output output.json \
+  --verbose
+```
+
+### Condition Evaluation Log Example
+
+```
+[DEBUG] Evaluating condition for rule 'cbr_rate_control':
+[DEBUG]   AND condition with 2 sub-conditions:
+[DEBUG]     1. eq: cbr == "no" → TRUE
+[DEBUG]     2. AND condition with 2 sub-conditions:
+[DEBUG]       2.1. exists: cabr → TRUE (value: "no")
+[DEBUG]       2.2. eq: cabr == "no" → TRUE
+[DEBUG]   Final result: TRUE
+[DEBUG] Rule 'cbr_rate_control' applied successfully
+```
+
+### Testing Conditions
+
+Create test cases for complex conditions:
+
+```python
+# Test condition evaluation
+from e2mc_assistant.converter import ConfigConverter
+
+converter = ConfigConverter('rules.yaml')
+
+# Test data
+test_config = {
+    'cbr': 'no',
+    'cabr': 'no',
+    'video_codec': 'libx264',
+    'profile': 'high'
+}
+
+# Evaluate specific rule
+rule_result = converter.evaluate_rule_condition(
+    rule_name='cbr_rate_control',
+    config_data=test_config
+)
+
+print(f"Rule condition result: {rule_result}")
+```
+
+---
+
+## 🎓 Best Practices
+
+### 1. Condition Organization
+
+```yaml
+# ✅ Good: Simple conditions first for fast evaluation
+condition:
+  operator: "AND"
+  conditions:
+    - operator: "eq"          # Simple equality check first
+      value: "mp4"
+    - operator: "exists"      # Existence check second
+      source_path: "bitrate"
+    - operator: "OR"          # Complex OR condition last
+      conditions:
+        - operator: "gte"
+          source_path: "bitrate"
+          value: "1000k"
+        - operator: "exists"
+          source_path: "maxrate"
+```
+
+### 2. String Value Handling
+
+```yaml
+# ✅ Good: Always quote string values in YAML
+condition:
+  operator: "eq"
+  value: "no"              # Quoted string
+
+# ❌ Bad: Unquoted values can cause parsing issues
+condition:
+  operator: "eq"
+  value: no                # May be interpreted as boolean
+```
+
+### 3. Readability and Maintainability
+
+```yaml
+# ✅ Good: Well-structured with clear logic
+condition:
+  operator: "AND"
+  conditions:
+    # Check if CBR is disabled
+    - operator: "eq"
+      value: "no"
+    # Ensure CABR parameter exists and is configured
+    - operator: "AND"
+      conditions:
+        - operator: "exists"
+          source_path: "cabr"
+        - operator: "eq"
+          source_path: "cabr"
+          value: "no"
+
+# ❌ Bad: Overly complex nesting
+condition:
+  operator: "AND"
+  conditions:
+    - operator: "OR"
+      conditions:
+        - operator: "AND"
+          conditions:
+            - operator: "NOT"
+              condition:
+                operator: "OR"
+                conditions:
+                  # ... deeply nested conditions
+```
+
+### 4. Performance Optimization
+
+```yaml
+# ✅ Good: Most selective conditions first
+condition:
+  operator: "AND"
+  conditions:
+    - operator: "eq"          # Most selective first
+      source_path: "output"
+      value: "advanced_hls"
+    - operator: "exists"      # Less selective second
+      source_path: "segment_seconds"
+    - operator: "gte"         # Least selective last
+      source_path: "bitrate"
+      value: "1000k"
+```
+
+### 5. Error Prevention
+
+```yaml
+# ✅ Good: Check existence before value comparison
+condition:
+  operator: "AND"
+  conditions:
+    - operator: "exists"      # Check existence first
+      source_path: "cabr"
+    - operator: "eq"          # Then check value
+      source_path: "cabr"
+      value: "no"
+
+# ❌ Bad: May cause errors if parameter doesn't exist
+condition:
+  operator: "eq"
+  source_path: "cabr"        # May not exist
+  value: "no"
+```
+
+---
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+#### 1. **Condition Never Matches**
+
+```yaml
+# Problem: Incorrect operator or value
+condition:
+  operator: "eq"
+  value: no                  # Should be "no" (string)
+
+# Solution: Use correct data types
+condition:
+  operator: "eq"
+  value: "no"               # Correct string value
+```
+
+#### 2. **Parameter Not Found Errors**
+
+```yaml
+# Problem: Referencing non-existent parameter
+condition:
+  operator: "eq"
+  source_path: "non_existent_param"
+  value: "value"
+
+# Solution: Check existence first
+condition:
+  operator: "AND"
+  conditions:
+    - operator: "exists"
+      source_path: "param_name"
+    - operator: "eq"
+      source_path: "param_name"
+      value: "value"
+```
+
+#### 3. **Complex Condition Performance**
+
+```yaml
+# Problem: Inefficient condition ordering
+condition:
+  operator: "AND"
+  conditions:
+    - operator: "OR"          # Complex condition first (slow)
+      conditions:
+        # ... many sub-conditions
+    - operator: "eq"          # Simple condition last
+      value: "mp4"
+
+# Solution: Reorder for efficiency
+condition:
+  operator: "AND"
+  conditions:
+    - operator: "eq"          # Simple condition first (fast)
+      value: "mp4"
+    - operator: "OR"          # Complex condition last
+      conditions:
+        # ... many sub-conditions
+```
+
+---
+
+## 📚 Reference
+
+### Condition Evaluation Order
+
+1. **Simple operators** (`eq`, `ne`, `exists`) are evaluated first
+2. **Comparison operators** (`gt`, `gte`, `lt`, `lte`) are evaluated second
+3. **List operators** (`in`) are evaluated third
+4. **Compound operators** (`AND`, `OR`, `NOT`) are evaluated last
+
+### Performance Characteristics
+
+| Operator | Performance | Notes |
+|----------|-------------|-------|
+| `eq`, `ne` | Fast | Direct value comparison |
+| `exists` | Fast | Simple existence check |
+| `gt`, `gte`, `lt`, `lte` | Medium | Numeric conversion required |
+| `in` | Medium | List iteration required |
+| `AND` | Variable | Short-circuits on first false |
+| `OR` | Variable | Short-circuits on first true |
+| `NOT` | Fast | Single condition negation |
+
+---
+
+## 📄 License
+
+This documentation is part of E2MC Assistant and is licensed under the MIT License.

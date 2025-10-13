@@ -64,7 +64,7 @@ class E2MCWorkflow:
         self.job_submitter = None
         self.video_analyzer = None
 
-    def convert_configs(self, input_dir: str, output_dir: str, rules_file: str, template_file: Optional[str] = None, schema_file: Optional[str] = None) -> List[str]:
+    def convert_configs(self, input_dir: str, output_dir: str, rules_file: str, template_file: Optional[str] = None, schema_file: Optional[str] = None, include_ids: Optional[List[str]] = None, exclude_ids: Optional[List[str]] = None) -> List[str]:
         """
         Convert Encoding.com configuration files to MediaConvert configuration files.
 
@@ -74,6 +74,8 @@ class E2MCWorkflow:
             rules_file: Path to the mapping rules file
             template_file: Optional path to a template MediaConvert file
             schema_file: Optional path to a JSON schema file for validation
+            include_ids: Optional list of video IDs to include
+            exclude_ids: Optional list of video IDs to exclude
 
         Returns:
             List of paths to the generated MediaConvert configuration files
@@ -109,6 +111,15 @@ class E2MCWorkflow:
                     file_id = id_match.group(1)
                 else:
                     file_id = os.path.splitext(filename)[0]
+                
+                # Apply include/exclude filtering
+                if include_ids and file_id not in include_ids:
+                    logger.info(f"Skipping {filename} - ID {file_id} not in include list")
+                    continue
+                
+                if exclude_ids and file_id in exclude_ids:
+                    logger.info(f"Skipping {filename} - ID {file_id} in exclude list")
+                    continue
                 
                 # Define output filename with the same ID prefix
                 output_file = os.path.join(output_dir, f"{file_id}.json")
@@ -1017,6 +1028,14 @@ def parse_arguments():
         '--validate',
         help='Path to JSON schema file for validation'
     )
+    convert_parser.add_argument(
+        '--include',
+        help='Comma-separated list of video IDs to include'
+    )
+    convert_parser.add_argument(
+        '--exclude',
+        help='Comma-separated list of video IDs to exclude'
+    )
     
     # Submit command
     submit_parser = subparsers.add_parser(
@@ -1156,13 +1175,24 @@ def main():
         )
         
         if args.command == 'convert':
+            # 处理 include 和 exclude 参数
+            include_ids = args.include.split(',') if args.include else None
+            exclude_ids = args.exclude.split(',') if args.exclude else None
+            
+            if include_ids:
+                print(f"Including only IDs: {include_ids}")
+            if exclude_ids:
+                print(f"Excluding IDs: {exclude_ids}")
+            
             # Convert configuration files
             converted_files = workflow.convert_configs(
                 input_dir=args.input_dir,
                 output_dir=args.output_dir,
                 rules_file=args.rules_file,
                 template_file=args.template_file,
-                schema_file=args.validate if hasattr(args, 'validate') else None
+                schema_file=args.validate if hasattr(args, 'validate') else None,
+                include_ids=include_ids,
+                exclude_ids=exclude_ids
             )
             
             print(f"Converted {len(converted_files)} configuration files")

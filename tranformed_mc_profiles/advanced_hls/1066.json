@@ -43,7 +43,8 @@
                   "FramerateDenominator": 1,
                   "GopSize": 90,
                   "GopSizeUnits": "FRAMES",
-                  "CodecProfile": "MAIN"
+                  "CodecProfile": "MAIN",
+                  "CodecLevel": "LEVEL_3_1"
                 }
               },
               "VideoPreprocessors": {
@@ -85,7 +86,8 @@
                   "FramerateDenominator": 1,
                   "GopSize": 90,
                   "GopSizeUnits": "FRAMES",
-                  "CodecProfile": "MAIN"
+                  "CodecProfile": "MAIN",
+                  "CodecLevel": "LEVEL_3_1"
                 }
               },
               "VideoPreprocessors": {
@@ -127,7 +129,8 @@
                   "FramerateDenominator": 1,
                   "GopSize": 90,
                   "GopSizeUnits": "FRAMES",
-                  "CodecProfile": "HIGH"
+                  "CodecProfile": "HIGH",
+                  "CodecLevel": "LEVEL_4"
                 }
               },
               "VideoPreprocessors": {

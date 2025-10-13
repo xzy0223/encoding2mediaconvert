@@ -74,3 +74,21 @@ File ID: 1071:1750823572815-r3g0nt, Status: COMPLETE
 File ID: 897:1750823594308-jd4cl5, Status: COMPLETE
 Success: 2, Errors: 0
 --- End of Summary ---
+
+--- Job Execution Summary (2025-10-09 09:04:48) ---
+Submitted 1 MediaConvert jobs
+Job 1043: ERROR: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/captionDescriptions/0/destinationSettings/burninDestinationSettings: Should match all dependencies: See other errors for more details | /outputGroups/0/outputs/0/captionDescriptions/0/destinationSettings/destinationType: Must be BURN_IN
+Success: 0, Errors: 1
+--- End of Summary ---
+
+--- Job Execution Summary (2025-10-09 09:08:06) ---
+Submitted 1 MediaConvert jobs
+File ID: 1066:1760000864839-ssa9u0, Status: COMPLETE
+Success: 1, Errors: 0
+--- End of Summary ---
+
+--- Job Execution Summary (2025-10-09 09:20:13) ---
+Submitted 1 MediaConvert jobs
+File ID: 1066:1760001591653-cob8z5, Status: COMPLETE
+Success: 1, Errors: 0
+--- End of Summary ---

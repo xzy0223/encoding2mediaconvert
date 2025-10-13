@@ -1,7 +1,7 @@
 Error submitting MediaConvert job for 1043
-Timestamp: 2025-06-20T02:55:37.005948
+Timestamp: 2025-10-09T09:04:48.500248
 
-Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/captionDescriptions/0: captionSelectorName is a required property
+Error message: An error occurred (BadRequestException) when calling the CreateJob operation: /outputGroups/0/outputs/0/captionDescriptions/0/destinationSettings/burninDestinationSettings: Should match all dependencies: See other errors for more details | /outputGroups/0/outputs/0/captionDescriptions/0/destinationSettings/destinationType: Must be BURN_IN
 
 Job settings:
 {
@@ -42,7 +42,7 @@ Job settings:
                 "H264Settings": {
                   "RateControlMode": "VBR",
                   "Bitrate": 5000000,
-                  "MaxBitrate": 6250000,
+                  "MaxBitrate": 12500000,
                   "CodecProfile": "HIGH",
                   "HrdBufferSize": 10000000,
                   "GopSize": 50,
@@ -55,6 +55,7 @@ Job settings:
                   "ParDenominator": 1,
                   "QualityTuningLevel": "MULTI_PASS_HQ",
                   "MinIInterval": 5,
+                  "CodecLevel": "LEVEL_4_1",
                   "NumberBFramesBetweenReferenceFrames": 2
                 }
               },
@@ -69,7 +70,7 @@ Job settings:
             "CaptionDescriptions": [
               {
                 "DestinationSettings": {
-                  "DestinationType": "BURN_IN",
+                  "DestinationType": "EMBEDDED",
                   "BurninDestinationSettings": {
                     "FontSize": 16,
                     "BackgroundOpacity": 255
@@ -89,7 +90,7 @@ Job settings:
                 "H264Settings": {
                   "RateControlMode": "VBR",
                   "Bitrate": 3000000,
-                  "MaxBitrate": 3750000,
+                  "MaxBitrate": 7500000,
                   "CodecProfile": "HIGH",
                   "HrdBufferSize": 6000000,
                   "GopSize": 50,
@@ -102,6 +103,7 @@ Job settings:
                   "ParDenominator": 1,
                   "QualityTuningLevel": "MULTI_PASS_HQ",
                   "MinIInterval": 5,
+                  "CodecLevel": "LEVEL_4_1",
                   "NumberBFramesBetweenReferenceFrames": 2
                 }
               },
@@ -125,7 +127,7 @@ Job settings:
                 "H264Settings": {
                   "RateControlMode": "VBR",
                   "Bitrate": 2000000,
-                  "MaxBitrate": 2500000,
+                  "MaxBitrate": 5000000,
                   "CodecProfile": "HIGH",
                   "HrdBufferSize": 4000000,
                   "GopSize": 50,
@@ -138,6 +140,7 @@ Job settings:
                   "ParDenominator": 1,
                   "QualityTuningLevel": "MULTI_PASS_HQ",
                   "MinIInterval": 5,
+                  "CodecLevel": "LEVEL_4_1",
                   "NumberBFramesBetweenReferenceFrames": 2
                 }
               },
@@ -161,7 +164,7 @@ Job settings:
                 "H264Settings": {
                   "RateControlMode": "VBR",
                   "Bitrate": 1200000,
-                  "MaxBitrate": 1500000,
+                  "MaxBitrate": 3000000,
                   "CodecProfile": "HIGH",
                   "HrdBufferSize": 1400000,
                   "GopSize": 50,
@@ -174,6 +177,7 @@ Job settings:
                   "ParDenominator": 1,
                   "QualityTuningLevel": "MULTI_PASS_HQ",
                   "MinIInterval": 5,
+                  "CodecLevel": "LEVEL_4_1",
                   "NumberBFramesBetweenReferenceFrames": 2
                 }
               },
@@ -197,7 +201,7 @@ Job settings:
                 "H264Settings": {
                   "RateControlMode": "VBR",
                   "Bitrate": 500000,
-                  "MaxBitrate": 625000,
+                  "MaxBitrate": 1250000,
                   "CodecProfile": "BASELINE",
                   "EntropyEncoding": "CAVLC",
                   "NumberBFramesBetweenReferenceFrames": 0,
@@ -211,7 +215,8 @@ Job settings:
                   "ParNumerator": 1,
                   "ParDenominator": 1,
                   "QualityTuningLevel": "MULTI_PASS_HQ",
-                  "MinIInterval": 5
+                  "MinIInterval": 5,
+                  "CodecLevel": "LEVEL_3"
                 }
               },
               "Width": 512,
@@ -234,7 +239,7 @@ Job settings:
                 "H264Settings": {
                   "RateControlMode": "VBR",
                   "Bitrate": 300000,
-                  "MaxBitrate": 380000,
+                  "MaxBitrate": 750000,
                   "CodecProfile": "BASELINE",
                   "EntropyEncoding": "CAVLC",
                   "NumberBFramesBetweenReferenceFrames": 0,
@@ -248,7 +253,8 @@ Job settings:
                   "ParNumerator": 1,
                   "ParDenominator": 1,
                   "QualityTuningLevel": "MULTI_PASS_HQ",
-                  "MinIInterval": 5
+                  "MinIInterval": 5,
+                  "CodecLevel": "LEVEL_3"
                 }
               },
               "Width": 256,
@@ -291,6 +297,9 @@ Job settings:
       "Source": "ZEROBASED"
     },
     "FollowSource": 1
+  },
+  "AccelerationSettings": {
+    "Mode": "DISABLED"
   },
   "Role": "arn:aws:iam::935206693453:role/MediaConvertRole"
 }

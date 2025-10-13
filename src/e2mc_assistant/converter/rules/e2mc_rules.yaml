@@ -955,7 +955,7 @@ rules:
       condition:
         source_path: "audio_codec"
         operator: "in"
-        value: ["dolby_aac", "dolby_heaac", "libfaac"]
+        value: ["dolby_aac", "dolby_heaac", "libfaac", "aac"]
     target:
       path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.AacSettings.CodingMode"
       transform: "audio_channels_format"

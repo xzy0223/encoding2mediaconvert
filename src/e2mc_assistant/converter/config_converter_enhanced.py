@@ -592,6 +592,9 @@ class ConfigConverter:
     
     def apply_transform(self, value: Any, transform_name: str, context: Dict = None) -> Any:
         """Apply transformation function"""
+
+        self.logger.info(f"Applying transform '{transform_name}', and full tranformers list: {self.transformers.keys()}")
+
         # Check if it's a custom function
         if transform_name in self.custom_functions:
             # 防止递归调用
@@ -629,6 +632,7 @@ class ConfigConverter:
             transformer = self.transformers[transform_name]
             str_value = str(value)
             if str_value in transformer:
+                self.logger.info(f"Value '{str_value}' found in transformer '{transform_name}'")
                 return transformer[str_value]
             else:
                 # If the value doesn't match any mapping in the transformer,
@@ -861,7 +865,8 @@ class ConfigConverter:
         """
         outputs = []
         source_data = context.get('source_data', {})
-        output_format = self.get_value_by_path(source_data, 'output')
+        # get output format from source data or from streams list
+        output_format = self.get_value_by_path(source_data, 'output') or self.get_value_by_path(streams[0], 'output') or "mp4"
         
         self.logger.debug(f"Generating outputs from {len(streams)} streams for format: {output_format}")
         
@@ -1456,7 +1461,7 @@ class ConfigConverter:
                     self.logger.info(f"Set Bitrate to {bitrate_value} from <bitrate>={bitrate_str}")
                     self.logger.info(f"Set MaxBitrate to {maxrate_value} from <maxrate>={maxrate_str}")
                     
-                elif maxrate_value == bitrate_value:
+                elif maxrate_value <= bitrate_value:
                     # Case 4.c: bitrate exists, maxrate exists and equals bitrate
                     self._set_nested_value(target_data, f"{target_path}.RateControlMode", "CBR")
                     self.logger.info(f"Set RateControlMode to CBR because neither <cbr> nor <hard_cbr> exists and <maxrate> equals <bitrate>")
@@ -1488,16 +1493,18 @@ class ConfigConverter:
         
         # Check if video_codec exists
         video_codec = self.get_value_by_path(source_data, 'video_codec')
+
         
         # If video_codec doesn't exist, set default to AVC (H.264)
         if not video_codec:
+            self.logger.info(f"Processing video_codec: {video_codec}")
             target_path = "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Codec"
             self._set_nested_value(target_data, target_path, "H_264")
             self.logger.info(f"Set {target_path} to H_264 (default because <video_codec> not specified)")
             processed_params.add('video_codec')
-        else:
-            # If video_codec exists, mark it as processed
-            processed_params.add('video_codec')
+        # else:
+        #     # If video_codec exists, mark it as processed
+        #     processed_params.add('video_codec')
         
         return processed_params
     
@@ -1750,7 +1757,7 @@ class ConfigConverter:
             with open(source_file, 'r') as f:
                 source_data = json.load(f)
         
-        # self.logger.debug(f"parsed xml is: {source_data}")
+        self.logger.info(f"parsed xml is: {source_data}")
         
         # Load target template (if provided)
         if template_file:
@@ -1958,10 +1965,10 @@ class ConfigConverter:
                 self.logger.info(f"Audio parameters processed by custom audio settings handler")
                 
             # Process video codec settings (set default if needed)
-            # video_processed_params = self._process_video_codec_settings(source_data, target_data)
-            # if video_processed_params:
-            #     processed_params.update(video_processed_params)
-            #     self.logger.info(f"Video codec parameters processed by custom video codec handler")
+            video_processed_params = self._process_video_codec_settings(source_data, target_data)
+            if video_processed_params:
+                processed_params.update(video_processed_params)
+                self.logger.info(f"Video codec parameters processed by custom video codec handler")
         
         # Create a rule lookup dictionary for faster access
         rule_lookup = {}
@@ -2162,7 +2169,7 @@ class ConfigConverter:
 
             # Skip already processed parameters
             if path in processed_params:
-                self.logger.info(f" Skip the processed parameter: {path}={value}")
+                self.logger.info(f" This param have been processed, skip the processed parameter: {path}={value}")
                 self._log_bottom_header(f"Finished rule processing for {path}")
                 continue
                 

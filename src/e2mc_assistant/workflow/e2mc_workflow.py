@@ -193,7 +193,7 @@ class E2MCWorkflow:
         print(f"Detailed conversion logs saved to {log_file} and individual files in {output_dir}")
         return converted_files
 
-    def submit_mediaconvert_jobs(self, config_dir: str, s3_source_path: str, wait_for_completion: bool = True, include_ids: Optional[List[str]] = None, exclude_ids: Optional[List[str]] = None) -> Dict[str, str]:
+    def submit_mediaconvert_jobs(self, config_dir: str, s3_source_path: str, wait_for_completion: bool = True, include_ids: Optional[List[str]] = None, exclude_ids: Optional[List[str]] = None, s3_output_path: Optional[str] = None) -> Dict[str, str]:
         """
         Submit MediaConvert jobs for each configuration file.
 
@@ -203,6 +203,7 @@ class E2MCWorkflow:
             wait_for_completion: Whether to wait for each job to complete before submitting the next
             include_ids: Optional list of IDs to include (only these IDs will be processed)
             exclude_ids: Optional list of IDs to exclude from processing
+            s3_output_path: Optional S3 path for MediaConvert output files
 
         Returns:
             Dictionary mapping job IDs to their status
@@ -255,7 +256,12 @@ class E2MCWorkflow:
                     
                     # Update input URL and output destination
                     job_profile['Settings']['Inputs'][0]['FileInput'] = source_video
-                    output_destination = f"{s3_source_path.rstrip('/')}/{file_id}/"
+                    if s3_output_path:
+                        # Use custom output path
+                        output_destination = f"{s3_output_path.rstrip('/')}/{file_id}/"
+                    else:
+                        # Use default pattern
+                        output_destination = f"{s3_source_path.rstrip('/')}/{file_id}/"
                     job_profile = self.job_submitter.update_output_destination(job_profile, output_destination)
                     
                     # Submit the job
@@ -297,8 +303,9 @@ class E2MCWorkflow:
                         else:
                             # Job completed successfully, upload JSON file with timestamp suffix
                             try:
-                                # Parse S3 path
-                                bucket_name, prefix = self._parse_s3_path(s3_source_path)
+                                # Parse S3 path - use s3_output_path if provided, otherwise use s3_source_path
+                                upload_path = s3_output_path if s3_output_path else s3_source_path
+                                bucket_name, prefix = self._parse_s3_path(upload_path)
                                 
                                 # Generate timestamp suffix for the JSON file
                                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -1074,6 +1081,10 @@ def parse_arguments():
         '--exclude',
         help='Comma-separated list of video IDs to exclude'
     )
+    submit_parser.add_argument(
+        '--s3-output-path',
+        help='S3 path for MediaConvert output files (overrides default s3-source-path/{id}/ pattern)'
+    )
     
     # Analyze command
     analyze_parser = subparsers.add_parser(
@@ -1214,7 +1225,8 @@ def main():
                 s3_source_path=args.s3_source_path,
                 wait_for_completion=not args.no_wait,
                 include_ids=include_ids,
-                exclude_ids=exclude_ids
+                exclude_ids=exclude_ids,
+                s3_output_path=getattr(args, 's3_output_path', None)
             )
             
             # Create summary log file path

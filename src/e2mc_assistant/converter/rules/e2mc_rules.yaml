@@ -668,8 +668,13 @@ rules:
       path: "framerate"
       type: "string"
       condition:
-        operator: "eq"
-        value: "24000/1001"
+        operator: "AND"
+        conditions:
+          - operator: "eq"
+            value: "24000/1001"
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["mpeg4", "libx264"]
     target:
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateControl"
         value: "SPECIFIED"
@@ -678,13 +683,19 @@ rules:
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateDenominator"
         value: 1001
 
+
           
   - source:
       path: "framerate"
       type: "number"
       condition:
-        operator: "eq"
-        value: 29.97
+        operator: "AND"
+        conditions:
+          - operator: "eq"
+            value: 29.97
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["mpeg4", "libx264"]
     target:
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateControl"
         value: "SPECIFIED"
@@ -697,8 +708,13 @@ rules:
       path: "framerate"
       type: "number"
       condition:
-        operator: "eq"
-        value: 59.94
+        operator: "AND"
+        conditions:
+          - operator: "eq"
+            value: 59.94
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["mpeg4", "libx264"]
     target:
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateControl"
         value: "SPECIFIED"
@@ -712,8 +728,13 @@ rules:
       path: "framerate"
       type: "number"
       condition:
-        operator: "eq"
-        value: 25
+        operator: "AND"
+        conditions:
+          - operator: "eq"
+            value: 25
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["mpeg4", "libx264"]
     target:
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateControl"
         value: "SPECIFIED"
@@ -726,8 +747,13 @@ rules:
       path: "framerate"
       type: "number"
       condition:
-        operator: "eq"
-        value: 30
+        operator: "AND"
+        conditions:
+          - operator: "eq"
+            value: 30
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["mpeg4", "libx264"]
     target:
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateControl"
         value: "SPECIFIED"
@@ -740,10 +766,129 @@ rules:
       path: "framerate"
       type: "string"
       condition:
-        operator: "eq"
-        value: ""
+        operator: "AND"
+        conditions:
+          - operator: "eq"
+            value: ""
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["mpeg4", "libx264"]
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateControl"
+      value: "INITIALIZE_FROM_SOURCE"
+
+  # 处理帧率参数 for h265
+  - source:
+      path: "framerate"
+      type: "string"
+      condition:
+        operator: "AND"
+        conditions:
+          - operator: "eq"
+            value: "24000/1001"
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["hevc"]
+    target:
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.FramerateControl"
+        value: "SPECIFIED"
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.FramerateNumerator"
+        value: 24000
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.FramerateDenominator"
+        value: 1001
+
+
+          
+  - source:
+      path: "framerate"
+      type: "number"
+      condition:
+        operator: "AND"
+        conditions:
+          - operator: "eq"
+            value: 29.97
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["hevc"]
+    target:
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.FramerateControl"
+        value: "SPECIFIED"
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.FramerateNumerator"
+        value: 30000
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.FramerateDenominator"
+        value: 1001
+          
+  - source:
+      path: "framerate"
+      type: "number"
+      condition:
+        operator: "AND"
+        conditions:
+          - operator: "eq"
+            value: 59.94
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["hevc"]
+    target:
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.FramerateControl"
+        value: "SPECIFIED"
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.FramerateNumerator"
+        value: 60000
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.FramerateDenominator"
+        value: 1001
+          
+  # 处理帧率参数 - 修复版本
+  - source:
+      path: "framerate"
+      type: "number"
+      condition:
+        operator: "AND"
+        conditions:
+          - operator: "eq"
+            value: 25
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["hevc"]
+    target:
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.FramerateControl"
+        value: "SPECIFIED"
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.FramerateNumerator"
+        value: 25
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.FramerateDenominator"
+        value: 1
+          
+  - source:
+      path: "framerate"
+      type: "number"
+      condition:
+        operator: "AND"
+        conditions:
+          - operator: "eq"
+            value: 30
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["hevc"]
+    target:
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.FramerateControl"
+        value: "SPECIFIED"
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.FramerateNumerator"
+        value: 30
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.FramerateDenominator"
+        value: 1
+          
+  - source:
+      path: "framerate"
+      type: "string"
+      condition:
+        operator: "AND"
+        conditions:
+          - operator: "eq"
+            value: ""
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["hevc"]
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.FramerateControl"
       value: "INITIALIZE_FROM_SOURCE"
         
   # Resolution
@@ -1032,6 +1177,16 @@ rules:
         value: "ac3"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.Ac3Settings.Dialnorm"
+
+  - source:
+      path: "dialnorm_threshold"
+      type: "number"
+      condition:
+        source_path: "audio_codec"
+        operator: "eq"
+        value: "libfaac"
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.AacSettings.Dialnorm"
       
   # Audio normalization
   - source:
@@ -1572,6 +1727,37 @@ rules:
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.NumberBFramesBetweenReferenceFrames"
         value: 0
 
+  # 处理编码配置文件参数 for h265
+  - source:
+      path: "profile"
+      type: "string"
+      condition:
+        source_path: "video_codec"
+        operator: "in"
+        value: ["hevc"]
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.CodecProfile"
+      transform: "profile_format_hevc"
+
+  - source:
+      path: "profile"
+      type: "string"
+      condition:
+        operator: "AND"
+        conditions:
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["hevc"]
+          - operator: "eq"
+            value: "baseline"
+    target:
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.CodecProfile"
+        value: "BASELINE"
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.EntropyEncoding"
+        value: "CAVLC"
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.NumberBFramesBetweenReferenceFrames"
+        value: 0
+
   # 处理视频编码器B帧策略参数
   - source:
       path: "video_codec_parameters.b_strategy"
@@ -1868,6 +2054,14 @@ transformers:
     "high": "HIGH"
     "High": "HIGH"
     "baseline": "BASELINE"
+
+  profile_format_hevc:
+    "main": "MAIN_MAIN"
+    "main10": "MAIN10_MAIN"
+    "main-10": "MAIN10_MAIN"
+    "high": "MAIN_HIGH"
+    "High": "MAIN_HIGH"
+
     
   h264_level_format:
     '1': "LEVEL_1"
@@ -1892,7 +2086,7 @@ transformers:
     '51': "LEVEL_5_1"
     '52': "LEVEL_5_2"
   
-    h265_level_format:
+  h265_level_format:
     '1': "LEVEL_1"
     '10': "LEVEL_1"
     '11': "LEVEL_1_1"

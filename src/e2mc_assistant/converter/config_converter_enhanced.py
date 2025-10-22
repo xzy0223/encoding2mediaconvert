@@ -480,40 +480,57 @@ class ConfigConverter:
                 self.logger.info(f"Split multi-value field {field} into list: {values}")
         
         # If we have multi-value fields, generate streams and replace the original result
-        if has_multi_values and all(field in result for field in multi_value_fields):
-            # Check if all multi-value fields have the same number of elements
-            lengths = [len(result[field]) for field in multi_value_fields]
-            if len(set(lengths)) == 1:  # All have the same length
-                # Generate streams from multi-value fields
+        if has_multi_values:
+            # Get lengths of multi-value fields that exist
+            multi_lengths = []
+            for field in multi_value_fields:
+                if field in result and isinstance(result[field], list):
+                    multi_lengths.append(len(result[field]))
+            
+            if multi_lengths and len(set(multi_lengths)) == 1:  # All existing multi-value fields have the same length
+                num_streams = multi_lengths[0]
                 streams = []
-                for i in range(lengths[0]):
+                
+                for i in range(num_streams):
                     stream = {}
+                    
                     # Map multi-value fields to singular fields in each stream
-                    stream['bitrate'] = result['bitrates'][i]
-                    stream['size'] = result['sizes'][i]
+                    if 'bitrates' in result and isinstance(result['bitrates'], list):
+                        stream['bitrate'] = result['bitrates'][i]
+                    elif 'bitrate' in result:
+                        stream['bitrate'] = result['bitrate']
                     
-                    # Convert keyframe to integer
-                    keyframe_value = result['keyframes'][i]
-                    if isinstance(keyframe_value, str) and keyframe_value.isdigit():
-                        stream['keyframe'] = int(keyframe_value)
-                    else:
-                        stream['keyframe'] = keyframe_value
+                    if 'sizes' in result and isinstance(result['sizes'], list):
+                        stream['size'] = result['sizes'][i]
+                    elif 'size' in result:
+                        stream['size'] = result['size']
                     
-                    # Convert framerate to float or int as appropriate
-                    framerate_value = result['framerates'][i]
-                    if isinstance(framerate_value, str):
-                        if framerate_value.isdigit():
-                            stream['framerate'] = int(framerate_value)
-                        elif self._is_float(framerate_value):
-                            stream['framerate'] = float(framerate_value)
+                    if 'keyframes' in result and isinstance(result['keyframes'], list):
+                        keyframe_value = result['keyframes'][i]
+                        if isinstance(keyframe_value, str) and keyframe_value.isdigit():
+                            stream['keyframe'] = int(keyframe_value)
+                        else:
+                            stream['keyframe'] = keyframe_value
+                    elif 'keyframe' in result:
+                        stream['keyframe'] = result['keyframe']
+                    
+                    if 'framerates' in result and isinstance(result['framerates'], list):
+                        framerate_value = result['framerates'][i]
+                        if isinstance(framerate_value, str):
+                            if framerate_value.isdigit():
+                                stream['framerate'] = int(framerate_value)
+                            elif self._is_float(framerate_value):
+                                stream['framerate'] = float(framerate_value)
+                            else:
+                                stream['framerate'] = framerate_value
                         else:
                             stream['framerate'] = framerate_value
-                    else:
-                        stream['framerate'] = framerate_value
+                    elif 'framerate' in result:
+                        stream['framerate'] = result['framerate']
                     
                     # Copy other relevant fields from the source
                     for key, value in result.items():
-                        if key not in multi_value_fields:
+                        if key not in multi_value_fields and key not in ['bitrate', 'size', 'keyframe', 'framerate']:
                             stream[key] = value
                     
                     streams.append(stream)
@@ -525,7 +542,7 @@ class ConfigConverter:
                 self.logger.info(f"Generated {len(streams)} streams from multi-value fields and replaced original parameters")
                 return new_result
             else:
-                self.logger.warning(f"Multi-value fields have different lengths: {lengths}, cannot generate streams")
+                self.logger.warning(f"Multi-value fields have different lengths: {multi_lengths}, cannot generate streams")
         
         # Debug output
         self.logger.debug(f"Parsed XML structure: {result}")

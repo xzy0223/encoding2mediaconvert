@@ -163,6 +163,10 @@ rules:
       type: "dummy"  # dummy type to indicate no actual conversion needed
 
   - source:
+      path: "video_codec_parameters.force-cfr"
+      type: "dummy"  # dummy type to indicate no actual conversion needed
+
+  - source:
       path: "closed_captions.forced"
       type: "dummy" 
 
@@ -324,6 +328,20 @@ rules:
         value: ["libvpx"]
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings.QualityTuningLevel"
+      transform: "two_pass_format"
+
+  - source:
+      path: "two_pass"
+      type: "string"
+      condition:
+        operator: "OR"
+        conditions:
+          - operator: "NOT"
+            condition:
+              source_path: "video_codec"
+              operator: "exists"      
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.QualityTuningLevel"
       transform: "two_pass_format"
 
         
@@ -550,14 +568,29 @@ rules:
       path: "segment_duration"
       type: "number"
       condition:
+        operator: "AND"
+        conditions:
+          - source_path: "output"
+            operator: "in"
+            value: ["fmp4_hls", "advanced_fmp4"]
+          - operator: "NOT"
+            condition:
+              source_path: "fragment_duration"
+              operator: "exists"
+    target:
+      - path: "Settings.OutputGroups[0].OutputGroupSettings.CmafGroupSettings.SegmentLength"
+      - path: "Settings.OutputGroups[0].OutputGroupSettings.CmafGroupSettings.FragmentLength"
+        value: 2
+
+  - source:
+      path: "segment_duration"
+      type: "number"
+      condition:
         source_path: "output"
         operator: "in"
         value: ["fmp4_hls", "advanced_fmp4"]
     target:
       - path: "Settings.OutputGroups[0].OutputGroupSettings.CmafGroupSettings.SegmentLength"
-      - path: "Settings.OutputGroups[0].OutputGroupSettings.CmafGroupSettings.MinSegmentLength"
-        value: 0
-
         
   # Segment duration for streaming formats - HLS
   - source:
@@ -572,6 +605,26 @@ rules:
       - path: "Settings.OutputGroups[0].OutputGroupSettings.HlsGroupSettings.MinSegmentLength"
         value: 0
 
+  - source:
+      path: "segment_duration"
+      type: "number"
+      condition:
+        operator: "AND"
+        conditions:
+          - source_path: "output"
+            operator: "in"
+            value: ["advanced_hls", "ipad_stream"]
+          - operator: "NOT"
+            condition:
+              source_path: "fragment_duration"
+              operator: "exists"
+    target:
+      - path: "Settings.OutputGroups[0].OutputGroupSettings.HlsGroupSettings.SegmentLength"
+      - path: "Settings.OutputGroups[0].OutputGroupSettings.HlsGroupSettings.MinSegmentLength"
+        value: 0
+      - path: "Settings.OutputGroups[0].OutputGroupSettings.HlsGroupSettings.FragmentLength"
+        value: 2
+
         
   # Segment duration for streaming formats - DASH
   - source:
@@ -583,6 +636,35 @@ rules:
         value: ["mpeg_dash", "advanced_dash"]
     target:
       - path: "Settings.OutputGroups[0].OutputGroupSettings.DashIsoGroupSettings.SegmentLength"
+
+  - source:
+      path: "segment_duration"
+      type: "number"
+      condition:
+        operator: "AND"
+        conditions:
+          - source_path: "output"
+            operator: "in"
+            value: ["mpeg_dash", "advanced_dash"]
+          - operator: "NOT"
+            condition:
+              source_path: "fragment_duration"
+              operator: "exists"
+    target:
+      - path: "Settings.OutputGroups[0].OutputGroupSettings.DashIsoGroupSettings.SegmentLength"
+      - path: "Settings.OutputGroups[0].OutputGroupSettings.DashIsoGroupSettings.FragmentLength"
+        value: 2
+  # 
+  - source:
+      path: "dash_profile"
+      type: "string"
+      condition:
+        source_path: "output"
+        operator: "in"
+        value: ["mpeg_dash", "advanced_dash"]
+    target:
+      path: "Settings.OutputGroups[0].OutputGroupSettings.DashIsoGroupSettings.MpdProfile"
+      transform: "dash_profile_format"
 
   - source:
       path: "duration_precision"
@@ -742,6 +824,25 @@ rules:
         value: 25
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateDenominator"
         value: 1
+
+  - source:
+      path: "framerate"
+      type: "number"
+      condition:
+        operator: "AND"
+        conditions:
+          - operator: "eq"
+            value: 23.98
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["mpeg4", "libx264"]
+    target:
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateControl"
+        value: "SPECIFIED"
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateNumerator"
+        value: 24000
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.FramerateDenominator"
+        value: 1001
           
   - source:
       path: "framerate"
@@ -786,6 +887,25 @@ rules:
         conditions:
           - operator: "eq"
             value: "24000/1001"
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["hevc"]
+    target:
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.FramerateControl"
+        value: "SPECIFIED"
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.FramerateNumerator"
+        value: 24000
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.FramerateDenominator"
+        value: 1001
+
+  - source:
+      path: "framerate"
+      type: "string"
+      condition:
+        operator: "AND"
+        conditions:
+          - operator: "eq"
+            value: 23.98
           - source_path: "video_codec"
             operator: "in"
             value: ["hevc"]
@@ -1178,15 +1298,15 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.Ac3Settings.Dialnorm"
 
-  - source:
-      path: "dialnorm_threshold"
-      type: "number"
-      condition:
-        source_path: "audio_codec"
-        operator: "eq"
-        value: "libfaac"
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.AacSettings.Dialnorm"
+  # - source:
+  #     path: "dialnorm_threshold"
+  #     type: "number"
+  #     condition:
+  #       source_path: "audio_codec"
+  #       operator: "eq"
+  #       value: "libfaac"
+  #   target:
+  #     path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.AacSettings.Dialnorm"
       
   # Audio normalization
   - source:
@@ -1360,8 +1480,8 @@ rules:
       type: "string"
       condition:
         source_path: "output"
-        operator: "eq"
-        value: "mp4"
+        operator: "in"
+        value: ["mp4", "flv", "mov", "iphone"]
     target:
       path: "Settings.OutputGroups[0].OutputGroupSettings.FileGroupSettings.Destination"
       value: "S3_OUTPUT_URL"
@@ -1992,6 +2112,12 @@ rules:
       path: "Settings.TimecodeConfig.Source"
       value: "EMBEDDED"
 
+  - source:
+      path: "language"
+      type: "string"
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].LanguageCode"
+      transform: "language_code_format"
 
 transformers:
   output_group_type:
@@ -2265,3 +2391,9 @@ transformers:
   twin_turbo_format:
     "yes": "PREFERRED"
     "no": "DISABLED"
+
+  dash_profile_format:
+    "live": "MAIN_PROFILE"
+    "ondemand": "ON_DEMAND_PROFILE"
+
+  

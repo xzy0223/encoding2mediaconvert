@@ -1028,6 +1028,12 @@ class ConfigConverter:
                         name_modifier += "_stereo"
                     elif channels == 1:
                         name_modifier += "_mono"
+
+                # Add language info to name modifier if available
+                if 'language' in stream:
+                    language = stream['language'].lower()
+                    name_modifier += f"_{language}"
+        
                 
                 # Add language info from alternate_source_mapping if use_alternate_id is present
                 if 'use_alternate_id' in stream and 'alternate_source_mapping' in context:

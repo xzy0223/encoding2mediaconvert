@@ -1220,7 +1220,7 @@ rules:
       condition:
         source_path: "audio_codec"
         operator: "in"
-        value: ["dolby_aac", "dolby_heaac", "libfaac", "aac"]
+        value: ["dolby_aac", "dolby_heaac", "libfaac", "aac", "dolby_heaacv2"]
     target:
       path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.AacSettings.CodingMode"
       transform: "audio_channels_format"
@@ -1451,6 +1451,19 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].CaptionDescriptions[0].DestinationSettings.DestinationType"
       transform: "caption_mux_type_format"
+
+  - source:
+      path: "closed_captions.mux_type"
+      type: "string"
+      condition:
+        operator: "eq"
+        value: "dvb"
+    target:
+      - path: "Settings.OutputGroups[0].Outputs[0].CaptionDescriptions[0].DestinationSettings.DestinationType"
+        transform: "caption_mux_type_format"
+      - path: "Settings.Inputs[0].CaptionSelectors.Cap1.SourceSettings.SourceType"
+        value: "DVB_SUB"
+
       
   # 处理字幕背景透明度参数
   - source:
@@ -1481,7 +1494,7 @@ rules:
       condition:
         source_path: "output"
         operator: "in"
-        value: ["mp4", "flv", "mov", "iphone"]
+        value: ["mp4", "flv", "mov", "iphone","mpegts"]
     target:
       path: "Settings.OutputGroups[0].OutputGroupSettings.FileGroupSettings.Destination"
       value: "S3_OUTPUT_URL"

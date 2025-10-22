@@ -467,7 +467,7 @@ class ConfigConverter:
             self.logger.info(f"Expanded streams with multiple use_alternate_id values. Total streams: {len(new_streams)}")
         
         # Special handling for multi-value elements like bitrates, size, keyframes, framerates
-        multi_value_fields = ['bitrates', 'size', 'keyframes', 'framerates']
+        multi_value_fields = ['bitrates', 'keyframes', 'framerates', "sizes"]
         has_multi_values = False
         
         # Check if we have multi-value fields
@@ -490,7 +490,7 @@ class ConfigConverter:
                     stream = {}
                     # Map multi-value fields to singular fields in each stream
                     stream['bitrate'] = result['bitrates'][i]
-                    stream['size'] = result['size'][i]
+                    stream['size'] = result['sizes'][i]
                     
                     # Convert keyframe to integer
                     keyframe_value = result['keyframes'][i]
@@ -1560,6 +1560,15 @@ class ConfigConverter:
                 # i. Set codec to AAC
                 self._set_nested_value(target_data, f"{target_path}.CodecSettings.Codec", "AAC")
                 self.logger.info(f"Set AudioDescriptions[0].CodecSettings.Codec to AAC from <audio_codec>={audio_codec}")
+                if audio_codec in ["dolby_heaacv2"]:
+                    self._set_nested_value(target_data, f"{target_path}.CodecSettings.AacSettings.CodecProfile", "HEV2")
+                    self.logger.info(f"Set AudioDescriptions[0].CodecSettings.AacSettings.CodecProfile to HEV2 for <audio_codec>={audio_codec}")
+                elif audio_codec in ["dolby_heaac"]:
+                    self._set_nested_value(target_data, f"{target_path}.CodecSettings.AacSettings.CodecProfile", "HEV1")
+                    self.logger.info(f"Set AudioDescriptions[0].CodecSettings.AacSettings.CodecProfile to HEV1 for <audio_codec>={audio_codec}")
+                else:
+                    self._set_nested_value(target_data, f"{target_path}.CodecSettings.AacSettings.CodecProfile", "LC")
+                    self.logger.info(f"Set AudioDescriptions[0].CodecSettings.AacSettings.CodecProfile to LC for <audio_codec>={audio_codec}")
                 
                 # ii. Set default bitrate
                 self._set_nested_value(target_data, f"{target_path}.CodecSettings.AacSettings.Bitrate", 96000)
@@ -1909,7 +1918,7 @@ class ConfigConverter:
                     container = "M2TS"
                     container_settings_key = "M2tsSettings"
                 elif output_format == "smooth_streaming":
-                    container = "SMOOTH_STREAMING"
+                    container = "ISMV"
                     container_settings_key = None
                 elif output_format == "webm":
                     container = "WEBM"

@@ -915,8 +915,8 @@ class ConfigConverter:
         elif output_format == "mpegts":
             container = "M2TS"
             container_settings_key = "M2tsSettings"
-        elif output_format == "mpegts":
-            container = "smooth_streaming"
+        elif output_format == "smooth_streaming":
+            container = "ISMV"
             container_settings_key = None
         elif output_format == "webm":
             container = "WEBM"
@@ -2153,18 +2153,20 @@ class ConfigConverter:
             height = output['VideoDescription']['Height']
             resolution_part = f"_{width}x{height}"
             
-            # Add bitrate information if available
+            # Add bitrate information if available from any codec settings
             if ('VideoDescription' in output and 
-                'CodecSettings' in output['VideoDescription'] and 
-                'H264Settings' in output['VideoDescription']['CodecSettings']):
+                'CodecSettings' in output['VideoDescription']):
                 
-                h264_settings = output['VideoDescription']['CodecSettings']['H264Settings']
-                if 'Bitrate' in h264_settings:
-                    return f"{resolution_part}_{h264_settings['Bitrate']}_mc"
-                elif 'MaxBitrate' in h264_settings:
-                    return f"{resolution_part}_{h264_settings['MaxBitrate']}_mc"
-                else:
-                    return f"{resolution_part}_mc"
+                codec_settings = output['VideoDescription']['CodecSettings']
+                # Check all possible codec settings types
+                for codec_type in codec_settings:
+                    settings = codec_settings[codec_type]
+                    if 'Bitrate' in settings:
+                        return f"{resolution_part}_{settings['Bitrate']}_mc"
+                    elif 'MaxBitrate' in settings:
+                        return f"{resolution_part}_{settings['MaxBitrate']}_mc"
+                
+                return f"{resolution_part}_mc"
         
         return "_mc"  # Default if we can't extract resolution/bitrate
         

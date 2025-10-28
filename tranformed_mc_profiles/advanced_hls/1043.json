@@ -280,7 +280,8 @@
             "NameModifier": "_audio_128K_aac_stereo",
             "OutputSettings": {
               "HlsSettings": {
-                "AudioTrackType": "AUDIO_ONLY_VARIANT_STREAM"
+                "AudioGroupId": "audio",
+                "AudioTrackType": "ALTERNATE_AUDIO_AUTO_SELECT"
               }
             }
           }

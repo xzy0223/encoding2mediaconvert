@@ -37,6 +37,17 @@ rules:
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings"
         transform: "process_set_aspect_ratio"
 
+  - source:
+      path: "set_aspect_ratio"
+      type: "string"
+      condition:
+        source_path: "video_codec"
+        operator: "in"
+        value: ["libvpx"]
+    target:
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings"
+        transform: "process_set_aspect_ratio"
+
   # Parameters that don't need conversion but need to be recorded as processed
   - source:
       path: "VCodecParameters"
@@ -289,6 +300,14 @@ rules:
       path: "video_codec_parameters.sc_threshold"
       type: "dummy"
 
+  - source:
+      path: "manifest.add_audio_only"
+      type: "dummy"
+
+  - source:
+      path: "audio_only"
+      type: "dummy"
+
   # 处理视频旋转参数
   - source:
       path: "set_rotate"
@@ -471,6 +490,22 @@ rules:
       - path: "Settings.OutputGroups[0].OutputGroupSettings.Type"
         value: "MS_SMOOTH_GROUP_SETTINGS"      
 
+  - source:
+      path: "output"
+      type: "string"
+      condition:
+        operator: "AND"
+        conditions:
+          - operator: "NOT"
+            condition:
+              source_path: "segment_duration"
+              operator: "exists" 
+          - operator: "eq"
+            value: "smooth_streaming"
+    target:
+      - path: "Settings.OutputGroups[0].OutputGroupSettings.MsSmoothGroupSettings.FragmentLength"
+        value: 2
+ 
 
   - source:
       path: "bufsize"
@@ -581,6 +616,8 @@ rules:
       - path: "Settings.OutputGroups[0].OutputGroupSettings.CmafGroupSettings.SegmentLength"
       - path: "Settings.OutputGroups[0].OutputGroupSettings.CmafGroupSettings.FragmentLength"
         value: 2
+      - path: "Settings.OutputGroups[0].OutputGroupSettings.CmafGroupSettings.SegmentControl"
+        value: "SEGMENTED_FILES"
 
   - source:
       path: "segment_duration"
@@ -591,6 +628,8 @@ rules:
         value: ["fmp4_hls", "advanced_fmp4"]
     target:
       - path: "Settings.OutputGroups[0].OutputGroupSettings.CmafGroupSettings.SegmentLength"
+      - path: "Settings.OutputGroups[0].OutputGroupSettings.CmafGroupSettings.SegmentControl"
+        value: "SEGMENTED_FILES"
         
   # Segment duration for streaming formats - HLS
   - source:
@@ -604,6 +643,8 @@ rules:
       - path: "Settings.OutputGroups[0].OutputGroupSettings.HlsGroupSettings.SegmentLength"
       - path: "Settings.OutputGroups[0].OutputGroupSettings.HlsGroupSettings.MinSegmentLength"
         value: 0
+      - path: "Settings.OutputGroups[0].OutputGroupSettings.HlsGroupSettings.SegmentControl"
+        value: "SEGMENTED_FILES"
 
   - source:
       path: "segment_duration"
@@ -622,8 +663,8 @@ rules:
       - path: "Settings.OutputGroups[0].OutputGroupSettings.HlsGroupSettings.SegmentLength"
       - path: "Settings.OutputGroups[0].OutputGroupSettings.HlsGroupSettings.MinSegmentLength"
         value: 0
-      - path: "Settings.OutputGroups[0].OutputGroupSettings.HlsGroupSettings.FragmentLength"
-        value: 2
+      - path: "Settings.OutputGroups[0].OutputGroupSettings.HlsGroupSettings.SegmentControl"
+        value: "SEGMENTED_FILES"
 
         
   # Segment duration for streaming formats - DASH
@@ -636,6 +677,8 @@ rules:
         value: ["mpeg_dash", "advanced_dash"]
     target:
       - path: "Settings.OutputGroups[0].OutputGroupSettings.DashIsoGroupSettings.SegmentLength"
+      - path: "Settings.OutputGroups[0].OutputGroupSettings.DashIsoGroupSettings.SegmentControl"
+        value: "SEGMENTED_FILES"
 
   - source:
       path: "segment_duration"
@@ -654,6 +697,8 @@ rules:
       - path: "Settings.OutputGroups[0].OutputGroupSettings.DashIsoGroupSettings.SegmentLength"
       - path: "Settings.OutputGroups[0].OutputGroupSettings.DashIsoGroupSettings.FragmentLength"
         value: 2
+      - path: "Settings.OutputGroups[0].OutputGroupSettings.DashIsoGroupSettings.SegmentControl"
+        value: "SEGMENTED_FILES"
   # 
   - source:
       path: "dash_profile"
@@ -1010,7 +1055,140 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.FramerateControl"
       value: "INITIALIZE_FROM_SOURCE"
-        
+
+  # 处理帧率参数 for vp9
+  - source:
+      path: "framerate"
+      type: "string"
+      condition:
+        operator: "AND"
+        conditions:
+          - operator: "eq"
+            value: "24000/1001"
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["libvpx"]
+    target:
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings.FramerateControl"
+        value: "SPECIFIED"
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings.FramerateNumerator"
+        value: 24000
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings.FramerateDenominator"
+        value: 1001
+
+  - source:
+      path: "framerate"
+      type: "string"
+      condition:
+        operator: "AND"
+        conditions:
+          - operator: "eq"
+            value: 23.98
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["libvpx"]
+    target:
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings.FramerateControl"
+        value: "SPECIFIED"
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings.FramerateNumerator"
+        value: 24000
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings.FramerateDenominator"
+        value: 1001
+
+
+          
+  - source:
+      path: "framerate"
+      type: "number"
+      condition:
+        operator: "AND"
+        conditions:
+          - operator: "eq"
+            value: 29.97
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["libvpx"]
+    target:
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings.FramerateControl"
+        value: "SPECIFIED"
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings.FramerateNumerator"
+        value: 30000
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings.FramerateDenominator"
+        value: 1001
+          
+  - source:
+      path: "framerate"
+      type: "number"
+      condition:
+        operator: "AND"
+        conditions:
+          - operator: "eq"
+            value: 59.94
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["libvpx"]
+    target:
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings.FramerateControl"
+        value: "SPECIFIED"
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings.FramerateNumerator"
+        value: 60000
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings.FramerateDenominator"
+        value: 1001
+          
+  # 处理帧率参数 - 修复版本
+  - source:
+      path: "framerate"
+      type: "number"
+      condition:
+        operator: "AND"
+        conditions:
+          - operator: "eq"
+            value: 25
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["libvpx"]
+    target:
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings.FramerateControl"
+        value: "SPECIFIED"
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings.FramerateNumerator"
+        value: 25
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings.FramerateDenominator"
+        value: 1
+          
+  - source:
+      path: "framerate"
+      type: "number"
+      condition:
+        operator: "AND"
+        conditions:
+          - operator: "eq"
+            value: 30
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["libvpx"]
+    target:
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings.FramerateControl"
+        value: "SPECIFIED"
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings.FramerateNumerator"
+        value: 30
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings.FramerateDenominator"
+        value: 1
+          
+  - source:
+      path: "framerate"
+      type: "string"
+      condition:
+        operator: "AND"
+        conditions:
+          - operator: "eq"
+            value: ""
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["libvpx"]
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings.FramerateControl"
+      value: "INITIALIZE_FROM_SOURCE"
+  
   # Resolution
   - source:
       path: "size"
@@ -1241,8 +1419,8 @@ rules:
       type: "number"
       condition:
         source_path: "audio_codec"
-        operator: "eq"
-        value: "libvpx"
+        operator: "in"
+        value: ["libvpx", "vorbis", "libvorbis"]
     target:
       path: "Settings.OutputGroups[0].Outputs[0].AudioDescriptions[0].CodecSettings.VorbisSettings.Channels"
         
@@ -1486,6 +1664,16 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.VideoPreprocessors.Deinterlacer"
       value: {}
+
+  - source:
+      path: "video_codec_parameters.deinterlacing"
+      type: "string"
+      condition:
+        operator: "in"
+        value: ["yes", "auto"]
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.VideoPreprocessors.Deinterlacer"
+      value: {}
       
   # 处理输出目标路径参数
   - source:
@@ -1494,7 +1682,7 @@ rules:
       condition:
         source_path: "output"
         operator: "in"
-        value: ["mp4", "flv", "mov", "iphone","mpegts"]
+        value: ["mp4", "flv", "mov", "iphone","mpegts", "webm"]
     target:
       path: "Settings.OutputGroups[0].OutputGroupSettings.FileGroupSettings.Destination"
       value: "S3_OUTPUT_URL"
@@ -1531,6 +1719,17 @@ rules:
     target:
       path: "Settings.OutputGroups[0].OutputGroupSettings.CmafGroupSettings.Destination"
       value: "S3_OUTPUT_URL"
+
+  - source:
+      path: "destination"
+      type: "string"
+      condition:
+        source_path: "output"
+        operator: "in"
+        value: ["smooth_streaming"]
+    target:
+      path: "Settings.OutputGroups[0].OutputGroupSettings.MsSmoothGroupSettings.Destination"
+      value: "S3_OUTPUT_URL"
             
   # 处理强制隔行参数
   - source:
@@ -1539,7 +1738,14 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.InterlaceMode"
       transform: "force_interlaced_format"
-        
+
+  - source:
+      path: "scan_type"
+      type: "string"
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.InterlaceMode"
+      transform: "scan_type_format"      
+
   # 处理MP4文件类型参数
   - source:
       path: "ftyp"
@@ -1622,8 +1828,13 @@ rules:
       path: "pixel_aspect_ratio"
       type: "string"
       condition:
-        operator: "eq"
-        value: "1:1"
+        operator: "AND"
+        conditions:
+          - operator: "eq"
+            value: "1:1"
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["libx264", "mpeg4"]
     target:
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.ParControl"
         value: "SPECIFIED"
@@ -1631,13 +1842,56 @@ rules:
         value: 1
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.ParDenominator"
         value: 1
+
+  - source:
+      path: "pixel_aspect_ratio"
+      type: "string"
+      condition:
+        operator: "AND"
+        conditions:
+          - operator: "eq"
+            value: "1:1"
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["libx265", "hevc"]
+    target:
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.ParControl"
+        value: "SPECIFIED"
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.ParNumerator"
+        value: 1
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.ParDenominator"
+        value: 1
+
+  - source:
+      path: "pixel_aspect_ratio"
+      type: "string"
+      condition:
+        operator: "AND"
+        conditions:
+          - operator: "eq"
+            value: "1:1"
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["libvpx"]
+    target:
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings.ParControl"
+        value: "SPECIFIED"
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings.ParNumerator"
+        value: 1
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings.ParDenominator"
+        value: 1
           
   - source:
       path: "pixel_aspect_ratio"
       type: "string"
       condition:
-        operator: "eq"
-        value: "1.77:1"
+        operator: "AND"
+        conditions:
+          - operator: "eq"
+            value: "1.77:1"
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["libx264", "mpeg4"]
     target:
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.ParControl"
         value: "SPECIFIED"
@@ -1645,17 +1899,89 @@ rules:
         value: 16
       - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.ParDenominator"
         value: 9
+
+  - source:
+      path: "pixel_aspect_ratio"
+      type: "string"
+      condition:
+        operator: "AND"
+        conditions:
+          - operator: "eq"
+            value: "1.77:1"
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["libx265", "hevc"]
+    target:
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.ParControl"
+        value: "SPECIFIED"
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.ParNumerator"
+        value: 16
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.ParDenominator"
+        value: 9
+
+  - source:
+      path: "pixel_aspect_ratio"
+      type: "string"
+      condition:
+        operator: "AND"
+        conditions:
+          - operator: "eq"
+            value: "1.77:1"
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["libvpx"]
+    target:
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings.ParControl"
+        value: "SPECIFIED"
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings.ParNumerator"
+        value: 16
+      - path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings.ParDenominator"
+        value: 9
           
   - source:
       path: "pixel_aspect_ratio"
       type: "string"
       condition:
-        operator: "eq"
-        value: ""
+        operator: "AND"
+        conditions:
+          - operator: "eq"
+            value: ""
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["libx264", "mpeg4"]
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.ParControl"
       value: "INITIALIZE_FROM_SOURCE"
-        
+
+  - source:
+      path: "pixel_aspect_ratio"
+      type: "string"
+      condition:
+        operator: "AND"
+        conditions:
+          - operator: "eq"
+            value: ""
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["libx265", "hevc"]
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.ParControl"
+      value: "INITIALIZE_FROM_SOURCE"
+
+  - source:
+      path: "pixel_aspect_ratio"
+      type: "string"
+      condition:
+        operator: "AND"
+        conditions:
+          - operator: "eq"
+            value: ""
+          - source_path: "video_codec"
+            operator: "in"
+            value: ["libvpx"]
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings.ParControl"
+      value: "INITIALIZE_FROM_SOURCE"       
         
   # 处理turbo参数
   - source:
@@ -1675,9 +2001,20 @@ rules:
         
   # 处理视频编码器熵编码参数
 
+  # - source:
+  #     path: "video_codec_parameters.coder"
+  #     type: "string"
+  #   target:
+  #     path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.EntropyEncoding"
+  #     transform: "coder_format"
+
   - source:
       path: "video_codec_parameters.coder"
       type: "string"
+      condition:
+        source_path: "video_codec"
+        operator: "in"
+        value: ["mpeg4", "libx264"]
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.EntropyEncoding"
       transform: "coder_format"
@@ -1758,7 +2095,17 @@ rules:
         value: "hevc"
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.GopClosedCadence"
-        
+
+  - source:
+      path: "video_codec_parameters.keyframe"
+      type: "number"
+      condition:
+        source_path: "video_codec"
+        operator: "eq"
+        value: "libvpx"
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.Vp9Settings.GopSize"
+
   # 处理视频编码器最大关键帧间隔参数
   - source:
       path: "video_codec_parameters.keyint_max"
@@ -1816,7 +2163,8 @@ rules:
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.CodecProfile"
       transform: "profile_format"
-        
+
+
   # 处理视频编码器vprofile参数
   - source:
       path: "video_codec_parameters.vprofile"
@@ -1959,8 +2307,23 @@ rules:
   - source:
       path: "video_codec_parameters.refs"
       type: "number"
+      condition:
+        source_path: "video_codec"
+        operator: "in"
+        value: ["mpeg4", "libx264"]
     target:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.NumberReferenceFrames"
+
+  - source:
+      path: "video_codec_parameters.refs"
+      type: "number"
+      condition:
+        source_path: "video_codec"
+        operator: "in"
+        value: ["libx265", "hevc"]
+    target:
+      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H265Settings.NumberReferenceFrames"
+
 
   # 处理视频编码器级别参数
   - source:
@@ -2030,12 +2393,12 @@ rules:
       path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.MinIInterval"
 
 
-  # 处理视频编码器参考帧数量参数
-  - source:
-      path: "video_codec_parameters.refs"
-      type: "number"
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.NumberReferenceFrames"
+  # # 处理视频编码器参考帧数量参数
+  # - source:
+  #     path: "video_codec_parameters.refs"
+  #     type: "number"
+  #   target:
+  #     path: "Settings.OutputGroups[0].Outputs[0].VideoDescription.CodecSettings.H264Settings.NumberReferenceFrames"
 
 
 
@@ -2070,8 +2433,10 @@ rules:
         operator: "eq"
         value: "advanced_hls"
     target:
-      path: "Settings.OutputGroups[0].Outputs[0].OutputSettings.HlsSettings.AudioTrackType"
-      transform: "add_audio_only_format"
+      - path: "Settings.OutputGroups[0].Outputs[0].OutputSettings.HlsSettings.AudioTrackType"
+        transform: "add_audio_only_format"
+      - path: "Settings.OutputGroups[0].Outputs[0].OutputSettings.HlsSettings.AudioGroupId"
+        value: "audio"
 
   - source:
       path: "manifest.add_audio_only"
@@ -2081,30 +2446,32 @@ rules:
         operator: "in"
         value: ["advanced_fmp4", "fmp4_hls"]
     target:
-      path: "Settings.OutputGroups[0].Outputs[0].ContainerSettings.CmfcSettings.AudioTrackType"
-      transform: "add_audio_only_format"
+      - path: "Settings.OutputGroups[0].Outputs[0].ContainerSettings.CmfcSettings.AudioTrackType"
+        transform: "add_audio_only_format"
+      - path: "Settings.OutputGroups[0].Outputs[0].ContainerSettings.CmfcSettings.AudioGroupId"
+        value: "audio"
 
-  - source:
-      path: "audio_only"
-      type: "string"
-      condition:
-        source_path: "output"
-        operator: "eq"
-        value: "advanced_hls"
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].OutputSettings.HlsSettings.AudioTrackType"
-      transform: "add_audio_only_format"
+  # - source:
+  #     path: "audio_only"
+  #     type: "string"
+  #     condition:
+  #       source_path: "output"
+  #       operator: "eq"
+  #       value: "advanced_hls"
+  #   target:
+  #     path: "Settings.OutputGroups[0].Outputs[0].OutputSettings.HlsSettings.AudioTrackType"
+  #     transform: "add_audio_only_format"
 
-  - source:
-      path: "audio_only"
-      type: "string"
-      condition:
-        source_path: "output"
-        operator: "in"
-        value: ["advanced_fmp4", "fmp4_hls"]
-    target:
-      path: "Settings.OutputGroups[0].Outputs[0].ContainerSettings.CmfcSettings.AudioTrackType"
-      transform: "add_audio_only_format"
+  # - source:
+  #     path: "audio_only"
+  #     type: "string"
+  #     condition:
+  #       source_path: "output"
+  #       operator: "in"
+  #       value: ["advanced_fmp4", "fmp4_hls"]
+  #   target:
+  #     path: "Settings.OutputGroups[0].Outputs[0].ContainerSettings.CmfcSettings.AudioTrackType"
+  #     transform: "add_audio_only_format"
 
   - source:
       path: "group_id"
@@ -2307,6 +2674,10 @@ transformers:
   force_interlaced_format:
     "tff": "TOP_FIELD"
     "no": "PROGRESSIVE"
+  
+  scan_type_format:
+    "interlaced": "INTERLACED"
+    "progressive": "PROGRESSIVE"
     
   hard_cbr_format:
     "yes": "CBR"
@@ -2395,7 +2766,7 @@ transformers:
     "yes": 1
 
   add_audio_only_format:
-    "yes": "AUDIO_ONLY_VARIANT_STREAM"
+    "yes": "ALTERNATE_AUDIO_AUTO_SELECT"
 
   turbo_format:
     "yes": "PREFERRED"

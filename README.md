@@ -242,11 +242,34 @@ python /home/ec2-user/e2mc_assistant/src/e2mc_assistant/workflow/e2mc_workflow.p
 | Parameter | Required | Description |
 |-----------|----------|-------------|
 | `--config-dir` | ✅ | Directory containing MediaConvert JSON configuration files |
-| `--s3-source-path` | ✅ | S3 path containing input video files (must end with /) |
+| `--s3-source-path` | ✅ | S3 base path containing input video files organized by ID (must end with /) |
 | `--s3-output-path` | ✅ | S3 path where output files will be stored (must end with /) |
 | `--role-arn` | ✅ | IAM role ARN with MediaConvert and S3 permissions |
 | `--include` | ❌ | Submit jobs only for configs with this ID (extracted from filename) |
 | `--exclude` | ❌ | Skip configs with this ID (extracted from filename) |
+
+#### S3 Path Structure:
+
+The S3 source path must be organized with subdirectories for each profile ID:
+
+```
+s3://bucket-name/base-path/
+├── 16/
+│   ├── 16_sample_source.mp4
+│   └── 16_metadata.json
+├── 720/
+│   ├── 720_test_source.mp4
+│   └── 720_info.txt
+└── 1080/
+    ├── 1080_hd_source.mp4
+    └── 1080_config.xml
+```
+
+**Expected Structure**: `s3://bucket/base-path/{id}/{id}_*_source.{extension}`
+
+**Example**: For profile ID `16`, the system looks for videos in `s3://bucket/base-path/16/` with patterns like:
+- `16_sample_source.mp4` (preferred - contains "_source")
+- `16_video.mp4` (fallback - starts with ID)
 
 #### Examples:
 

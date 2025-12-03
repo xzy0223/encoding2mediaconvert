@@ -670,6 +670,135 @@ e2mc-workflow workflow --config-dir configs/ --s3-input s3://input/ --s3-output 
 
 ---
 
+## 🎯 生产环境工作流命令
+
+对于生产级别的配置文件转换和任务提交，我们推荐使用这两个核心命令，它们提供全面的控制和过滤功能：
+
+### 1. `convert` - 配置文件转换命令
+
+将 Encoding.com XML 配置文件转换为 AWS MediaConvert JSON 配置，支持高级过滤选项。
+
+```bash
+python /home/ec2-user/e2mc_assistant/src/e2mc_assistant/workflow/e2mc_workflow.py convert \
+    --input-dir /home/ec2-user/e2mc_assistant/encoding_profiles/batch2/iphone \
+    --output-dir /home/ec2-user/e2mc_assistant/tranformed_mc_profiles/batch2/iphone \
+    --rules-file /home/ec2-user/e2mc_assistant/src/e2mc_assistant/converter/rules/e2mc_rules.yaml \
+    --template-file /home/ec2-user/e2mc_assistant/src/e2mc_assistant/converter/templates/mp4_template.json \
+    --validate /home/ec2-user/e2mc_assistant/utils/mc_config_validator/mc_setting_schema.json \
+    --include 16
+```
+
+#### 参数说明：
+
+| 参数 | 必需 | 说明 |
+|------|------|------|
+| `--input-dir` | ✅ | 包含 Encoding.com XML 配置文件的目录 |
+| `--output-dir` | ✅ | 保存转换后的 MediaConvert JSON 文件的目录 |
+| `--rules-file` | ✅ | 定义转换映射的 YAML 规则文件路径 |
+| `--template-file` | ✅ | MediaConvert JSON 模板文件路径 |
+| `--validate` | ❌ | 用于验证输出配置的 JSON 模式文件路径 |
+| `--include` | ❌ | 只处理具有此 ID 的配置文件（从文件名提取） |
+| `--exclude` | ❌ | 跳过具有此 ID 的配置文件（从文件名提取） |
+
+#### 配置文件 ID 提取：
+- **ID 来源**：从 XML 文件名中提取配置文件 ID
+- **提取模式**：`^(\d+)` - 提取文件名开头的数字
+- **示例**：
+  - `16.xml` → ID: `16`
+  - `720_test.xml` → ID: `720`
+  - `1080p_profile.xml` → ID: `1080`
+  - `test_16.xml` → ID: `test_16`（回退到不含扩展名的完整文件名）
+
+### 2. `submit` - 任务提交命令
+
+使用转换后的 JSON 配置文件提交 MediaConvert 任务，支持 S3 输入/输出路径。
+
+```bash
+python /home/ec2-user/e2mc_assistant/src/e2mc_assistant/workflow/e2mc_workflow.py submit \
+    --config-dir /home/ec2-user/e2mc_assistant/tranformed_mc_profiles/batch2/iphone \
+    --s3-source-path s3://fw-e2mc-batch2/encoding_sample_videos/iphone/ \
+    --s3-output-path s3://fw-e2mc-batch2/encoding_sample_videos/output/iphone/ \
+    --role-arn arn:aws:iam::935206693453:role/MediaConvertRole \
+    --include 16
+```
+
+#### 参数说明：
+
+| 参数 | 必需 | 说明 |
+|------|------|------|
+| `--config-dir` | ✅ | 包含 MediaConvert JSON 配置文件的目录 |
+| `--s3-source-path` | ✅ | 包含按 ID 组织的输入视频文件的 S3 基础路径（必须以 / 结尾） |
+| `--s3-output-path` | ✅ | 存储输出文件的 S3 路径（必须以 / 结尾） |
+| `--role-arn` | ✅ | 具有 MediaConvert 和 S3 权限的 IAM 角色 ARN |
+| `--include` | ❌ | 只为具有此 ID 的配置文件提交任务（从文件名提取） |
+| `--exclude` | ❌ | 跳过具有此 ID 的配置文件（从文件名提取） |
+
+#### S3 路径结构：
+
+S3 源路径必须按每个配置文件 ID 组织子目录：
+
+```
+s3://bucket-name/base-path/
+├── 16/
+│   ├── 16_sample_source.mp4
+│   └── 16_metadata.json
+├── 720/
+│   ├── 720_test_source.mp4
+│   └── 720_info.txt
+└── 1080/
+    ├── 1080_hd_source.mp4
+    └── 1080_config.xml
+```
+
+**预期结构**：`s3://bucket/base-path/{id}/{id}_*_source.{extension}`
+
+**示例**：对于配置文件 ID `16`，系统会在 `s3://bucket/base-path/16/` 中查找符合以下模式的视频：
+- `16_sample_source.mp4`（首选 - 包含 "_source"）
+- `16_video.mp4`（备选 - 以 ID 开头）
+
+#### 配置文件 ID 过滤：
+
+两个命令都支持 `--include` 和 `--exclude` 参数进行精确的配置文件选择：
+
+- **`--include`**：只处理 ID 匹配指定值的配置文件
+- **`--exclude`**：跳过 ID 匹配指定值的配置文件
+- **优先级**：`--exclude` 优先于 `--include`
+- **ID 提取**：使用模式 `^(\d+)` 从文件名中提取 ID
+- **使用场景**：
+  - 处理特定配置文件：`--include 16`（只处理 `16.xml` → `16.json`）
+  - 跳过有问题的配置文件：`--exclude 720`（跳过 `720.xml`）
+  - 测试单个配置文件：`--include 1080`（只处理 `1080.xml`）
+
+#### 完整工作流示例：
+
+```bash
+# 步骤 1：只转换 iPhone 格式的配置文件 ID "16"
+python .../e2mc_workflow.py convert \
+    --input-dir encoding_profiles/pilot1/iphone \
+    --output-dir tranformed_mc_profiles/pilot1/iphone \
+    --rules-file src/e2mc_assistant/converter/rules/e2mc_rules.yaml \
+    --template-file src/e2mc_assistant/converter/templates/mp4_template.json \
+    --validate utils/mc_config_validator/mc_setting_schema.json \
+    --include 16
+
+# 步骤 2：为转换后的配置文件 ID "16" 提交 MediaConvert 任务
+python .../e2mc_workflow.py submit \
+    --config-dir tranformed_mc_profiles/pilot1/iphone \
+    --s3-source-path s3://my-bucket/source-videos/iphone/ \
+    --s3-output-path s3://my-bucket/output-videos/iphone/ \
+    --role-arn arn:aws:iam::123456789012:role/MediaConvertRole \
+    --include 16
+```
+
+#### 文件命名约定：
+
+为了确保命令正常工作，请确保您的文件遵循以下命名模式：
+- **输入 XML 文件**：`{ID}.xml`（例如：`16.xml`、`720.xml`、`1080.xml`）
+- **输出 JSON 文件**：`{ID}.json`（例如：`16.json`、`720.json`、`1080.json`）
+- **S3 视频文件**：`s3://bucket/base-path/{ID}/{ID}_*_source.*`（例如：`s3://bucket/videos/16/16_sample_source.mp4`）
+
+---
+
 ## 🐍 Python API
 
 ### 配置转换

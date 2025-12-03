@@ -157,6 +157,167 @@ e2mc-workflow workflow --config-dir configs/ --s3-input s3://input/ --s3-output 
 
 ---
 
+## 🎯 Production Workflow Commands
+
+For production-level profile conversion and job submission, we recommend using these two core commands that provide comprehensive control and filtering capabilities:
+
+### 1. `convert` - Profile Conversion Command
+
+Convert Encoding.com XML profiles to AWS MediaConvert JSON configurations with advanced filtering options.
+
+```bash
+python /home/ec2-user/e2mc_assistant/src/e2mc_assistant/workflow/e2mc_workflow.py convert \
+    --input-dir /home/ec2-user/e2mc_assistant/encoding_profiles/batch2/iphone \
+    --output-dir /home/ec2-user/e2mc_assistant/tranformed_mc_profiles/batch2/iphone \
+    --rules-file /home/ec2-user/e2mc_assistant/src/e2mc_assistant/converter/rules/e2mc_rules.yaml \
+    --template-file /home/ec2-user/e2mc_assistant/src/e2mc_assistant/converter/templates/mp4_template.json \
+    --validate /home/ec2-user/e2mc_assistant/utils/mc_config_validator/mc_setting_schema.json \
+    --include 16
+```
+
+#### Parameters:
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `--input-dir` | ✅ | Directory containing Encoding.com XML profile files to convert |
+| `--output-dir` | ✅ | Directory where converted MediaConvert JSON files will be saved |
+| `--rules-file` | ✅ | Path to YAML rules file defining conversion mappings |
+| `--template-file` | ✅ | Path to MediaConvert JSON template file |
+| `--validate` | ❌ | Path to JSON schema file for validating output configurations |
+| `--include` | ❌ | Process only profiles with this ID (extracted from filename) |
+| `--exclude` | ❌ | Skip profiles with this ID (extracted from filename) |
+
+#### Profile ID Extraction:
+- **ID Source**: Profile IDs are extracted from XML filenames
+- **Pattern**: `^(\d+)` - extracts the leading number from filename
+- **Examples**: 
+  - `16.xml` → ID: `16`
+  - `720_test.xml` → ID: `720`
+  - `1080p_profile.xml` → ID: `1080`
+  - `test_16.xml` → ID: `test_16` (fallback to full filename without extension)
+
+#### Examples:
+
+```bash
+# Convert all profiles in a directory
+python .../e2mc_workflow.py convert \
+    --input-dir encoding_profiles/mp4 \
+    --output-dir tranformed_mc_profiles/mp4 \
+    --rules-file rules/e2mc_rules.yaml \
+    --template-file templates/mp4_template.json
+
+# Convert only profile with ID "16"
+python .../e2mc_workflow.py convert \
+    --input-dir encoding_profiles/hls \
+    --output-dir tranformed_mc_profiles/hls \
+    --rules-file rules/e2mc_rules.yaml \
+    --template-file templates/hls_template.json \
+    --include 16
+
+# Convert all except profile with ID "720"
+python .../e2mc_workflow.py convert \
+    --input-dir encoding_profiles/all \
+    --output-dir tranformed_mc_profiles/all \
+    --rules-file rules/e2mc_rules.yaml \
+    --template-file templates/mp4_template.json \
+    --exclude 720 \
+    --validate utils/mc_config_validator/mc_setting_schema.json
+```
+
+### 2. `submit` - Job Submission Command
+
+Submit MediaConvert jobs using converted JSON configurations with S3 input/output paths.
+
+```bash
+python /home/ec2-user/e2mc_assistant/src/e2mc_assistant/workflow/e2mc_workflow.py submit \
+    --config-dir /home/ec2-user/e2mc_assistant/tranformed_mc_profiles/batch2/iphone \
+    --s3-source-path s3://fw-e2mc-batch2/encoding_sample_videos/iphone/ \
+    --s3-output-path s3://fw-e2mc-batch2/encoding_sample_videos/output/iphone/ \
+    --role-arn arn:aws:iam::935206693453:role/MediaConvertRole \
+    --include 16
+```
+
+#### Parameters:
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `--config-dir` | ✅ | Directory containing MediaConvert JSON configuration files |
+| `--s3-source-path` | ✅ | S3 path containing input video files (must end with /) |
+| `--s3-output-path` | ✅ | S3 path where output files will be stored (must end with /) |
+| `--role-arn` | ✅ | IAM role ARN with MediaConvert and S3 permissions |
+| `--include` | ❌ | Submit jobs only for configs with this ID (extracted from filename) |
+| `--exclude` | ❌ | Skip configs with this ID (extracted from filename) |
+
+#### Examples:
+
+```bash
+# Submit all jobs in a directory
+python .../e2mc_workflow.py submit \
+    --config-dir tranformed_mc_profiles/mp4 \
+    --s3-source-path s3://input-bucket/videos/ \
+    --s3-output-path s3://output-bucket/results/ \
+    --role-arn arn:aws:iam::123456789012:role/MediaConvertRole
+
+# Submit only job for profile ID "16"
+python .../e2mc_workflow.py submit \
+    --config-dir tranformed_mc_profiles/hls \
+    --s3-source-path s3://input-bucket/hls-videos/ \
+    --s3-output-path s3://output-bucket/hls-results/ \
+    --role-arn arn:aws:iam::123456789012:role/MediaConvertRole \
+    --include 16
+
+# Submit all except profile ID "720"
+python .../e2mc_workflow.py submit \
+    --config-dir tranformed_mc_profiles/all \
+    --s3-source-path s3://input-bucket/all-videos/ \
+    --s3-output-path s3://output-bucket/all-results/ \
+    --role-arn arn:aws:iam::123456789012:role/MediaConvertRole \
+    --exclude 720
+```
+
+#### Profile ID Filtering:
+
+Both commands support `--include` and `--exclude` parameters for precise profile selection:
+
+- **`--include`**: Process only profiles whose ID matches the specified value
+- **`--exclude`**: Skip profiles whose ID matches the specified value  
+- **Priority**: `--exclude` takes precedence over `--include`
+- **ID Extraction**: IDs are extracted from filenames using pattern `^(\d+)`
+- **Use Cases**: 
+  - Process specific profile: `--include 16` (processes only `16.xml` → `16.json`)
+  - Skip problematic profile: `--exclude 720` (skips `720.xml`)
+  - Test single profile: `--include 1080` (processes only `1080.xml`)
+
+#### Complete Workflow Example:
+
+```bash
+# Step 1: Convert only profile ID "16" for iPhone format
+python .../e2mc_workflow.py convert \
+    --input-dir encoding_profiles/pilot1/iphone \
+    --output-dir tranformed_mc_profiles/pilot1/iphone \
+    --rules-file src/e2mc_assistant/converter/rules/e2mc_rules.yaml \
+    --template-file src/e2mc_assistant/converter/templates/mp4_template.json \
+    --validate utils/mc_config_validator/mc_setting_schema.json \
+    --include 16
+
+# Step 2: Submit MediaConvert job for the converted profile ID "16"
+python .../e2mc_workflow.py submit \
+    --config-dir tranformed_mc_profiles/pilot1/iphone \
+    --s3-source-path s3://my-bucket/source-videos/iphone/ \
+    --s3-output-path s3://my-bucket/output-videos/iphone/ \
+    --role-arn arn:aws:iam::123456789012:role/MediaConvertRole \
+    --include 16
+```
+
+#### File Naming Convention:
+
+For the commands to work correctly, ensure your files follow this naming pattern:
+- **Input XML files**: `{ID}.xml` (e.g., `16.xml`, `720.xml`, `1080.xml`)
+- **Output JSON files**: `{ID}.json` (e.g., `16.json`, `720.json`, `1080.json`)
+- **S3 video files**: `{ID}_*_source.*` (e.g., `16_sample_source.mp4`)
+
+---
+
 ## 🐍 Python API
 
 ### Configuration Conversion

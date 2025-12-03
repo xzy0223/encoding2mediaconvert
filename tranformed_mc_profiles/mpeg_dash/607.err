@@ -1,6 +1,0 @@
-Validation failed for /home/ec2-user/e2mc_assistant/tranformed_mc_profiles/mpeg_dash/607.json
-Validation errors:
-Found 1 unknown parameter errors:
-1. Unknown parameter 'MinSegmentLength' at OutputGroups[0].OutputGroupSettings.DashIsoGroupSettings.MinSegmentLength. Valid parameters are: AdditionalManifests, AudioChannelConfigSchemeIdUri, BaseUrl, DashIFrameTrickPlayNameModifier, DashManifestStyle, Destination, DestinationSettings, Encryption, FragmentLength, HbbtvCompliance, ImageBasedTrickPlay, ImageBasedTrickPlaySettings, MinBufferTime, MinFinalSegmentLength, MpdManifestBandwidthType, MpdProfile, PtsOffsetHandlingForBFrames, SegmentControl, SegmentLength, SegmentLengthControl, VideoCompositionOffsets, WriteSegmentTimelineInRepresentation
-   --> INVALID PARAMETER: 'MinSegmentLength'
-   --> FULL PATH: 'OutputGroups[0].OutputGroupSettings.DashIsoGroupSettings.MinSegmentLength'
